@@ -1,0 +1,17 @@
+{
+  "name": "cdl",
+  "version": "0.0.1",
+  "description": "Chart definition language",
+  "main": "index.js",
+  "packageManager": "pnpm@8.14.1",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Chart",
+    "definition",
+    "language"
+  ],
+  "author": "Naeemo <naeemo@qq.com>",
+  "license": "MIT"
+}

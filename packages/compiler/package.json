@@ -1,0 +1,16 @@
+{
+  "name": "@cdl/compiler",
+  "version": "0.0.1",
+  "description": "CDL compiler",
+  "scripts": {
+    "test": "ts-node compiler.ts line.chart"
+  },
+  "author": "Naeemo <naeemo@qq.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.11.0"
+  },
+  "dependencies": {
+    "ts-node": "^10.9.2"
+  }
+}
