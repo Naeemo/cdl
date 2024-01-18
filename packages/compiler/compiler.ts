@@ -7,7 +7,7 @@ export interface Series {
 }
 
 export interface Chart {
-    data: Data
+    data: string
     series: Series[]
 }
 
@@ -145,14 +145,99 @@ function parseForTokens(chars: string[]): string[] {
     return tokens
 }
 
+function tokensToCDLFile(tokens: string[]): CDLFile {
+    const file: CDLFile = {data: {}, chart: {}}
+
+    let dataStatus = 0
+    let dataBody: string[][] = []
+    let chartStatus = 0
+    let chartBody: Chart = {data: '', series: []}
+    for (let token of tokens) {
+        // read data title
+        if (dataStatus === 1) {
+            file.data[token] = dataBody = []
+            dataStatus = 2
+            continue
+        }
+
+        // read data body
+        if (dataStatus === 2) {
+            // data body starts
+            if (token === '{') {
+                continue
+            }
+            // data body ends
+            if (token === '}') {
+                dataStatus = 0
+                dataBody = []
+                continue
+            }
+            dataBody.push(token.split(','))
+            continue
+        }
+
+        // read chart title
+        if (chartStatus === 1) {
+            file.chart[token] = chartBody = {data: '', series: []}
+            chartStatus = 2
+            continue
+        }
+
+        // read chart body, data part
+        if (chartStatus === 2) {
+            // chart body data part starts
+            if (token === '{') {
+                continue
+            }
+            // chart body data part ends
+            if (token === '-') {
+                chartStatus = 3
+                continue
+            }
+            chartBody.data = token
+            continue
+        }
+
+        // read chart body, series part
+        if (chartStatus === 3) {
+            // chart body ends
+            if (token === '}') {
+                chartStatus = 0
+                chartBody = {data: '', series: []}
+                continue
+            }
+            if (token !== 'line') {
+                console.warn('unrecognized chart series type', token);
+                continue
+            }
+            chartBody.series.push({type: token})
+            continue
+        }
+
+        switch (token) {
+            case 'Data': {
+                dataStatus = 1
+                break
+            }
+            case 'Chart': {
+                chartStatus = 1
+                break
+            }
+        }
+    }
+
+    console.info(`================ ⬇️ cdl file ⬇️ ================`)
+    console.info(JSON.stringify(file, null, '  '))
+    console.info(`================ ⬆️ cdl file ⬆️ ================`)
+    return file
+}
+
 export function compile(source: string): CDLFile {
     const trimmed = stripeComments(source)
     const tokens = parseForTokens(trimmed)
+    const cdlFile = tokensToCDLFile(tokens)
 
-    return {
-        data: {},
-        chart: {}
-    }
+    return cdlFile
 }
 
 (function cli() {

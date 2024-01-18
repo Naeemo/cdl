@@ -13,7 +13,7 @@ Data 销量数据 {
 }
 
 Chart 每月销量趋势 {
-    sales
+    销量数据
     -
     line
 }
