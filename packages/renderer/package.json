@@ -1,0 +1,20 @@
+{
+  "name": "@cdl/renderer-echarts",
+  "version": "0.0.1",
+  "description": "CDL ECharts renderer - Convert CDL AST to ECharts option",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "node dist/test.js"
+  },
+  "dependencies": {
+    "@cdl/compiler": "file:../compiler"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "@types/node": "^20.11.0"
+  },
+  "author": "Naeemo",
+  "license": "MIT"
+}
