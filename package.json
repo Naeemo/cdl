@@ -5,7 +5,9 @@
   "main": "index.js",
   "packageManager": "pnpm@8.14.1",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "keywords": [
     "Chart",
@@ -13,5 +15,10 @@
     "language"
   ],
   "author": "Naeemo <naeemo@qq.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "vitepress": "^1.0.0",
+    "echarts": "^5.4.3",
+    "vue": "^3.4.0"
+  }
 }
