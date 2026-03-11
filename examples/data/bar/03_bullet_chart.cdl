@@ -1,0 +1,24 @@
+// 示例：预算 vs 实际支出
+// 查询类型：裸数据
+// 图表类型：子弹图
+
+@lang(data)
+BudgetActual {
+    category,budget,actual,target
+    营销,100,85,90
+    研发,200,180,190
+    人力,150,148,150
+    运营,80,75,78
+}
+
+Chart {
+    use BudgetActual
+    type bar
+    x category
+    
+    series budget { y budget, style background }
+    series actual { y actual }
+    series target { y target, style marker }
+    
+    @style "子弹图，背景是预算，条形是实际，标记是目标"
+}

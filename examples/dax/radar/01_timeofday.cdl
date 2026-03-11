@@ -1,0 +1,23 @@
+// 示例：时段分析
+// 查询类型：DAX
+// 图表类型：雷达图
+
+@lang(dax)
+@source('powerbi_sales_model')
+TimeOfDaySales {
+    EVALUATE
+    SUMMARIZECOLUMNS(
+        'Time'[Hour],
+        "Sales", [Total Sales]
+    )
+}
+
+Chart {
+    use TimeOfDaySales
+    type radar
+    dim [Hour]
+    value [Sales]
+    
+    @style "24小时时段雷达图"
+    @color "按时段着色，白天亮晚上暗"
+}

@@ -1,0 +1,34 @@
+// 示例：客户分层
+// 查询类型：SQL
+// 图表类型：金字塔图
+
+@lang(sql)
+@source('crm_db')
+CustomerTier {
+    SELECT 
+        tier,
+        COUNT(*) as customers
+    FROM (
+        SELECT 
+            customer_id,
+            CASE 
+                WHEN total_spent > 10000 THEN 'VIP'
+                WHEN total_spent > 5000 THEN '高价值'
+                WHEN total_spent > 1000 THEN '普通'
+                ELSE '新客户'
+            END as tier
+        FROM customers
+    ) t
+    GROUP BY tier
+}
+
+Chart {
+    use CustomerTier
+    type bar
+    x tier
+    y customers
+    
+    @style "金字塔形，VIP在上，新客户在下"
+    @color "从上到下金色渐变"
+    @animation "逐层展开"
+}

@@ -1,0 +1,29 @@
+// 示例：产品子类别销售对比
+// 查询类型：DAX
+// 图表类型：柱状图
+
+@lang(dax)
+@source('powerbi_sales_model')
+SubcategorySales {
+    EVALUATE
+    TOPN(
+        10,
+        SUMMARIZECOLUMNS(
+            'Product'[Subcategory],
+            "Sales", [Total Sales],
+            "Profit", [Total Profit]
+        ),
+        [Sales], DESC
+    )
+}
+
+Chart {
+    use SubcategorySales
+    type bar
+    x [Subcategory]
+    y [Sales]
+    
+    @style "水平柱状图，TOP10"
+    @color "按利润率着色，高利润绿色，低利润红色"
+    @animation "从高到低依次出现"
+}

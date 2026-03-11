@@ -1,0 +1,26 @@
+// 示例：产品生命周期散点
+// 查询类型：DAX
+// 图表类型：散点图（气泡）
+
+@lang(dax)
+@source('powerbi_product_model')
+ProductLifecycle {
+    EVALUATE
+    ADDCOLUMNS(
+        SUMMARIZE('Product', 'Product'[Product Name]),
+        "Revenue", [Total Sales],
+        "Margin %", [Profit Margin],
+        "Units Sold", [Total Quantity]
+    )
+}
+
+Chart {
+    use ProductLifecycle
+    type scatter
+    x [Revenue]
+    y [Margin %]
+    size [Units Sold]
+    
+    @style "四象限分析，气泡大小表示销量"
+    @color "按利润率分段着色"
+}

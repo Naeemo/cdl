@@ -1,0 +1,32 @@
+// 示例：桑基图 - 流量来源转化
+// 查询类型：SQL
+// 图表类型：桑基图
+
+@lang(sql)
+@source('analytics_db')
+SankeyFlow {
+    SELECT source, target, value FROM (
+        SELECT '搜索引擎' as source, '网站首页' as target, 4000 as value
+        UNION ALL SELECT '搜索引擎', '产品页', 2000
+        UNION ALL SELECT '社交媒体', '网站首页', 3000
+        UNION ALL SELECT '社交媒体', '活动页', 1500
+        UNION ALL SELECT '直接访问', '网站首页', 2000
+        UNION ALL SELECT '网站首页', '产品页', 3000
+        UNION ALL SELECT '网站首页', '退出', 6000
+        UNION ALL SELECT '产品页', '购物车', 2000
+        UNION ALL SELECT '产品页', '退出', 3000
+        UNION ALL SELECT '活动页', '注册', 800
+        UNION ALL SELECT '活动页', '退出', 700
+    ) t
+}
+
+Chart {
+    use SankeyFlow
+    type sankey
+    from source
+    to target
+    value value
+    
+    @style "桑基图，显示流量走向和转化"
+    @color "不同来源不同颜色"
+}

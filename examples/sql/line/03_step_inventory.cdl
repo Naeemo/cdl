@@ -1,0 +1,25 @@
+// 示例：阶梯线图 - 库存变化
+// 查询类型：SQL
+// 图表类型：阶梯线图
+
+@lang(sql)
+@source('inventory_db')
+InventoryLevel {
+    SELECT 
+        date,
+        quantity
+    FROM inventory_daily
+    WHERE product_id = 'SKU001'
+    ORDER BY date
+}
+
+Chart {
+    use InventoryLevel
+    type line
+    x date
+    y quantity
+    
+    @style "阶梯线，表示离散变化"
+    @color "#e74c3c"
+    @animation "水平然后垂直绘制"
+}

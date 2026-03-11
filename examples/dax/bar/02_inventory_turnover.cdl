@@ -1,0 +1,25 @@
+// 示例：库存周转
+// 查询类型：DAX
+// 图表类型：子弹图
+
+@lang(dax)
+@source('powerbi_inventory_model')
+InventoryTurnover {
+    EVALUATE
+    SUMMARIZECOLUMNS(
+        'Product'[Category],
+        "Turnover", [Inventory Turnover],
+        "Target", 6
+    )
+}
+
+Chart {
+    use InventoryTurnover
+    type bar
+    x [Category]
+    series actual { y [Turnover] }
+    series target { y [Target], style marker }
+    
+    @style "子弹图，对比目标和实际周转率"
+    @color "达标=绿, 不达标=红"
+}

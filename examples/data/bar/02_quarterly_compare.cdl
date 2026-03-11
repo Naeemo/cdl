@@ -1,0 +1,24 @@
+// 示例：季度对比
+// 查询类型：裸数据
+// 图表类型：分组柱状图
+
+@lang(data)
+QuarterlyCompare {
+    quarter,y2023,y2024
+    Q1,100,120
+    Q2,110,135
+    Q3,105,140
+    Q4,130,155
+}
+
+Chart {
+    use QuarterlyCompare
+    type bar
+    x quarter
+    series y2023 { y y2023 }
+    series y2024 { y y2024 }
+    
+    @style "分组柱状，两年对比"
+    @color "2023=灰色, 2024=蓝色"
+    @animation "依次升起"
+}

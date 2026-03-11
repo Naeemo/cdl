@@ -1,0 +1,27 @@
+// 示例：区域销售额对比
+// 查询类型：SQL
+// 图表类型：柱状图
+
+@lang(sql)
+@source('sales_db')
+RegionalSales {
+    SELECT 
+        region,
+        SUM(amount) as sales
+    FROM orders
+    WHERE order_date >= '2024-01-01'
+    GROUP BY region
+    ORDER BY sales DESC
+}
+
+Chart {
+    use RegionalSales
+    type bar
+    x region
+    y sales
+    
+    @style "垂直柱状图，圆角顶部"
+    @color "蓝紫色渐变"
+    @animation "从下往上生长"
+    @title "各区域销售额排名"
+}

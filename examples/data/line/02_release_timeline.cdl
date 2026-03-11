@@ -1,0 +1,23 @@
+// 示例：版本迭代时间线
+// 查询类型：裸数据
+// 图表类型：时间轴
+
+@lang(data)
+ReleaseTimeline {
+    version,date,features
+    v1.0,2024-01-15,5
+    v1.1,2024-02-20,3
+    v1.2,2024-03-10,8
+    v2.0,2024-05-01,12
+}
+
+Chart {
+    use ReleaseTimeline
+    type line
+    x date
+    y features
+    
+    @style "版本发布时间点，显示功能数量"
+    @color "里程碑标记"
+    @interaction "点击显示详细功能列表"
+}

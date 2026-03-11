@@ -1,0 +1,29 @@
+// 示例：多品类销售对比
+// 查询类型：SQL
+// 图表类型：分组折线图
+
+@lang(sql)
+@source('sales_db')
+CategorySales {
+    SELECT 
+        DATE_FORMAT(order_date, '%Y-%m') as month,
+        category,
+        SUM(amount) as sales
+    FROM orders o
+    JOIN products p ON o.product_id = p.id
+    WHERE order_date >= '2024-01-01'
+    GROUP BY month, category
+    ORDER BY month, category
+}
+
+Chart {
+    use CategorySales
+    type line
+    x month
+    y sales
+    group category
+    
+    @style "多条折线，不同颜色"
+    @color "category: [电子=#ff6b6b, 服装=#4ecdc4, 食品=#ffe66d]"
+    @animation "依次绘制"
+}

@@ -1,0 +1,25 @@
+// 示例：树图 - 品类层级
+// 查询类型：SQL
+// 图表类型：树图
+
+@lang(sql)
+@source('product_db')
+CategoryTree {
+    SELECT 
+        parent_category,
+        category,
+        SUM(sales) as value
+    FROM sales_by_category
+    GROUP BY parent_category, category
+}
+
+Chart {
+    use CategoryTree
+    type treemap
+    parent parent_category
+    name category
+    value value
+    
+    @style "矩形树图，面积表示销售额"
+    @color "每个大类不同色系"
+}

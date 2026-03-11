@@ -1,0 +1,27 @@
+// 示例：价格与销量相关性
+// 查询类型：SQL
+// 图表类型：散点图
+
+@lang(sql)
+@source('sales_db')
+PriceSales {
+    SELECT 
+        price,
+        quantity as sales_volume,
+        category
+    FROM orders o
+    JOIN products p ON o.product_id = p.id
+    WHERE order_date >= '2024-01-01'
+}
+
+Chart {
+    use PriceSales
+    type scatter
+    x price
+    y sales_volume
+    group category
+    
+    @style "气泡大小表示销量，添加趋势线"
+    @color "按 category 分色"
+    @animation "散点逐个出现"
+}

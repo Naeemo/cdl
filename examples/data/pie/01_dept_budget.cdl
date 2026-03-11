@@ -1,0 +1,25 @@
+// 示例：部门预算分配
+// 查询类型：裸数据
+// 图表类型：饼图
+
+@lang(data)
+DepartmentBudget {
+    dept,budget
+    研发,500
+    市场,300
+    销售,400
+    运营,200
+    人力,100
+    行政,80
+}
+
+Chart {
+    use DepartmentBudget
+    type pie
+    label dept
+    value budget
+    
+    @style "半圆饼图，重点突出研发"
+    @color "研发=蓝色, 其他=灰色系"
+    @title "部门预算分配（万元）"
+}

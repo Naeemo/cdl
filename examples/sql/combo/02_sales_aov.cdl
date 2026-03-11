@@ -1,0 +1,27 @@
+// 示例：双Y轴 - 销量和客单价
+// 查询类型：SQL
+// 图表类型：双轴折线图
+
+@lang(sql)
+@source('sales_db')
+SalesAOV {
+    SELECT 
+        DATE_FORMAT(order_date, '%m') as month,
+        COUNT(*) as orders,
+        ROUND(SUM(amount)/COUNT(*), 2) as aov
+    FROM orders
+    WHERE order_date >= '2024-01-01'
+    GROUP BY month
+}
+
+Chart {
+    use SalesAOV
+    type combo
+    x month
+    
+    series orders { type line, y orders, axis left }
+    series aov { type line, y aov, axis right }
+    
+    @style "销量左轴，客单价右轴"
+    @color "销量=#3498db, 客单价=#e74c3c"
+}

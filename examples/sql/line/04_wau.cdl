@@ -1,0 +1,25 @@
+// 示例：周活跃用户趋势
+// 查询类型：SQL
+// 图表类型：平滑曲线图
+
+@lang(sql)
+@source('analytics_db')
+WAU {
+    SELECT 
+        DATE_TRUNC('week', date) as week,
+        COUNT(DISTINCT user_id) as wau
+    FROM user_activity
+    GROUP BY week
+    ORDER BY week
+}
+
+Chart {
+    use WAU
+    type line
+    x week
+    y wau
+    
+    @style "平滑曲线，带置信区间阴影"
+    @color "#667eea"
+    @title "周活跃用户（WAU）趋势"
+}

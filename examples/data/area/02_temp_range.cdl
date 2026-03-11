@@ -1,0 +1,26 @@
+// 示例：温度变化范围
+// 查询类型：裸数据
+// 图表类型：范围面积图
+
+@lang(data)
+TemperatureRange {
+    month,min,max,avg
+    1月,-5,5,0
+    2月,-3,8,2
+    3月,2,15,8
+    4月,8,22,15
+    5月,15,28,21
+    6月,20,35,27
+}
+
+Chart {
+    use TemperatureRange
+    type area
+    x month
+    
+    series range { y0 min, y1 max, style range }
+    series avg { y avg, type line }
+    
+    @style "面积显示温度范围，折线显示平均"
+    @color "范围=浅蓝透明, 平均线=深蓝"
+}

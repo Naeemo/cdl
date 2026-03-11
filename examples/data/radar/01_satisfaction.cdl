@@ -1,0 +1,25 @@
+// 示例：员工满意度调查
+// 查询类型：裸数据
+// 图表类型：雷达图
+
+@lang(data)
+SatisfactionSurvey {
+    dimension,score
+    薪资福利,75
+    工作环境,85
+    团队氛围,90
+    职业发展,70
+    工作生活平衡,65
+    管理支持,80
+}
+
+Chart {
+    use SatisfactionSurvey
+    type radar
+    dim dimension
+    value score
+    
+    @style "填充雷达图，显示平均值参考线"
+    @color "#9b59b6"
+    @title "员工满意度雷达图"
+}

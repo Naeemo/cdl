@@ -1,0 +1,25 @@
+// 示例：游戏关卡通过率
+// 查询类型：裸数据
+// 图表类型：漏斗图
+
+@lang(data)
+GameFunnel {
+    level,players,drop_rate
+    下载,10000,0
+    注册,6500,35
+    完成教程,4800,26
+    通过第1关,3200,33
+    通过第5关,1500,53
+    付费,300,80
+}
+
+Chart {
+    use GameFunnel
+    type bar
+    x level
+    y players
+    
+    @style "游戏转化漏斗，显示每步流失率"
+    @color "从上到下红色渐变"
+    @interaction "hover显示留存率"
+}

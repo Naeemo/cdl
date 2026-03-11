@@ -1,0 +1,20 @@
+// 示例：仪表盘 - KPI 完成率
+// 查询类型：裸数据
+// 图表类型：仪表盘图
+
+@lang(data)
+KPIData {
+    metric,current,target
+    销售额完成率,85,100
+}
+
+Chart {
+    use KPIData
+    type gauge
+    value current
+    max target
+    
+    @style "半圆仪表盘，颜色分段（红黄绿）"
+    @color "0-60红, 60-80黄, 80-100绿"
+    @animation "指针摆动到当前值"
+}

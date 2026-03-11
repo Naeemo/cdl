@@ -1,0 +1,32 @@
+// 示例：订单状态流转
+// 查询类型：DAX
+// 图表类型：桑基图
+
+@lang(dax)
+@source('powerbi_order_model')
+OrderFlow {
+    EVALUATE
+    DATATABLE(
+        "From", STRING, "To", STRING, "Count", INTEGER,
+        {
+            { "下单", "支付", 1000 },
+            { "支付", "发货", 950 },
+            { "发货", "签收", 900 },
+            { "签收", "完成", 880 },
+            { "支付", "取消", 50 },
+            { "发货", "退货", 30 },
+            { "签收", "退货", 20 }
+        }
+    )
+}
+
+Chart {
+    use OrderFlow
+    type sankey
+    from [From]
+    to [To]
+    value [Count]
+    
+    @style "订单状态流转，显示各环节转化"
+    @animation "流量流动效果"
+}

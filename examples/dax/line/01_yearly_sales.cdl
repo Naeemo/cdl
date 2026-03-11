@@ -1,0 +1,25 @@
+// 示例：年度销售额（DAX 度量值）
+// 查询类型：DAX
+// 图表类型：折线图
+
+@lang(dax)
+@source('powerbi_sales_model')
+YearlySales {
+    EVALUATE
+    SUMMARIZECOLUMNS(
+        'Date'[Year],
+        "Total Sales", [Total Sales]
+    )
+    ORDER BY 'Date'[Year]
+}
+
+Chart {
+    use YearlySales
+    type line
+    x Year
+    y [Total Sales]
+    
+    @style "带标记点的折线"
+    @color "#3498db"
+    @title "年度销售趋势"
+}

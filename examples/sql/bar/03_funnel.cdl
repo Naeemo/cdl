@@ -1,0 +1,24 @@
+// 示例：漏斗图 - 用户转化
+// 查询类型：SQL
+// 图表类型：漏斗图（用倒置柱状图实现）
+
+@lang(sql)
+@source('analytics_db')
+FunnelData {
+    SELECT '访问' as stage, 10000 as users
+    UNION ALL SELECT '注册', 3000
+    UNION ALL SELECT '激活', 1500
+    UNION ALL SELECT '付费', 500
+    UNION ALL SELECT '复购', 200
+}
+
+Chart {
+    use FunnelData
+    type bar
+    x stage
+    y users
+    
+    @style "倒置漏斗，中间对齐，显示转化率"
+    @color "从上到下渐变"
+    @animation "逐层展开"
+}

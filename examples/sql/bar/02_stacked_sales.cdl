@@ -1,0 +1,28 @@
+// 示例：堆叠柱状图 - 月度品类销售
+// 查询类型：SQL
+// 图表类型：堆叠柱状图
+
+@lang(sql)
+@source('sales_db')
+StackedSales {
+    SELECT 
+        DATE_FORMAT(order_date, '%Y-%m') as month,
+        category,
+        SUM(amount) as sales
+    FROM orders o
+    JOIN products p ON o.product_id = p.id
+    GROUP BY month, category
+    ORDER BY month
+}
+
+Chart {
+    use StackedSales
+    type bar
+    x month
+    y sales
+    stack category
+    
+    @style "堆叠柱状图，显示总数和占比"
+    @color "每类不同颜色，整体协调"
+    @animation "逐层堆叠"
+}

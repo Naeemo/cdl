@@ -1,0 +1,27 @@
+// 示例：月度销售趋势
+// 查询类型：SQL
+// 图表类型：折线图
+
+@lang(sql)
+@source('sales_db')
+MonthlySales {
+    SELECT 
+        DATE_FORMAT(order_date, '%Y-%m') as month,
+        SUM(amount) as sales
+    FROM orders
+    WHERE order_date >= '2024-01-01'
+    GROUP BY month
+    ORDER BY month
+}
+
+Chart {
+    use MonthlySales
+    type line
+    x month
+    y sales
+    
+    @style "平滑曲线，带数据点标记"
+    @color "#4fc3f7"
+    @animation "从左到右绘制"
+    @title "2024年月度销售趋势"
+}

@@ -1,0 +1,26 @@
+// 示例：用户增长趋势（累计）
+// 查询类型：SQL
+// 图表类型：面积图
+
+@lang(sql)
+@source('user_db')
+UserGrowth {
+    SELECT 
+        DATE_FORMAT(created_at, '%Y-%m') as month,
+        COUNT(*) as new_users,
+        SUM(COUNT(*)) OVER (ORDER BY DATE_FORMAT(created_at, '%Y-%m')) as total_users
+    FROM users
+    GROUP BY month
+    ORDER BY month
+}
+
+Chart {
+    use UserGrowth
+    type area
+    x month
+    y total_users
+    
+    @style "渐变面积填充，下方半透明"
+    @color "从 #667eea 到 #764ba2 的渐变"
+    @animation "从下往上填充"
+}

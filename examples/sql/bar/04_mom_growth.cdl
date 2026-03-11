@@ -1,0 +1,29 @@
+// 示例：环比增长率
+// 查询类型：SQL
+// 图表类型：带正负面的柱状图
+
+@lang(sql)
+@source('sales_db')
+MomGrowth {
+    SELECT 
+        month,
+        sales,
+        LAG(sales) OVER (ORDER BY month) as last_month,
+        ROUND((sales - LAG(sales) OVER (ORDER BY month)) / LAG(sales) OVER (ORDER BY month) * 100, 2) as growth_rate
+    FROM (
+        SELECT DATE_FORMAT(order_date, '%Y-%m') as month, SUM(amount) as sales
+        FROM orders
+        GROUP BY month
+    ) t
+}
+
+Chart {
+    use MomGrowth
+    type bar
+    x month
+    y growth_rate
+    
+    @style "正负柱状图，正值绿色，负值红色，零点线"
+    @color "正=#27ae60, 负=#e74c3c"
+    @title "月度环比增长率（%）"
+}

@@ -1,0 +1,27 @@
+// 示例：错误率趋势
+// 查询类型：SQL
+// 图表类型：双轴线图
+
+@lang(sql)
+@source('monitoring_db')
+ErrorRate {
+    SELECT 
+        DATE_FORMAT(timestamp, '%H:00') as hour,
+        COUNT(*) as total_requests,
+        SUM(CASE WHEN status >= 500 THEN 1 ELSE 0 END) as errors,
+        ROUND(SUM(CASE WHEN status >= 500 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as error_rate
+    FROM access_logs
+    WHERE timestamp >= CURDATE()
+    GROUP BY hour
+}
+
+Chart {
+    use ErrorRate
+    type combo
+    x hour
+    series requests { type bar, y total_requests, axis left }
+    series error_rate { type line, y error_rate, axis right }
+    
+    @style "请求量柱状，错误率折线，右轴百分比"
+    @color "请求量=#3498db, 错误率=#e74c3c"
+}

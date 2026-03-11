@@ -1,0 +1,31 @@
+// 示例：星座分布
+// 查询类型：裸数据
+// 图表类型：极坐标柱状图
+
+@lang(data)
+ZodiacDist {
+    sign,count
+    白羊,85
+    金牛,92
+    双子,78
+    巨蟹,88
+    狮子,95
+    处女,82
+    天秤,90
+    天蝎,87
+    射手,93
+    摩羯,80
+    水瓶,86
+    双鱼,91
+}
+
+Chart {
+    use ZodiacDist
+    type bar
+    x sign
+    y count
+    
+    @style "极坐标柱状图，圆形排列12星座"
+    @color "12种不同颜色"
+    @animation "顺时针依次出现"
+}

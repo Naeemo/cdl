@@ -1,0 +1,31 @@
+// 示例：K线图 - 股票价格
+// 查询类型：SQL
+// 图表类型：K线图
+
+@lang(sql)
+@source('finance_db')
+StockPrice {
+    SELECT 
+        date,
+        open_price as open,
+        high_price as high,
+        low_price as low,
+        close_price as close
+    FROM stock_daily
+    WHERE stock_code = '000001'
+    ORDER BY date
+}
+
+Chart {
+    use StockPrice
+    type candlestick
+    x date
+    open open
+    high high
+    low low
+    close close
+    
+    @style "K线图，涨红跌绿"
+    @color "涨=#e74c3c, 跌=#27ae60"
+    @interaction "鼠标悬停显示 OHLC"
+}

@@ -1,0 +1,27 @@
+// 示例：多序列面积图
+// 查询类型：SQL
+// 图表类型：堆叠面积图
+
+@lang(sql)
+@source('sales_db')
+MultiSeriesArea {
+    SELECT 
+        DATE_FORMAT(order_date, '%Y-%m') as month,
+        channel,
+        SUM(amount) as sales
+    FROM orders
+    GROUP BY month, channel
+}
+
+Chart {
+    use MultiSeriesArea
+    type area
+    x month
+    y sales
+    group channel
+    stack true
+    
+    @style "堆叠面积图，显示累积趋势"
+    @color "每个渠道不同颜色"
+    @animation "从下往上累积填充"
+}

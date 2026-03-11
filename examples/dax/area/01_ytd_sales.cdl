@@ -1,0 +1,24 @@
+// 示例：YTD 累计销售
+// 查询类型：DAX
+// 图表类型：面积图
+
+@lang(dax)
+@source('powerbi_sales_model')
+YTDSales {
+    EVALUATE
+    SUMMARIZECOLUMNS(
+        'Date'[Month],
+        "YTD Sales", TOTALYTD([Total Sales], 'Date'[Date])
+    )
+    ORDER BY 'Date'[Month]
+}
+
+Chart {
+    use YTDSales
+    type area
+    x [Month]
+    y [YTD Sales]
+    
+    @style "累计面积图，显示年度进度"
+    @color "渐变蓝"
+}

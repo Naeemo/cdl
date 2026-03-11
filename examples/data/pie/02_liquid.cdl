@@ -1,0 +1,19 @@
+// 示例：水球图 - 达成率
+// 查询类型：裸数据
+// 图表类型：水球图
+
+@lang(data)
+WaterballData {
+    name,value
+    年度目标完成度,0.75
+}
+
+Chart {
+    use WaterballData
+    type liquid
+    value value
+    
+    @style "水球填充图，波浪效果"
+    @color "#3498db"
+    @animation "波浪起伏"
+}

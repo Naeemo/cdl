@@ -1,0 +1,27 @@
+// 示例：产品类别占比
+// 查询类型：SQL
+// 图表类型：饼图
+
+@lang(sql)
+@source('sales_db')
+CategoryShare {
+    SELECT 
+        category,
+        SUM(amount) as sales,
+        ROUND(SUM(amount) * 100.0 / SUM(SUM(amount)) OVER(), 2) as percentage
+    FROM orders o
+    JOIN products p ON o.product_id = p.id
+    GROUP BY category
+}
+
+Chart {
+    use CategoryShare
+    type pie
+    label category
+    value sales
+    
+    @style "环形图，内半径40%"
+    @color "柔和 pastel 配色"
+    @animation "扇形展开"
+    @interaction "hover 显示百分比和金额"
+}

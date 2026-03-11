@@ -1,0 +1,30 @@
+// 示例：身高体重分布
+// 查询类型：裸数据
+// 图表类型：散点图
+
+@lang(data)
+HeightWeight {
+    height,weight,gender
+    170,65,M
+    165,55,F
+    180,80,M
+    160,50,F
+    175,70,M
+    168,58,F
+    172,68,M
+    158,48,F
+    178,75,M
+    162,52,F
+}
+
+Chart {
+    use HeightWeight
+    type scatter
+    x height
+    y weight
+    group gender
+    
+    @style "按性别分色，添加趋势线"
+    @color "M=蓝色, F=粉色"
+    @animation "点逐个放大出现"
+}

@@ -1,0 +1,32 @@
+// 示例：多维度能力评估
+// 查询类型：SQL
+// 图表类型：雷达图
+
+@lang(sql)
+@source('hr_db')
+SkillAssessment {
+    SELECT 
+        employee_name,
+        '技术能力' as dimension, technical as score
+    FROM assessments
+    UNION ALL
+    SELECT employee_name, '沟通能力', communication FROM assessments
+    UNION ALL
+    SELECT employee_name, '领导力', leadership FROM assessments
+    UNION ALL
+    SELECT employee_name, '执行力', execution FROM assessments
+    UNION ALL
+    SELECT employee_name, '创新力', innovation FROM assessments
+}
+
+Chart {
+    use SkillAssessment
+    type radar
+    dim dimension
+    value score
+    group employee_name
+    
+    @style "多边形雷达图，填充半透明"
+    @color "不同员工不同颜色"
+    @animation "线条逐步绘制"
+}

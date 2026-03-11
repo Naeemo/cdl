@@ -1,0 +1,22 @@
+// 示例：多维度评分
+// 查询类型：裸数据
+// 图表类型：平行坐标图
+
+@lang(data)
+ParallelScore {
+    product,price,quality,service,brand
+    A,80,90,85,88
+    B,70,85,80,75
+    C,90,75,90,92
+    D,60,95,70,65
+}
+
+Chart {
+    use ParallelScore
+    type parallel
+    dimensions [price, quality, service, brand]
+    group product
+    
+    @style "平行坐标，每条线代表一个产品"
+    @color "每个产品不同颜色"
+}

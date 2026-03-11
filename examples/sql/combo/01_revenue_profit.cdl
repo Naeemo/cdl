@@ -1,0 +1,29 @@
+// 示例：收入与利润对比
+// 查询类型：SQL  
+// 图表类型：组合图（柱状+折线）
+
+@lang(sql)
+@source('finance_db')
+RevenueProfit {
+    SELECT 
+        DATE_FORMAT(date, '%Y-%m') as month,
+        SUM(revenue) as revenue,
+        SUM(profit) as profit,
+        ROUND(SUM(profit) * 100.0 / SUM(revenue), 2) as profit_margin
+    FROM financials
+    GROUP BY month
+    ORDER BY month
+}
+
+Chart {
+    use RevenueProfit
+    type combo
+    x month
+    
+    series revenue { type bar, y revenue }
+    series profit { type line, y profit }
+    series margin { type line, y profit_margin, axis right }
+    
+    @style "收入用柱状，利润和利润率用折线，双Y轴"
+    @color "收入=#4fc3f7, 利润=#66bb6a, 利润率=#ffa726"
+}

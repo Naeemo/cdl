@@ -1,0 +1,21 @@
+// 示例：客户满意度 NPS
+// 查询类型：DAX
+// 图表类型：仪表盘
+
+@lang(dax)
+@source('powerbi_survey_model')
+NPS {
+    EVALUATE
+    { ( "NPS", [NPS Score] ) }
+}
+
+Chart {
+    use NPS
+    type gauge
+    value [NPS Score]
+    min -100
+    max 100
+    
+    @style "NPS仪表盘，-100到100"
+    @color "负值=红, 0-30=黄, 30-70=浅绿, 70+=深绿"
+}

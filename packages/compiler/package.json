@@ -1,16 +1,28 @@
 {
   "name": "@cdl/compiler",
-  "version": "0.0.1",
-  "description": "CDL compiler",
+  "version": "0.0.2",
+  "description": "CDL compiler - Compile CDL to typed JSON AST",
+  "main": "compiler.ts",
+  "types": "types.ts",
   "scripts": {
-    "test": "ts-node compiler.ts line.chart"
+    "test": "ts-node compiler.ts line.chart",
+    "build": "tsc --declaration",
+    "test:example": "ts-node compiler.ts examples/sql/line/01_monthly_sales.cdl"
   },
   "author": "Naeemo <naeemo@qq.com>",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^20.11.0"
+    "@types/node": "^20.19.37",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "ts-node": "^10.9.2"
+  },
+  "exports": {
+    ".": {
+      "types": "./types.ts",
+      "default": "./compiler.ts"
+    },
+    "./types": "./types.ts"
   }
 }

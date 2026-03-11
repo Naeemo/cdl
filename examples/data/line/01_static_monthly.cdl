@@ -1,0 +1,31 @@
+// 示例：静态月度数据
+// 查询类型：裸数据
+// 图表类型：折线图
+
+@lang(data)
+StaticMonthly {
+    month,sales
+    1月,120
+    2月,132
+    3月,101
+    4月,134
+    5月,90
+    6月,230
+    7月,210
+    8月,200
+    9月,180
+    10月,190
+    11月,250
+    12月,280
+}
+
+Chart {
+    use StaticMonthly
+    type line
+    x month
+    y sales
+    
+    @style "带区域填充的折线图"
+    @color "紫色渐变"
+    @animation "波浪式绘制"
+}

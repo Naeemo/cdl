@@ -1,0 +1,27 @@
+// 示例：网站流量热力图
+// 查询类型：SQL
+// 图表类型：热力图
+
+@lang(sql)
+@source('analytics_db')
+TrafficHeatmap {
+    SELECT 
+        DAYOFWEEK(visit_date) as day_of_week,
+        HOUR(visit_time) as hour,
+        COUNT(*) as visits
+    FROM website_traffic
+    WHERE visit_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+    GROUP BY day_of_week, hour
+}
+
+Chart {
+    use TrafficHeatmap
+    type heatmap
+    x hour
+    y day_of_week
+    value visits
+    
+    @style "颜色深浅表示流量大小，周一到周日"
+    @color "从浅黄到深红"
+    @title "网站访问热力图（按星期和小时）"
+}

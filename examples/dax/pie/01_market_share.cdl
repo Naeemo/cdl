@@ -1,0 +1,23 @@
+// 示例：市场份额（DAX）
+// 查询类型：DAX
+// 图表类型：饼图
+
+@lang(dax)
+@source('powerbi_sales_model')
+MarketShare {
+    EVALUATE
+    SUMMARIZECOLUMNS(
+        'Product'[Brand],
+        "Market Share", [Market Share %]
+    )
+}
+
+Chart {
+    use MarketShare
+    type pie
+    label [Brand]
+    value [Market Share]
+    
+    @style "玫瑰图，按份额大小调整扇形半径"
+    @color "品牌色"
+}

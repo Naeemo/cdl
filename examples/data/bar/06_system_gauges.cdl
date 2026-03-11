@@ -1,0 +1,23 @@
+// 示例：系统资源使用
+// 查询类型：裸数据
+// 图表类型：仪表盘组
+
+@lang(data)
+SystemResource {
+    metric,current,max
+    CPU,65,100
+    内存,78,100
+    磁盘,45,100
+    网络,32,100
+}
+
+Chart {
+    use SystemResource
+    type gauge
+    value current
+    max max
+    
+    @style "四个仪表盘并排显示"
+    @color "CPU=蓝, 内存=紫, 磁盘=绿, 网络=橙"
+    @layout "2x2网格"
+}

@@ -1,0 +1,31 @@
+// 示例：帕累托图
+// 查询类型：DAX
+// 图表类型：组合图（柱状+折线）
+
+@lang(dax)
+@source('powerbi_sales_model')
+ParetoData {
+    VAR SortedProducts = 
+        ADDCOLUMNS(
+            SUMMARIZE('Product', 'Product'[Product Name]),
+            "Sales", [Total Sales]
+        )
+    VAR TotalSales = SUMX(SortedProducts, [Sales])
+    RETURN
+    EVALUATE
+    ADDCOLUMNS(
+        SortedProducts,
+        "Cumulative %", DIVIDE(SUMX(FILTER(SortedProducts, [Sales] >= EARLIER([Sales])), [Sales]), TotalSales)
+    )
+    ORDER BY [Sales] DESC
+}
+
+Chart {
+    use ParetoData
+    type combo
+    x [Product Name]
+    series sales { type bar, y [Sales] }
+    series cumulative { type line, y [Cumulative %], axis right }
+    
+    @style "柱状销售额，折线累计百分比，80/20线"
+}

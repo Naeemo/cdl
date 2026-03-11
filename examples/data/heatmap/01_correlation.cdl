@@ -1,0 +1,26 @@
+// 示例：相关性矩阵
+// 查询类型：裸数据
+// 图表类型：相关性热力图
+
+@lang(data)
+CorrelationMatrix {
+    var1,var2,correlation
+    销售额,广告费,0.85
+    销售额,客服数,0.65
+    销售额,库存量,-0.45
+    广告费,客服数,0.55
+    广告费,库存量,-0.30
+    客服数,库存量,-0.20
+}
+
+Chart {
+    use CorrelationMatrix
+    type heatmap
+    x var1
+    y var2
+    value correlation
+    
+    @style "相关性矩阵，-1到1，红到蓝"
+    @color "负相关=红, 正相关=蓝, 0=白"
+    @interaction "显示具体相关系数值"
+}

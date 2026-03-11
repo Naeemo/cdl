@@ -1,0 +1,26 @@
+// 示例：词云 - 商品标签
+// 查询类型：SQL
+// 图表类型：词云
+
+@lang(sql)
+@source('product_db')
+TagCloud {
+    SELECT 
+        tag,
+        COUNT(*) as frequency
+    FROM product_tags
+    GROUP BY tag
+    ORDER BY frequency DESC
+    LIMIT 50
+}
+
+Chart {
+    use TagCloud
+    type wordcloud
+    text tag
+    size frequency
+    
+    @style "词云图，高频词大，低频词小"
+    @color "随机彩色"
+    @animation "词逐个飞入"
+}

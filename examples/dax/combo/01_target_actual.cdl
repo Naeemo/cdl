@@ -1,0 +1,29 @@
+// 示例：月度销售目标 vs 实际
+// 查询类型：DAX
+// 图表类型：组合图
+
+@lang(dax)
+@source('powerbi_sales_model')
+SalesTargetActual {
+    EVALUATE
+    SUMMARIZECOLUMNS(
+        'Date'[Month],
+        "Target", [Sales Target],
+        "Actual", [Total Sales],
+        "Achievement %", DIVIDE([Total Sales], [Sales Target])
+    )
+    ORDER BY 'Date'[Month]
+}
+
+Chart {
+    use SalesTargetActual
+    type combo
+    x [Month]
+    
+    series target { type bar, y [Target], style dashed }
+    series actual { type line, y [Actual] }
+    series achievement { type line, y [Achievement %], axis right }
+    
+    @style "目标虚线柱状，实际实线折线，完成率右轴"
+    @color "目标=灰色, 实际=蓝色, 完成率=橙色"
+}

@@ -1,0 +1,24 @@
+// 示例：地图数据（按省）
+// 查询类型：SQL
+// 图表类型：地图热力图
+
+@lang(sql)
+@source('sales_db')
+ProvinceSales {
+    SELECT 
+        province,
+        SUM(amount) as sales
+    FROM orders
+    GROUP BY province
+}
+
+Chart {
+    use ProvinceSales
+    type map
+    region province
+    value sales
+    
+    @style "中国地图，省为单位，颜色深浅表示销量"
+    @color "从浅蓝到深蓝"
+    @interaction "hover 显示具体数值"
+}

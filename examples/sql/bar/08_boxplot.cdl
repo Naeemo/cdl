@@ -1,0 +1,27 @@
+// 示例：响应时间分布
+// 查询类型：SQL
+// 图表类型：箱线图
+
+@lang(sql)
+@source('monitoring_db')
+ResponseTime {
+    SELECT 
+        endpoint,
+        AVG(response_time) as median,
+        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY response_time) as q1,
+        PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY response_time) as q3,
+        MIN(response_time) as min,
+        MAX(response_time) as max
+    FROM api_logs
+    GROUP BY endpoint
+}
+
+Chart {
+    use ResponseTime
+    type boxplot
+    x endpoint
+    y [min, q1, median, q3, max]
+    
+    @style "箱线图，显示异常值"
+    @color "不同API不同颜色"
+}

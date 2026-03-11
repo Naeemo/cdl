@@ -1,0 +1,26 @@
+// 示例：同期群分析（Cohort Analysis）
+// 查询类型：DAX
+// 图表类型：热力图
+
+@lang(dax)
+@source('powerbi_user_model')
+CohortRetention {
+    EVALUATE
+    SUMMARIZECOLUMNS(
+        'Cohort'[Cohort Month],
+        'Retention'[Period],
+        "Retention Rate", [Retention Rate]
+    )
+}
+
+Chart {
+    use CohortRetention
+    type heatmap
+    x [Cohort Month]
+    y [Period]
+    value [Retention Rate]
+    
+    @style "留存率热力图，数值百分比显示"
+    @color "从红到绿，低留存红色，高留存绿色"
+    @title "用户同期群留存分析"
+}

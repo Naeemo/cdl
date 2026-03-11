@@ -1,0 +1,23 @@
+// 示例：情绪分布
+// 查询类型：裸数据
+// 图表类型：南丁格尔玫瑰图
+
+@lang(data)
+SentimentData {
+    sentiment,count
+    非常满意,45
+    满意,30
+    一般,15
+    不满意,7
+    非常不满意,3
+}
+
+Chart {
+    use SentimentData
+    type pie
+    label sentiment
+    value count
+    
+    @style "南丁格尔玫瑰图，半径表示数量"
+    @color "从绿到红"
+}
