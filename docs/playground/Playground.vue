@@ -125,6 +125,8 @@ CategoryData {
 Chart {
     use CategoryData
     type pie
+    x name
+    y value
     @style "环形"
 }`,
   scatter: `@lang(data)
@@ -169,6 +171,8 @@ SkillData {
 Chart {
     use SkillData
     type radar
+    x skill
+    y score
     @color "#9b59b6"
 }`
 }
@@ -213,20 +217,56 @@ async function run() {
 }
 
 function mockCompile(source) {
-  // Simple mock compile
-  const hasData = source.includes('@lang')
-  const hasChart = source.includes('Chart')
-  
-  if (!hasData || !hasChart) {
-    return { success: false, error: '需要 Data 和 Chart 定义' }
+  // Parse Data block
+  const dataMatch = source.match(/@lang\(data\)\s*\n(\w+)\s*\{([^}]+)\}/)
+  if (!dataMatch) {
+    return { success: false, error: '未找到数据定义，需要 @lang(data) DataName { ... }' }
   }
   
-  const typeMatch = source.match(/type\s+(\w+)/)
+  const dataName = dataMatch[1]
+  const dataContent = dataMatch[2].trim()
+  const dataLines = dataContent.split('\n').map(l => l.trim()).filter(l => l)
+  
+  if (dataLines.length < 2) {
+    return { success: false, error: '数据至少需要表头和一行数据' }
+  }
+  
+  // Parse header and rows
+  const headers = dataLines[0].split(',').map(h => h.trim())
+  const rows = dataLines.slice(1).map(line => {
+    const values = line.split(',').map(v => v.trim())
+    const row = {}
+    headers.forEach((h, i) => {
+      const val = values[i]
+      row[h] = isNaN(Number(val)) ? val : Number(val)
+    })
+    return row
+  })
+  
+  // Parse Chart block
+  const chartMatch = source.match(/Chart\s+(?:\w+\s+)?\{([^}]+)\}/s)
+  if (!chartMatch) {
+    return { success: false, error: '未找到 Chart 定义' }
+  }
+  
+  const chartContent = chartMatch[1]
+  
+  // Check use statement
+  const useMatch = chartContent.match(/use\s+(\w+)/)
+  if (!useMatch || useMatch[1] !== dataName) {
+    return { success: false, error: `Chart 必须使用数据源 ${dataName}` }
+  }
+  
+  const typeMatch = chartContent.match(/type\s+(\w+)/)
   const chartType = typeMatch ? typeMatch[1] : 'line'
   
-  const xMatch = source.match(/x\s+(\w+)/)
-  const yMatch = source.match(/y\s+(\w+)/)
+  const xMatch = chartContent.match(/x\s+(\w+)/)
+  const yMatch = chartContent.match(/y\s+(\w+)/)
   
+  const xField = xMatch?.[1] || headers[0]
+  const yField = yMatch?.[1] || headers[1] || headers[0]
+  
+  // Parse hints
   const titleMatch = source.match(/@title\s+"([^"]+)"/)
   const styleMatch = source.match(/@style\s+"([^"]+)"/)
   const colorMatch = source.match(/@color\s+"([^"]+)"/)
@@ -234,9 +274,12 @@ function mockCompile(source) {
   return {
     success: true,
     ast: {
+      dataName,
+      headers,
+      rows,
       chartType,
-      x: xMatch?.[1] || 'x',
-      y: yMatch?.[1] || 'y',
+      xField,
+      yField,
       hints: {
         title: titleMatch?.[1],
         style: styleMatch?.[1],
@@ -247,53 +290,76 @@ function mockCompile(source) {
 }
 
 function mockRender(ast) {
+  const { rows, xField, yField, chartType, hints } = ast
+  
+  // Extract data for chart
+  const xData = rows.map(r => r[xField])
+  const yData = rows.map(r => r[yField])
+  
   const option = {
     animation: true,
-    title: ast.hints?.title ? { text: ast.hints.title, left: 'center' } : undefined,
+    title: hints?.title ? { text: hints.title, left: 'center' } : undefined,
     tooltip: { trigger: 'axis' },
     grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-    xAxis: { type: 'category', data: ['A', 'B', 'C', 'D', 'E'] },
+    xAxis: { 
+      type: 'category', 
+      data: xData 
+    },
     yAxis: { type: 'value' },
     series: [{
-      type: ast.chartType === 'area' ? 'line' : ast.chartType,
-      data: [120, 200, 150, 80, 70],
-      smooth: ast.hints?.style?.includes('平滑'),
-      areaStyle: ast.chartType === 'area' ? {} : undefined
+      type: chartType === 'area' ? 'line' : chartType,
+      data: yData,
+      smooth: hints?.style?.includes('平滑'),
+      areaStyle: chartType === 'area' ? {} : undefined
     }],
-    color: ast.hints?.color ? [ast.hints.color] : undefined
+    color: hints?.color ? [hints.color] : undefined
   }
   
-  if (ast.chartType === 'pie') {
+  if (chartType === 'pie') {
     delete option.xAxis
     delete option.yAxis
     delete option.grid
     option.series = [{
       type: 'pie',
-      radius: ast.hints?.style?.includes('环形') ? ['40%', '70%'] : '60%',
-      data: [
-        { value: 1048, name: 'A' },
-        { value: 735, name: 'B' },
-        { value: 580, name: 'C' }
-      ]
+      radius: hints?.style?.includes('环形') ? ['40%', '70%'] : '60%',
+      data: rows.map(r => ({ 
+        name: r[xField], 
+        value: r[yField] 
+      }))
     }]
     option.tooltip = { trigger: 'item' }
   }
   
-  if (ast.chartType === 'radar') {
+  if (chartType === 'radar') {
     delete option.xAxis
     delete option.yAxis
+    const maxValue = Math.max(...yData) * 1.2
     option.radar = {
-      indicator: [
-        { name: 'A', max: 100 },
-        { name: 'B', max: 100 },
-        { name: 'C', max: 100 },
-        { name: 'D', max: 100 }
-      ]
+      indicator: rows.map(r => ({ 
+        name: r[xField], 
+        max: maxValue 
+      }))
     }
     option.series = [{
       type: 'radar',
-      data: [{ value: [80, 90, 70, 85], name: '数据' }]
+      data: [{ 
+        value: rows.map(r => r[yField]), 
+        name: yField 
+      }]
     }]
+  }
+  
+  if (chartType === 'scatter') {
+    option.series = [{
+      type: 'scatter',
+      data: rows.map(r => [r[xField], r[yField]]),
+      symbolSize: 15
+    }]
+    option.tooltip = {
+      formatter: (params) => {
+        return `${xField}: ${params.data[0]}<br/>${yField}: ${params.data[1]}`
+      }
+    }
   }
   
   return { success: true, option }
