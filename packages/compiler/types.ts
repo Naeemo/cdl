@@ -95,3 +95,8 @@ export interface CompileResult {
   result?: CDLFile;
   errors: CompileError[];
 }
+
+export interface ValidationResult {
+  valid: boolean;
+  errors: CompileError[];
+}

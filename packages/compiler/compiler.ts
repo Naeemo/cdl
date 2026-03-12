@@ -17,8 +17,11 @@ import {
   CompileError,
 } from './types';
 
-// ===== 主编译函数 =====
+// ===== 公开 API =====
 
+/**
+ * 编译 CDL 源码为 AST
+ */
 export function compile(source: string): CompileResult {
   const errors: CompileError[] = [];
   
@@ -45,6 +48,18 @@ export function compile(source: string): CompileResult {
       }],
     };
   }
+}
+
+/**
+ * 验证 CDL 源码语法（不生成 AST，只检查错误）
+ * 适合 AI 快速检查生成的代码
+ */
+export function validate(source: string): { valid: boolean; errors: CompileError[] } {
+  const result = compile(source);
+  return {
+    valid: result.success,
+    errors: result.errors,
+  };
 }
 
 // ===== 注释移除 =====

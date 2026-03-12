@@ -1,28 +1,43 @@
 {
   "name": "@cdl/compiler",
-  "version": "0.0.2",
-  "description": "CDL compiler - Compile CDL to typed JSON AST",
-  "main": "compiler.ts",
-  "types": "types.ts",
+  "version": "0.1.0",
+  "description": "CDL compiler - Compile Chart Definition Language to typed JSON AST",
+  "main": "dist/compiler.js",
+  "types": "dist/compiler.d.ts",
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "test": "ts-node compiler.ts line.chart",
     "build": "tsc --declaration",
-    "test:example": "ts-node compiler.ts examples/sql/line/01_monthly_sales.cdl"
+    "test": "ts-node compiler.ts line.chart",
+    "test:example": "ts-node compiler.ts examples/sql/line/01_monthly_sales.cdl",
+    "prepublishOnly": "npm run build"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Naeemo/cdl.git",
+    "directory": "packages/compiler"
+  },
+  "bugs": {
+    "url": "https://github.com/Naeemo/cdl/issues"
+  },
+  "homepage": "https://github.com/Naeemo/cdl#readme",
+  "keywords": [
+    "cdl",
+    "chart",
+    "definition",
+    "language",
+    "compiler",
+    "ast",
+    "dsl"
+  ],
   "author": "Naeemo <naeemo@qq.com>",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.19.37",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
-  },
-  "dependencies": {
-    "ts-node": "^10.9.2"
-  },
-  "exports": {
-    ".": {
-      "types": "./types.ts",
-      "default": "./compiler.ts"
-    },
-    "./types": "./types.ts"
   }
 }

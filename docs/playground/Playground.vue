@@ -217,8 +217,8 @@ async function run() {
 }
 
 function mockCompile(source) {
-  // Parse Data block
-  const dataMatch = source.match(/@lang\(data\)\s*\n(\w+)\s*\{([^}]+)\}/)
+  // Parse Data block - 允许 @lang(data) 和数据名之间有任意空白（包括换行）
+  const dataMatch = source.match(/@lang\(data\)\s+(\w+)\s*\{([^}]+)\}/)
   if (!dataMatch) {
     return { success: false, error: '未找到数据定义，需要 @lang(data) DataName { ... }' }
   }

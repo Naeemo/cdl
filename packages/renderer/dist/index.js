@@ -34,6 +34,9 @@ function convertChartToECharts(chart, dataMap) {
         animation: true,
         animationDuration: 1000,
     };
+    // Get data from first data source
+    const dataDef = chart.dataSources.length > 0 ? dataMap.get(chart.dataSources[0]) : undefined;
+    const { headers, rows } = dataDef ? parseStaticData(dataDef.query) : { headers: [], rows: [] };
     // Title from hints
     if (chart.hints?.title) {
         option.title = {
@@ -62,51 +65,77 @@ function convertChartToECharts(chart, dataMap) {
     // Convert based on chart type
     switch (chart.chartType) {
         case 'line':
-            convertLineChart(chart, option);
+            convertLineChart(chart, option, headers, rows);
             break;
         case 'bar':
-            convertBarChart(chart, option);
+            convertBarChart(chart, option, headers, rows);
             break;
         case 'pie':
-            convertPieChart(chart, option);
+            convertPieChart(chart, option, headers, rows);
             break;
         case 'scatter':
-            convertScatterChart(chart, option);
+            convertScatterChart(chart, option, headers, rows);
             break;
         case 'area':
-            convertAreaChart(chart, option);
+            convertAreaChart(chart, option, headers, rows);
             break;
         case 'radar':
-            convertRadarChart(chart, option);
+            convertRadarChart(chart, option, headers, rows);
             break;
         case 'combo':
-            convertComboChart(chart, option);
+            convertComboChart(chart, option, headers, rows);
             break;
         case 'heatmap':
-            convertHeatmapChart(chart, option);
+            convertHeatmapChart(chart, option, headers, rows);
             break;
         default:
             // Default to line
-            convertLineChart(chart, option);
+            convertLineChart(chart, option, headers, rows);
     }
     // Apply style hints
     applyStyleHints(chart, option);
     return option;
 }
-function convertLineChart(chart, option) {
+/**
+ * Parse static data from CSV-like format
+ */
+function parseStaticData(query) {
+    const lines = query.split('\n').map(l => l.trim()).filter(l => l);
+    if (lines.length < 1) {
+        return { headers: [], rows: [] };
+    }
+    // First line is headers
+    const headers = lines[0].split(',').map(h => h.trim());
+    // Rest are data rows
+    const rows = lines.slice(1).map(line => {
+        const values = line.split(',').map(v => v.trim());
+        const row = {};
+        headers.forEach((h, i) => {
+            const val = values[i] || '';
+            // Try to parse as number
+            const num = Number(val);
+            row[h] = isNaN(num) ? val : num;
+        });
+        return row;
+    });
+    return { headers, rows };
+}
+function convertLineChart(chart, option, headers, rows) {
+    const xField = chart.x || headers[0] || '';
+    const yField = chart.y || headers[1] || headers[0] || '';
     option.xAxis = {
         type: 'category',
-        data: [], // Will be filled with actual data
-        name: chart.x || '',
+        data: rows.map(r => String(r[xField] || '')),
+        name: xField,
     };
     option.yAxis = {
         type: 'value',
-        name: chart.y || '',
+        name: yField,
     };
     option.series = [{
-            name: chart.y || 'value',
+            name: yField,
             type: 'line',
-            data: [], // Will be filled with actual data
+            data: rows.map(r => Number(r[yField]) || 0),
             smooth: chart.hints?.style?.includes('平滑') ?? false,
             symbol: chart.hints?.style?.includes('标记') ? 'circle' : 'none',
         }];
@@ -115,29 +144,36 @@ function convertLineChart(chart, option) {
         option.legend = { data: [] };
     }
 }
-function convertBarChart(chart, option) {
+function convertBarChart(chart, option, headers, rows) {
+    const xField = chart.x || headers[0] || '';
+    const yField = chart.y || headers[1] || headers[0] || '';
     option.xAxis = {
-        type: chart.stack ? 'category' : 'category',
-        data: [],
-        name: chart.x || '',
+        type: 'category',
+        data: rows.map(r => String(r[xField] || '')),
+        name: xField,
     };
     option.yAxis = {
         type: 'value',
-        name: chart.y || '',
+        name: yField,
     };
     option.series = [{
-            name: chart.y || 'value',
+            name: yField,
             type: 'bar',
-            data: [],
+            data: rows.map(r => Number(r[yField]) || 0),
             stack: chart.stack === true ? 'total' : chart.stack || undefined,
         }];
 }
-function convertPieChart(chart, option) {
+function convertPieChart(chart, option, headers, rows) {
+    const nameField = chart.x || headers[0] || '';
+    const valueField = chart.y || headers[1] || headers[0] || '';
     option.series = [{
             name: chart.hints?.title || 'data',
             type: 'pie',
             radius: chart.hints?.style?.includes('环形') ? ['40%', '70%'] : '60%',
-            data: [],
+            data: rows.map(r => ({
+                name: String(r[nameField] || ''),
+                value: Number(r[valueField]) || 0,
+            })),
             emphasis: {
                 itemStyle: {
                     shadowBlur: 10,
@@ -147,55 +183,69 @@ function convertPieChart(chart, option) {
             },
         }];
 }
-function convertScatterChart(chart, option) {
+function convertScatterChart(chart, option, headers, rows) {
+    const xField = chart.x || headers[0] || '';
+    const yField = chart.y || headers[1] || headers[0] || '';
     option.xAxis = {
         type: 'value',
-        name: chart.x || '',
+        name: xField,
     };
     option.yAxis = {
         type: 'value',
-        name: chart.y || '',
+        name: yField,
     };
     option.series = [{
             name: 'data',
             type: 'scatter',
-            data: [],
+            data: rows.map(r => [Number(r[xField]) || 0, Number(r[yField]) || 0]),
             symbolSize: 10,
         }];
 }
-function convertAreaChart(chart, option) {
+function convertAreaChart(chart, option, headers, rows) {
+    const xField = chart.x || headers[0] || '';
+    const yField = chart.y || headers[1] || headers[0] || '';
     option.xAxis = {
         type: 'category',
-        data: [],
-        name: chart.x || '',
+        data: rows.map(r => String(r[xField] || '')),
+        name: xField,
     };
     option.yAxis = {
         type: 'value',
-        name: chart.y || '',
+        name: yField,
     };
     option.series = [{
-            name: chart.y || 'value',
+            name: yField,
             type: 'line',
-            data: [],
+            data: rows.map(r => Number(r[yField]) || 0),
             areaStyle: {},
             smooth: chart.hints?.style?.includes('平滑') ?? false,
             stack: chart.stack === true ? 'total' : chart.stack || undefined,
         }];
 }
-function convertRadarChart(chart, option) {
+function convertRadarChart(chart, option, headers, rows) {
+    const dimField = chart.x || headers[0] || '';
+    const valueField = chart.y || headers[1] || headers[0] || '';
+    const maxValue = Math.max(...rows.map(r => Number(r[valueField]) || 0)) * 1.2;
     option.radar = {
-        indicator: [],
+        indicator: rows.map(r => ({
+            name: String(r[dimField] || ''),
+            max: maxValue,
+        })),
     };
     option.series = [{
             name: chart.hints?.title || 'radar',
             type: 'radar',
-            data: [],
+            data: [{
+                    value: rows.map(r => Number(r[valueField]) || 0),
+                    name: valueField,
+                }],
         }];
 }
-function convertComboChart(chart, option) {
+function convertComboChart(chart, option, headers, rows) {
+    const xField = chart.x || headers[0] || '';
     option.xAxis = {
         type: 'category',
-        data: [],
+        data: rows.map(r => String(r[xField] || '')),
     };
     option.yAxis = [
         {
@@ -211,10 +261,10 @@ function convertComboChart(chart, option) {
         name: s.name,
         type: s.type || 'line',
         yAxisIndex: s.axis === 'right' ? 1 : 0,
-        data: [],
+        data: rows.map(r => Number(r[s.yField]) || 0),
     })) || [];
 }
-function convertHeatmapChart(chart, option) {
+function convertHeatmapChart(chart, option, headers, rows) {
     option.xAxis = {
         type: 'category',
         data: [],
