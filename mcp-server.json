@@ -1,0 +1,130 @@
+{
+  "name": "cdl-server",
+  "version": "0.1.0",
+  "description": "MCP Server for CDL (Chart Definition Language)",
+  "tools": [
+    {
+      "name": "compile_cdl",
+      "description": "将 CDL 代码编译为 AST 或检查语法错误",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "CDL 源代码"
+          }
+        },
+        "required": ["code"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "ast": { "type": "object" },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "line": { "type": "number" },
+                "column": { "type": "number" },
+                "message": { "type": "string" },
+                "severity": { "type": "string", "enum": ["error", "warning"] }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "validate_cdl",
+      "description": "快速验证 CDL 语法是否正确（不生成完整 AST）",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "CDL 源代码"
+          }
+        },
+        "required": ["code"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "valid": { "type": "boolean" },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "line": { "type": "number" },
+                "message": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "render_cdl",
+      "description": "将 CDL 编译并渲染为 ECharts 配置",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "CDL 源代码"
+          },
+          "format": {
+            "type": "string",
+            "enum": ["echarts", "json"],
+            "default": "echarts",
+            "description": "输出格式"
+          }
+        },
+        "required": ["code"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "option": { "type": "object" },
+          "error": { "type": "string" }
+        }
+      }
+    },
+    {
+      "name": "generate_cdl",
+      "description": "根据描述生成 CDL 代码",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "图表描述，如\"展示过去6个月的销售趋势\""
+          },
+          "chartType": {
+            "type": "string",
+            "enum": ["line", "bar", "pie", "scatter", "area", "radar", "auto"],
+            "default": "auto",
+            "description": "图表类型"
+          },
+          "data": {
+            "type": "array",
+            "description": "可选的示例数据",
+            "items": { "type": "object" }
+          }
+        },
+        "required": ["description"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string" },
+          "explanation": { "type": "string" }
+        }
+      }
+    }
+  ]
+}

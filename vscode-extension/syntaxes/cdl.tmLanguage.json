@@ -1,0 +1,76 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "CDL",
+  "scopeName": "source.cdl",
+  "fileTypes": [".cdl"],
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#directives" },
+    { "include": "#keywords" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#identifiers" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.cdl",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.cdl",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "directives": {
+      "patterns": [
+        {
+          "name": "meta.annotation.cdl",
+          "match": "(@(lang|source|timeout|cache|style|color|animation|interaction|title|layout))\\s*(\\([^)]*\\))?",
+          "captures": {
+            "1": { "name": "storage.modifier.cdl" },
+            "3": { "name": "meta.annotation.parameters.cdl" }
+          }
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.declaration.cdl",
+          "match": "\\b(Data|Chart)\\b"
+        },
+        {
+          "name": "keyword.control.cdl",
+          "match": "\\b(use|type|x|y|group|stack|where|as)\\b"
+        },
+        {
+          "name": "keyword.other.charttype.cdl",
+          "match": "\\b(line|bar|pie|scatter|area|radar|heatmap|combo|gauge|candlestick|boxplot)\\b"
+        }
+      ]
+    },
+    "strings": {
+      "name": "string.quoted.double.cdl",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.cdl",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "numbers": {
+      "name": "constant.numeric.cdl",
+      "match": "\\b\\d+(\\.\\d+)?\\b"
+    },
+    "identifiers": {
+      "name": "variable.other.cdl",
+      "match": "[a-zA-Z_][a-zA-Z0-9_]*"
+    }
+  }
+}

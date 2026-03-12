@@ -1,0 +1,27 @@
+{
+  "name": "@cdl/cli",
+  "version": "0.1.0",
+  "description": "CDL Command Line Interface",
+  "main": "bin/cdl.js",
+  "bin": {
+    "cdl": "bin/cdl.js"
+  },
+  "files": [
+    "bin/",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node bin/cdl.js --help"
+  },
+  "dependencies": {
+    "@cdl/compiler": "^0.1.0",
+    "@cdl/renderer-echarts": "^0.1.0"
+  },
+  "author": "Naeemo <naeemo@qq.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Naeemo/cdl.git",
+    "directory": "packages/cli"
+  }
+}

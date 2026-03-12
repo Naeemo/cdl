@@ -1,0 +1,173 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/Naeemo/cdl/schemas/ast.json",
+  "title": "CDL AST",
+  "description": "Chart Definition Language Abstract Syntax Tree",
+  "type": "object",
+  "required": ["data", "charts"],
+  "properties": {
+    "data": {
+      "type": "array",
+      "description": "数据定义列表",
+      "items": {
+        "$ref": "#/definitions/DataDefinition"
+      }
+    },
+    "charts": {
+      "type": "array",
+      "description": "图表定义列表",
+      "items": {
+        "$ref": "#/definitions/ChartDefinition"
+      }
+    }
+  },
+  "definitions": {
+    "DataDefinition": {
+      "type": "object",
+      "required": ["type", "name", "lang", "config", "query"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "data"
+        },
+        "name": {
+          "type": "string",
+          "description": "数据源名称"
+        },
+        "lang": {
+          "type": "string",
+          "enum": ["sql", "dax", "data"],
+          "description": "查询语言类型"
+        },
+        "config": {
+          "$ref": "#/definitions/DataSourceConfig"
+        },
+        "query": {
+          "type": "string",
+          "description": "查询内容或静态数据"
+        }
+      }
+    },
+    "DataSourceConfig": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "数据源连接名"
+        },
+        "timeout": {
+          "type": "number",
+          "description": "查询超时（秒）"
+        },
+        "cache": {
+          "type": "number",
+          "description": "缓存时间（秒）"
+        },
+        "params": {
+          "type": "object",
+          "description": "查询参数"
+        }
+      }
+    },
+    "ChartDefinition": {
+      "type": "object",
+      "required": ["type", "chartType", "dataSources", "hints"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "chart"
+        },
+        "name": {
+          "type": "string",
+          "description": "图表名称"
+        },
+        "chartType": {
+          "type": "string",
+          "enum": [
+            "line", "bar", "pie", "scatter", "area",
+            "radar", "heatmap", "combo", "gauge"
+          ],
+          "description": "图表类型"
+        },
+        "dataSources": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "引用的数据源名称列表"
+        },
+        "x": {
+          "type": "string",
+          "description": "X 轴字段名"
+        },
+        "y": {
+          "type": "string",
+          "description": "Y 轴字段名"
+        },
+        "group": {
+          "type": "string",
+          "description": "分组字段名"
+        },
+        "stack": {
+          "oneOf": [
+            { "type": "boolean" },
+            { "type": "string" }
+          ],
+          "description": "堆叠配置"
+        },
+        "hints": {
+          "$ref": "#/definitions/ChartHint"
+        }
+      }
+    },
+    "ChartHint": {
+      "type": "object",
+      "description": "图表样式提示",
+      "properties": {
+        "style": {
+          "type": "string",
+          "description": "视觉样式描述"
+        },
+        "color": {
+          "type": "string",
+          "description": "主色调"
+        },
+        "animation": {
+          "type": "string",
+          "description": "动画效果描述"
+        },
+        "interaction": {
+          "type": "string",
+          "description": "交互行为描述"
+        },
+        "title": {
+          "type": "string",
+          "description": "图表标题"
+        },
+        "layout": {
+          "type": "string",
+          "description": "布局描述"
+        }
+      }
+    },
+    "CompileError": {
+      "type": "object",
+      "required": ["line", "column", "message", "severity"],
+      "properties": {
+        "line": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "column": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "message": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["error", "warning"]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "Data Definition": {
+    "prefix": "data",
+    "description": "Define a data source",
+    "body": [
+      "@lang(data)",
+      "${1:DataName} {",
+      "    ${2:field1},${3:field2}",
+      "    ${4:value1},${5:value2}",
+      "}",
+      ""
+    ]
+  },
+  "Chart Definition": {
+    "prefix": "chart",
+    "description": "Define a chart",
+    "body": [
+      "Chart ${1:ChartName} {",
+      "    use ${2:DataName}",
+      "    type ${3|line,bar,pie,scatter,area,radar|}",
+      "    x ${4:xField}",
+      "    y ${5:yField}",
+      "    ${6:@style \"${7:style}\"}",
+      "    ${8:@title \"${9:title}\"}",
+      "}",
+      ""
+    ]
+  },
+  "Line Chart": {
+    "prefix": "line",
+    "description": "Create a line chart",
+    "body": [
+      "@lang(data)",
+      "${1:Data} {",
+      "    ${2:x},${3:y}",
+      "    ${4:A},${5:10}",
+      "    ${6:B},${7:20}",
+      "}",
+      "",
+      "Chart ${8:LineChart} {",
+      "    use ${1:Data}",
+      "    type line",
+      "    x ${2:x}",
+      "    y ${3:y}",
+      "    @style \"平滑曲线\"",
+      "}",
+      ""
+    ]
+  },
+  "Bar Chart": {
+    "prefix": "bar",
+    "description": "Create a bar chart",
+    "body": [
+      "@lang(data)",
+      "${1:Data} {",
+      "    ${2:category},${3:value}",
+      "    ${4:A},${5:100}",
+      "    ${6:B},${7:200}",
+      "}",
+      "",
+      "Chart ${8:BarChart} {",
+      "    use ${1:Data}",
+      "    type bar",
+      "    x ${2:category}",
+      "    y ${3:value}",
+      "}",
+      ""
+    ]
+  },
+  "Pie Chart": {
+    "prefix": "pie",
+    "description": "Create a pie chart",
+    "body": [
+      "@lang(data)",
+      "${1:Data} {",
+      "    ${2:name},${3:value}",
+      "    ${4:A},${5:30}",
+      "    ${6:B},${7:70}",
+      "}",
+      "",
+      "Chart ${8:PieChart} {",
+      "    use ${1:Data}",
+      "    type pie",
+      "    x ${2:name}",
+      "    y ${3:value}",
+      "    @style \"环形\"",
+      "}",
+      ""
+    ]
+  },
+  "Style Hint": {
+    "prefix": "style",
+    "description": "Add style hint",
+    "body": ["@style \"${1:description}\""]
+  },
+  "Color Hint": {
+    "prefix": "color",
+    "description": "Add color hint",
+    "body": ["@color \"${1:#4fc3f7}\""]
+  },
+  "Title Hint": {
+    "prefix": "title",
+    "description": "Add title hint",
+    "body": ["@title \"${1:Chart Title}\""]
+  }
+}
