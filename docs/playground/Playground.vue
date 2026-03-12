@@ -42,7 +42,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import * as echarts from 'echarts'
 
 const cdlCode = ref(`@lang(data)
@@ -183,19 +183,20 @@ function loadExample() {
 async function run() {
   loading.value = true
   error.value = ''
-  echartsOption.value = null
   
   try {
     // Mock compile and render (in real app, import from packages)
     const result = mockCompile(cdlCode.value)
     if (!result.success) {
       error.value = result.error
+      echartsOption.value = null
       return
     }
     
     const renderResult = mockRender(result.ast)
     if (!renderResult.success) {
       error.value = renderResult.error
+      echartsOption.value = null
       return
     }
     
@@ -205,6 +206,7 @@ async function run() {
     renderChart()
   } catch (e) {
     error.value = e.message
+    echartsOption.value = null
   } finally {
     loading.value = false
   }
@@ -300,12 +302,11 @@ function mockRender(ast) {
 function renderChart() {
   if (!chartRef.value || !echartsOption.value) return
   
-  if (chartInstance) {
-    chartInstance.dispose()
+  if (!chartInstance) {
+    chartInstance = echarts.init(chartRef.value)
   }
   
-  chartInstance = echarts.init(chartRef.value)
-  chartInstance.setOption(echartsOption.value)
+  chartInstance.setOption(echartsOption.value, true) // true = not merge, replace
 }
 
 onMounted(() => {
@@ -313,6 +314,13 @@ onMounted(() => {
   window.addEventListener('resize', () => {
     chartInstance?.resize()
   })
+})
+
+onUnmounted(() => {
+  if (chartInstance) {
+    chartInstance.dispose()
+    chartInstance = null
+  }
 })
 
 watch(echartsOption, () => {
