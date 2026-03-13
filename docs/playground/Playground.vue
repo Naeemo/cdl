@@ -186,7 +186,6 @@ async function run() {
   }
 }
 
-// 极简行解析器
 function compileCDL(source) {
   const lines = source.split('\n')
   let dataName = ''
@@ -257,16 +256,6 @@ function compileCDL(source) {
       braceCount -= (line.match(/\}/g) || []).length
       
       if (braceCount <= 0) {
-        inChart = false
-        continue
-      }
-      chartLines.push(line)
-    }
-  }
-  
-  if (!dataName) return { success: false, error: '未找到数据定义' }
-  if (dataLines.length < 2) return { success: false, error: '数据需要表头和数据行' }
-  if (chartLines.length === 0) return { success: false, error: '未找到 Chart 定义' }
         inChart = false
         continue
       }
