@@ -26,19 +26,16 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install pnpm
-        run: npm install -g pnpm@9
-
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: npm install
 
       - name: Build packages
         run: |
-          cd packages/compiler && pnpm run build
-          cd ../renderer && pnpm run build
+          cd packages/compiler && npm install && npm run build
+          cd ../renderer && npm install && npm run build
 
       - name: Build docs
-        run: pnpm docs:build
+        run: npm run docs:build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
