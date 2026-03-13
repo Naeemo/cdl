@@ -237,8 +237,8 @@ async function run() {
 }
 
 function mockCompile(source) {
-  // Match @lang(data) DataName { ... } with multiline content
-  const dataMatch = source.match(/@lang\(data\)\s+(\w+)\s*\{([\s\S]*?)\n\}/)
+  // Match @lang(data) DataName { ... } with multiline content (allow no trailing newline)
+  const dataMatch = source.match(/@lang\(data\)\s+(\w+)\s*\{([\s\S]*?)\}/)
   if (!dataMatch) {
     return { success: false, error: '未找到数据定义，需要 @lang(data) DataName { ... }' }
   }
@@ -263,7 +263,7 @@ function mockCompile(source) {
   })
   
   // Match Chart block with multiline content
-  const chartMatch = source.match(/Chart\s+(?:\w+\s+)?\{([\s\S]*?)\n\}/)
+  const chartMatch = source.match(/Chart\s+(?:\w+\s+)?\{([\s\S]*?)\}/)
   if (!chartMatch) {
     return { success: false, error: '未找到 Chart 定义' }
   }
