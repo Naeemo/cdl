@@ -31,6 +31,35 @@ const selectedExample = ref('line')
 const isDirty = ref(false)
 let chartInstance = null
 
+// 导出功能
+function exportPNG() {
+  if (!chartInstance) return
+  const url = chartInstance.getDataURL({
+    type: 'png',
+    pixelRatio: 2,
+    backgroundColor: '#fff'
+  })
+  download(url, 'chart.png')
+}
+
+function exportSVG() {
+  if (!chartInstance) return
+  const url = chartInstance.getDataURL({
+    type: 'svg',
+    pixelRatio: 2
+  })
+  download(url, 'chart.svg')
+}
+
+function download(url, filename) {
+  const link = document.createElement('a')
+  link.download = filename
+  link.href = url
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
 const examples = [
   { name: 'line', label: '📈 折线' },
   { name: 'bar', label: '📊 柱状' },
@@ -261,35 +290,6 @@ function compileCDL(source) {
       }
       chartLines.push(line)
     }
-  }
-
-  // 导出功能
-  function exportPNG() {
-    if (!chartInstance) return
-    const url = chartInstance.getDataURL({
-      type: 'png',
-      pixelRatio: 2,
-      backgroundColor: '#fff'
-    })
-    download(url, 'chart.png')
-  }
-
-  function exportSVG() {
-    if (!chartInstance) return
-    const url = chartInstance.getDataURL({
-      type: 'svg',
-      pixelRatio: 2
-    })
-    download(url, 'chart.svg')
-  }
-
-  function download(url, filename) {
-    const link = document.createElement('a')
-    link.download = filename
-    link.href = url
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
   }
 
   if (!dataName) return { success: false, error: '未找到数据定义' }

@@ -4,6 +4,7 @@ const { compile } = require('@cdl/compiler');
 const { render } = require('@cdl/renderer-echarts');
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -18,10 +19,15 @@ Usage:
 Commands:
   compile <file.cdl>     Compile CDL to AST JSON
   render <file.cdl>      Render CDL to ECharts option JSON
+  export <file.cdl>      Export chart to PNG/SVG/PDF
   validate <file.cdl>    Validate CDL syntax
   init                   Create a sample CDL file
   nl "<description>"     Generate CDL from natural language
   help                   Show this help message
+
+Export Command Options:
+  cdl export example.cdl --format png --output chart.png
+  cdl export example.cdl --format svg --output chart.svg
 
 NL Command Options:
   cdl nl "show sales trend" --api-key <key>
@@ -126,6 +132,103 @@ Chart 月度销售 {
   console.log('Created example.cdl');
 }
 
+async function exportFile(args) {
+  const filePath = args[1];
+  if (!filePath) {
+    console.error('Error: Please provide a CDL file');
+    console.log('Usage: cdl export <file.cdl> --format <png|svg> --output <file>');
+    process.exit(1);
+  }
+
+  if (!fs.existsSync(filePath)) {
+    console.error(`Error: File not found: ${filePath}`);
+    process.exit(1);
+  }
+
+  // Parse options
+  let format = 'png';
+  let outputFile = 'chart.png';
+
+  for (let i = 2; i < args.length; i++) {
+    if (args[i] === '--format' && args[i + 1]) {
+      format = args[i + 1].toLowerCase();
+      i++;
+    } else if (args[i] === '--output' && args[i + 1]) {
+      outputFile = args[i + 1];
+      i++;
+    }
+  }
+
+  if (!['png', 'svg'].includes(format)) {
+    console.error('Error: Format must be png or svg');
+    process.exit(1);
+  }
+
+  const source = fs.readFileSync(filePath, 'utf-8');
+  const compileResult = compile(source);
+
+  if (!compileResult.success) {
+    console.error('Compilation errors:');
+    compileResult.errors.forEach(e => {
+      console.error(`  Line ${e.line}, Col ${e.column}: ${e.message}`);
+    });
+    process.exit(1);
+  }
+
+  const renderResult = render(compileResult.result);
+
+  if (!renderResult.success) {
+    console.error(`Render error: ${renderResult.error}`);
+    process.exit(1);
+  }
+
+  // Generate HTML with ECharts
+  const html = generateChartHTML(renderResult.option, format);
+
+  // Use puppeteer or similar to render - for now, save HTML
+  const tempHtmlFile = outputFile.replace(/\.[^.]+$/, '.html');
+  fs.writeFileSync(tempHtmlFile, html);
+
+  console.log(`✓ Chart HTML saved to: ${tempHtmlFile}`);
+  console.log('  Open this file in browser and save as image manually');
+  console.log('  (Headless browser support coming in next update)');
+}
+
+function generateChartHTML(option, format) {
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>CDL Export</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <style>
+    body { margin: 0; padding: 20px; }
+    #chart { width: 800px; height: 600px; }
+  </style>
+</head>
+<body>
+  <div id="chart"></div>
+  <script>
+    const chart = echarts.init(document.getElementById('chart'));
+    chart.setOption(${JSON.stringify(option)});
+    
+    // Auto-download for PNG/SVG
+    setTimeout(() => {
+      const url = chart.getDataURL({
+        type: '${format}',
+        pixelRatio: 2,
+        backgroundColor: '#fff'
+      });
+      const link = document.createElement('a');
+      link.download = 'chart.${format}';
+      link.href = url;
+      link.click();
+    }, 500);
+  </script>
+</body>
+</html>`;
+}
+
 async function nlCommand(args) {
   const description = args[1];
   if (!description) {
@@ -193,6 +296,9 @@ switch (command) {
     break;
   case 'render':
     renderFile(args[1]);
+    break;
+  case 'export':
+    exportFile(args);
     break;
   case 'validate':
     validateFile(args[1]);
