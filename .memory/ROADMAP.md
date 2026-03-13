@@ -6,10 +6,10 @@
 - [x] CLI 添加导出命令 `cdl export <file.cdl> --format png`
 - [x] 服务端渲染 API (`/api/export`)
 
-## P1: 更多数据源（待启动）
-- [ ] REST API 数据源支持
-- [ ] CSV 文件上传支持
-- [ ] Playground 支持粘贴 CSV
+## P1: 更多数据源（已完成 ✅）
+- [x] REST API 数据源支持（@source('https://...')）
+- [x] CSV 文件上传支持
+- [x] Playground 支持粘贴 CSV
 
 ## P2: 服务端渲染增强（待启动）
 - [ ] 支持定时任务生成报告
@@ -25,4 +25,4 @@
 - [ ] 主题系统
 
 ## 当前阶段
-P0 ✅ 已完成 - 导出功能已全面支持
+P1 ✅ 已完成 - 更多数据源已全面支持
