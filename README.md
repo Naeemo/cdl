@@ -41,6 +41,7 @@ Chart 月度销售 {
 - **🔒 安全交付** - DSL 不携带数据，权限和数据留在服务端
 - **🤖 AI 友好** - 结构化、可验证，LLM 易于生成和修改
 - **🎨 渐进渲染** - 核心层必渲染，@提示层可选解析
+- **📊 导出支持** - PNG/SVG 导出，支持 CLI 和服务端渲染
 
 ## 📦 安装
 
@@ -76,6 +77,33 @@ const { option } = render(result)
 // option 是标准的 ECharts 配置
 ```
 
+## 📤 导出图表
+
+### Playground 在线导出
+访问 [在线体验](https://naeemo.github.io/cdl/playground/)，编辑图表后点击 PNG/SVG 按钮导出。
+
+### CLI 导出
+```bash
+# 安装 CLI
+npm install -g @cdl/cli
+
+# 导出 PNG
+cdl export example.cdl --format png --output chart.png
+
+# 导出 SVG
+cdl export example.cdl --format svg --output chart.svg
+```
+
+### 服务端渲染 API
+```bash
+cd packages/server
+npm install
+npm start
+
+# POST /api/export
+# Body: { "source": "CDL代码", "format": "png" }
+```
+
 ## 📚 文档
 
 - [快速开始](https://naeemo.github.io/cdl/guide/) - 了解 CDL 基础概念和语法
@@ -91,7 +119,9 @@ const { option } = render(result)
 cdl/
 ├── packages/
 │   ├── compiler/          # CDL 编译器 - 将 CDL 编译为 AST
-│   └── renderer-echarts/  # ECharts 渲染器 - 将 AST 转为 ECharts 配置
+│   ├── renderer-echarts/  # ECharts 渲染器 - 将 AST 转为 ECharts 配置
+│   ├── cli/               # 命令行工具 - 编译、导出等功能
+│   └── server/            # 服务端渲染 - API 服务
 ├── docs/                  # VitePress 文档站点
 ├── examples/              # 示例 CDL 文件
 └── .github/workflows/     # GitHub Actions 部署配置
