@@ -462,7 +462,35 @@ function renderChart() {
   chartInstance.setOption(echartsOption.value, true)
 }
 
-// 导出功能
+// 生成分享链接
+function generateShareLink() {
+  const encoded = btoa(unescape(encodeURIComponent(cdlCode.value)))
+  const url = new URL(window.location.href)
+  url.searchParams.set('code', encoded)
+  shareUrl.value = url.toString()
+  showShareModal.value = true
+}
+
+function copyShareLink() {
+  navigator.clipboard.writeText(shareUrl.value).then(() => {
+    alert('链接已复制到剪贴板！')
+  })
+}
+
+function closeShareModal() {
+  showShareModal.value = false
+}
+
+// 导出 iframe 嵌入代码
+function generateEmbedCode() {
+  const encoded = btoa(unescape(encodeURIComponent(cdlCode.value)))
+  const url = new URL(window.location.href)
+  url.searchParams.set('code', encoded)
+  const embedCode = `<iframe src="${url.toString()}" width="100%" height="600" frameborder="0"></iframe>`
+  navigator.clipboard.writeText(embedCode).then(() => {
+    alert('iframe 嵌入代码已复制！')
+  })
+}
 function exportPNG() {
   if (!chartInstance) return
   const url = chartInstance.getDataURL({
@@ -527,6 +555,7 @@ watch(echartsOption, () => nextTick(renderChart))
           >
             {{ autoRefresh ? '⏸' : '▶' }}
           </button>
+          <button class="btn-share" @click="generateShareLink" title="分享链接">🔗</button>
           <select v-model="selectedExample" @change="loadExample" class="example-select">
             <option v-for="ex in examples" :key="ex.name" :value="ex.name">{{ ex.label }}</option>
           </select>
@@ -542,6 +571,7 @@ watch(echartsOption, () => nextTick(renderChart))
         <div class="header-actions">
           <button class="btn-export" @click="exportPNG" title="导出 PNG">PNG</button>
           <button class="btn-export" @click="exportSVG" title="导出 SVG">SVG</button>
+          <button class="btn-export" @click="generateEmbedCode" title="嵌入代码">Embed</button>
           <div v-if="loading" class="loading-dot"></div>
         </div>
       </div>
@@ -549,6 +579,18 @@ watch(echartsOption, () => nextTick(renderChart))
         <div v-if="error" class="error-message">{{ error }}</div>
         <div v-else-if="echartsOption" ref="chartRef" class="chart-container"></div>
         <div v-else class="placeholder">输入 CDL 代码查看图表</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 分享模态框 -->
+  <div v-if="showShareModal" class="modal-overlay" @click="closeShareModal">
+    <div class="modal" @click.stop>
+      <h3>🔗 分享链接</h3>
+      <input type="text" :value="shareUrl" readonly class="share-input" />
+      <div class="modal-actions">
+        <button class="btn-primary" @click="copyShareLink">复制链接</button>
+        <button class="btn-secondary" @click="closeShareModal">关闭</button>
       </div>
     </div>
   </div>
@@ -591,4 +633,17 @@ watch(echartsOption, () => nextTick(renderChart))
 .placeholder { flex: 1; display: flex; align-items: center; justify-content: center; color: #8c959f; font-size: 13px; }
 .error-message { padding: 12px; background: #fff2f0; border: 1px solid #ffccc7; border-radius: 6px; color: #cf222e; font-size: 12px; margin-bottom: 12px; }
 @media (max-width: 768px) { .playground { flex-direction: column; height: 800px; } .editor-pane, .preview-pane { width: 100%; height: 50%; } .editor-pane { border-right: none; border-bottom: 1px solid #30363d; } }
+
+/* 分享模态框 */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.modal { background: #fff; padding: 24px; border-radius: 8px; min-width: 400px; }
+.modal h3 { margin: 0 0 16px 0; font-size: 16px; }
+.share-input { width: 100%; padding: 8px 12px; border: 1px solid #d0d7de; border-radius: 4px; font-size: 13px; font-family: monospace; margin-bottom: 16px; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.btn-primary { padding: 6px 16px; background: #0969da; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+.btn-primary:hover { background: #0550ae; }
+.btn-secondary { padding: 6px 16px; background: #f6f8fa; color: #24292f; border: 1px solid #d0d7de; border-radius: 4px; cursor: pointer; }
+.btn-secondary:hover { background: #f3f4f6; }
+.btn-share { padding: 4px 8px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; cursor: pointer; font-size: 12px; color: #c9d1d9; }
+.btn-share:hover { background: #30363d; border-color: #58a6ff; }
 </style>

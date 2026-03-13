@@ -9,6 +9,8 @@ const http = require('http');
 const args = process.argv.slice(2);
 const command = args[0];
 
+let verboseMode = false;
+
 function showHelp() {
   console.log(`
 CDL CLI - Chart Definition Language Command Line Tool
@@ -26,9 +28,22 @@ Commands:
   nl "<description>"     Generate CDL from natural language
   help                   Show this help message
 
+Global Options:
+  --verbose, -v          Enable verbose output with detailed logs
+  --ast                  Show AST structure in compile/render commands
+
 Export Command Options:
   cdl export example.cdl --format png --output chart.png
   cdl export example.cdl --format svg --output chart.svg
+
+Init Command Options:
+  cdl init                    Create default line chart example
+  cdl init --template line    Create line chart template
+  cdl init --template bar     Create bar chart template
+  cdl init --template pie     Create pie chart template
+  cdl init --template scatter Create scatter chart template
+  cdl init --template radar   Create radar chart template
+  cdl init --template sql     Create SQL data source example
 
 Batch Command Options:
   cdl batch ./charts --format png --output ./exports
@@ -40,28 +55,67 @@ NL Command Options:
 
 Examples:
   cdl compile example.cdl > output.json
+  cdl compile example.cdl --ast              # Show AST with verbose structure
   cdl render example.cdl > echarts.json
   cdl validate example.cdl
+  cdl validate example.cdl --verbose         # Show detailed validation info
   cdl nl "line chart of monthly sales, blue color" --api-key $KIMI_API_KEY
 `);
 }
 
-function compileFile(filePath) {
+function compileFile(args) {
+  const filePath = args[1];
+  const showAst = args.includes('--ast');
+  const isVerbose = args.includes('--verbose') || args.includes('-v');
+  
+  if (!filePath) {
+    console.error('Error: Please provide a CDL file');
+    process.exit(1);
+  }
+  
   if (!fs.existsSync(filePath)) {
     console.error(`Error: File not found: ${filePath}`);
     process.exit(1);
   }
 
   const source = fs.readFileSync(filePath, 'utf-8');
+  
+  if (isVerbose) {
+    console.log(`📄 Reading file: ${filePath}`);
+    console.log(`📊 Source length: ${source.length} characters, ${source.split('\n').length} lines`);
+    console.log('');
+  }
+  
   const result = compile(source);
 
   if (result.success) {
-    console.log(JSON.stringify(result.result, null, 2));
+    if (showAst) {
+      console.log('=== Abstract Syntax Tree ===\n');
+      console.log(JSON.stringify(result.result, null, 2));
+      console.log('\n=== AST Summary ===');
+      console.log(`Data sources: ${result.result.data?.length || 0}`);
+      console.log(`Charts: ${result.result.charts?.length || 0}`);
+      if (result.result.charts?.length > 0) {
+        result.result.charts.forEach((chart, i) => {
+          console.log(`  Chart ${i + 1}: type=${chart.chartType}, dataSources=[${chart.dataSources?.join(', ')}]`);
+        });
+      }
+    } else {
+      console.log(JSON.stringify(result.result, null, 2));
+    }
   } else {
-    console.error('Compilation errors:');
+    console.error('❌ Compilation failed:');
     result.errors.forEach(e => {
       console.error(`  Line ${e.line}, Col ${e.column}: ${e.message}`);
+      if (e.suggestion) {
+        console.error(`  💡 ${e.suggestion}`);
+      }
     });
+    if (isVerbose) {
+      console.error('\nDebug info:');
+      console.error(`  Total errors: ${result.errors.length}`);
+      console.error(`  Source preview (first 200 chars): ${source.substring(0, 200)}...`);
+    }
     process.exit(1);
   }
 }
