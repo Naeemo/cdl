@@ -1,7 +1,16 @@
 <template>
-  <div class="playground">
-    <!-- 左侧编辑器 -->
-    <div class="editor-pane">
+  <div class="playground-container">
+    <!-- 简单导航栏 -->
+    <div class="nav-bar">
+      <a href="/cdl/" class="nav-logo">← CDL</a>
+      <span class="nav-title">Playground</span>
+      <a href="/cdl/guide/" class="nav-link">文档</a>
+      <a href="/cdl/examples/" class="nav-link">示例</a>
+    </div>
+    
+    <div class="playground">
+      <!-- 左侧编辑器 -->
+      <div class="editor-pane">
       <div class="pane-header">
         <div class="header-left">
           <span class="title">CDL</span>
@@ -398,7 +407,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (chartInstance) {
-    instance.dispose()
+    chartInstance.dispose()
     chartInstance = null
   }
 })
@@ -413,11 +422,63 @@ watch(echartsOption, () => {
   box-sizing: border-box;
 }
 
+.playground-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #0d1117;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-bar {
+  height: 48px;
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 24px;
+  flex-shrink: 0;
+}
+
+.nav-logo {
+  font-weight: 600;
+  font-size: 16px;
+  color: #58a6ff;
+  text-decoration: none;
+}
+
+.nav-logo:hover {
+  color: #79c0ff;
+}
+
+.nav-title {
+  font-size: 14px;
+  color: #8b949e;
+  flex: 1;
+}
+
+.nav-link {
+  font-size: 13px;
+  color: #c9d1d9;
+  text-decoration: none;
+  padding: 4px 12px;
+  border-radius: 6px;
+}
+
+.nav-link:hover {
+  background: #30363d;
+  color: #fff;
+}
+
 .playground {
   display: flex;
-  width: 100vw;
-  height: 100vh;
-  background: #0d1117;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
