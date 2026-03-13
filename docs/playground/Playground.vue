@@ -150,7 +150,7 @@ function loadExample() {
   }
 }
 
-// CSV 上传处理
+// CSV 粘贴处理
 function handlePaste(event) {
   const text = event.clipboardData.getData('text')
   // 检测是否为 CSV 格式（包含逗号和换行）
@@ -173,6 +173,9 @@ function handlePaste(event) {
     run()
   }
 }
+
+// CSV 文件上传处理
+function handleCSVUpload(event) {
   const file = event.target.files[0]
   if (!file) return
   

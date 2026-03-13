@@ -20,6 +20,7 @@ Commands:
   compile <file.cdl>     Compile CDL to AST JSON
   render <file.cdl>      Render CDL to ECharts option JSON
   export <file.cdl>      Export chart to PNG/SVG/PDF
+  batch <dir>            Batch export all .cdl files in directory
   validate <file.cdl>    Validate CDL syntax
   init                   Create a sample CDL file
   nl "<description>"     Generate CDL from natural language
@@ -28,6 +29,10 @@ Commands:
 Export Command Options:
   cdl export example.cdl --format png --output chart.png
   cdl export example.cdl --format svg --output chart.svg
+
+Batch Command Options:
+  cdl batch ./charts --format png --output ./exports
+  cdl batch ./reports --format pdf --output ./pdfs
 
 NL Command Options:
   cdl nl "show sales trend" --api-key <key>
@@ -441,6 +446,95 @@ async function nlCommand(args) {
   }
 }
 
+async function batchExport(args) {
+  const dirPath = args[1];
+  if (!dirPath) {
+    console.error('Error: Please provide a directory path');
+    console.log('Usage: cdl batch <directory> --format png --output ./exports');
+    process.exit(1);
+  }
+
+  if (!fs.existsSync(dirPath)) {
+    console.error(`Error: Directory not found: ${dirPath}`);
+    process.exit(1);
+  }
+
+  // Parse options
+  let format = 'png';
+  let outputDir = './exports';
+
+  for (let i = 2; i < args.length; i++) {
+    if (args[i] === '--format' && args[i + 1]) {
+      format = args[i + 1].toLowerCase();
+      i++;
+    } else if (args[i] === '--output' && args[i + 1]) {
+      outputDir = args[i + 1];
+      i++;
+    }
+  }
+
+  if (!['png', 'svg'].includes(format)) {
+    console.error('Error: Format must be png or svg');
+    process.exit(1);
+  }
+
+  // Create output directory
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  // Find all .cdl files
+  const files = fs.readdirSync(dirPath).filter(f => f.endsWith('.cdl'));
+  
+  if (files.length === 0) {
+    console.log('No .cdl files found in directory');
+    return;
+  }
+
+  console.log(`Found ${files.length} CDL files. Starting batch export...\n`);
+
+  let successCount = 0;
+  let failCount = 0;
+
+  for (const file of files) {
+    const inputFile = path.join(dirPath, file);
+    const outputFile = path.join(outputDir, file.replace('.cdl', `.${format}.html`));
+    
+    try {
+      const source = fs.readFileSync(inputFile, 'utf-8');
+      const compileResult = compile(source);
+
+      if (!compileResult.success) {
+        console.error(`✗ ${file}: Compilation failed`);
+        failCount++;
+        continue;
+      }
+
+      const renderResult = render(compileResult.result);
+
+      if (!renderResult.success) {
+        console.error(`✗ ${file}: Render failed - ${renderResult.error}`);
+        failCount++;
+        continue;
+      }
+
+      // Generate HTML
+      const html = generateChartHTML(renderResult.option, format);
+      fs.writeFileSync(outputFile, html);
+      
+      console.log(`✓ ${file} -> ${path.basename(outputFile)}`);
+      successCount++;
+    } catch (error) {
+      console.error(`✗ ${file}: ${error.message}`);
+      failCount++;
+    }
+  }
+
+  console.log(`\nBatch export complete: ${successCount} succeeded, ${failCount} failed`);
+  console.log(`Output directory: ${outputDir}`);
+  console.log('Note: Open HTML files in browser and save as image manually');
+}
+
 switch (command) {
   case 'compile':
     compileFile(args[1]);
@@ -450,6 +544,9 @@ switch (command) {
     break;
   case 'export':
     exportFile(args);
+    break;
+  case 'batch':
+    batchExport(args);
     break;
   case 'validate':
     validateFile(args[1]);
