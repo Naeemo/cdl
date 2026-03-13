@@ -2,7 +2,25 @@
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import * as echarts from 'echarts'
 
-const cdlCode = ref(`@lang(data)
+// 从 URL 参数或本地存储加载代码
+function getInitialCode() {
+  // 1. 优先从 URL 参数加载
+  const urlParams = new URLSearchParams(window.location.search)
+  const codeParam = urlParams.get('code')
+  if (codeParam) {
+    try {
+      return decodeURIComponent(escape(atob(codeParam)))
+    } catch (e) {
+      console.error('Failed to decode URL code:', e)
+    }
+  }
+  
+  // 2. 从本地存储加载
+  const saved = localStorage.getItem('cdl-playground-code')
+  if (saved) return saved
+  
+  // 3. 默认示例
+  return `@lang(data)
 SalesData {
     month,sales
     1月,100
@@ -21,7 +39,10 @@ Chart 月度销售 {
     @style "平滑曲线"
     @color "#4fc3f7"
     @title "月度销售趋势"
-}`)
+}`
+}
+
+const cdlCode = ref(getInitialCode())
 
 const loading = ref(false)
 const error = ref('')
@@ -32,6 +53,9 @@ const isDirty = ref(false)
 const autoRefresh = ref(false)
 const autoRefreshInterval = ref(null)
 let chartInstance = null
+
+const shareUrl = ref('')
+const showShareModal = ref(false)
 
 const examples = [
   { name: 'line', label: '📈 折线' },
@@ -140,6 +164,8 @@ Chart {
 let debounceTimer = null
 watch(cdlCode, () => {
   isDirty.value = true
+  // 自动保存到本地存储
+  localStorage.setItem('cdl-playground-code', cdlCode.value)
   clearTimeout(debounceTimer)
   debounceTimer = setTimeout(() => {
     run()
