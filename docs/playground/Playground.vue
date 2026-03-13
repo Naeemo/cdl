@@ -285,18 +285,22 @@ function mockCompile(source) {
   })
   
   // Find Chart block with balanced braces
-  const chartMatch = source.match(/Chart\s+(?:\w+\s+)?\{/)
-  if (!chartMatch) {
+  const chartIdx = source.search(/Chart\s+(?:\w+\s+)?\{/)
+  if (chartIdx === -1) {
     return { success: false, error: '未找到 Chart 定义' }
   }
   
-  const chartStart = source.indexOf(chartMatch[0]) + chartMatch[0].length
+  const chartStart = chartIdx + source.slice(chartIdx).indexOf('{') + 1
   let chartBraceCount = 1
   let chartPos = chartStart
   while (chartBraceCount > 0 && chartPos < source.length) {
     if (source[chartPos] === '{') chartBraceCount++
     if (source[chartPos] === '}') chartBraceCount--
     chartPos++
+  }
+  
+  if (chartBraceCount > 0) {
+    return { success: false, error: 'Chart 定义缺少结束括号 }' }
   }
   
   const chartContent = source.slice(chartStart, chartPos - 1)
