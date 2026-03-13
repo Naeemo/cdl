@@ -17,7 +17,7 @@ Chart 月度销售 {
     type line
     x month
     y sales
-
+    
     @style "平滑曲线"
     @color "#4fc3f7"
     @title "月度销售趋势"
@@ -30,35 +30,6 @@ const chartRef = ref(null)
 const selectedExample = ref('line')
 const isDirty = ref(false)
 let chartInstance = null
-
-// 导出功能
-function exportPNG() {
-  if (!chartInstance) return
-  const url = chartInstance.getDataURL({
-    type: 'png',
-    pixelRatio: 2,
-    backgroundColor: '#fff'
-  })
-  download(url, 'chart.png')
-}
-
-function exportSVG() {
-  if (!chartInstance) return
-  const url = chartInstance.getDataURL({
-    type: 'svg',
-    pixelRatio: 2
-  })
-  download(url, 'chart.svg')
-}
-
-function download(url, filename) {
-  const link = document.createElement('a')
-  link.download = filename
-  link.href = url
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-}
 
 const examples = [
   { name: 'line', label: '📈 折线' },
@@ -179,6 +150,37 @@ function loadExample() {
   }
 }
 
+// CSV 上传处理
+function handleCSVUpload(event) {
+  const file = event.target.files[0]
+  if (!file) return
+  
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    const csv = e.target.result
+    const dataName = file.name.replace('.csv', '').replace(/[^a-zA-Z0-9]/g, '')
+    const lines = csv.trim().split('\n')
+    if (lines.length < 2) {
+      error.value = 'CSV 文件需要至少包含表头和一行数据'
+      return
+    }
+    
+    // 解析 CSV 生成 CDL
+    const headers = lines[0].split(',').map(h => h.trim())
+    const dataLines = lines.slice(1, 11) // 最多取10行示例
+    
+    let cdl = `@lang(data)\n${dataName} {\n    ${headers.join(',')}\n`
+    dataLines.forEach(line => {
+      cdl += `    ${line.trim()}\n`
+    })
+    cdl += `}\n\nChart {\n    use ${dataName}\n    type line\n    x ${headers[0]}\n    y ${headers[1] || headers[0]}\n}`
+    
+    cdlCode.value = cdl
+    run()
+  }
+  reader.readAsText(file)
+}
+
 function refresh() {
   run()
 }
@@ -186,7 +188,7 @@ function refresh() {
 async function run() {
   loading.value = true
   error.value = ''
-
+  
   try {
     const result = compileCDL(cdlCode.value)
     if (!result.success) {
@@ -194,17 +196,17 @@ async function run() {
       echartsOption.value = null
       return
     }
-
+    
     const renderResult = renderChartOption(result.data, result.chart)
     if (!renderResult.success) {
       error.value = renderResult.error
       echartsOption.value = null
       return
     }
-
+    
     echartsOption.value = renderResult.option
     isDirty.value = false
-
+    
     await nextTick()
     renderChart()
   } catch (e) {
@@ -224,17 +226,17 @@ function compileCDL(source) {
   let inChart = false
   let braceCount = 0
   let expectingDataName = false
-
+  
   for (const rawLine of lines) {
     const line = rawLine.trim()
-
+    
     // Data 开始（@lang(data) 单独一行）
     if (!inData && !inChart && line === '@lang(data)') {
       expectingDataName = true
       continue
     }
-
-    // 期望 DataName {
+    
+    // 期望 DataName { 
     if (expectingDataName) {
       const m = line.match(/^(\w+)\s*\{/)
       if (m) {
@@ -251,12 +253,12 @@ function compileCDL(source) {
       }
       continue
     }
-
+    
     // Data 内部
     if (inData && !inChart) {
       braceCount += (line.match(/\{/g) || []).length
       braceCount -= (line.match(/\}/g) || []).length
-
+      
       if (braceCount <= 0) {
         inData = false
         continue
@@ -264,7 +266,7 @@ function compileCDL(source) {
       dataLines.push(line)
       continue
     }
-
+    
     // Chart 开始
     if (!inData && !inChart && line.startsWith('Chart')) {
       inChart = true
@@ -278,7 +280,7 @@ function compileCDL(source) {
       }
       continue
     }
-
+    
     // Chart 内部
     if (inChart) {
       braceCount += (line.match(/\{/g) || []).length
@@ -291,11 +293,11 @@ function compileCDL(source) {
       chartLines.push(line)
     }
   }
-
+  
   if (!dataName) return { success: false, error: '未找到数据定义' }
   if (dataLines.length < 2) return { success: false, error: '数据需要表头和数据行' }
   if (chartLines.length === 0) return { success: false, error: '未找到 Chart 定义' }
-
+  
   // 解析数据
   const headers = dataLines[0].split(',').map(h => h.trim())
   const rows = dataLines.slice(1).map(line => {
@@ -306,14 +308,14 @@ function compileCDL(source) {
     })
     return row
   })
-
+  
   // 解析 Chart
   const chartText = chartLines.join('\n')
   const useMatch = chartText.match(/use\s+(\w+)/)
   if (!useMatch || useMatch[1] !== dataName) {
     return { success: false, error: `Chart 必须使用数据源 ${dataName}` }
   }
-
+  
   return {
     success: true,
     data: { name: dataName, headers, rows },
@@ -331,7 +333,7 @@ function compileCDL(source) {
 function renderChartOption(data, chart) {
   const xData = data.rows.map(r => r[chart.xField])
   const yData = data.rows.map(r => r[chart.yField])
-
+  
   const option = {
     animation: true,
     title: chart.title ? { text: chart.title, left: 'center' } : undefined,
@@ -347,7 +349,7 @@ function renderChartOption(data, chart) {
     }],
     color: chart.color ? [chart.color] : undefined
   }
-
+  
   if (chart.type === 'pie') {
     delete option.xAxis
     delete option.yAxis
@@ -359,7 +361,7 @@ function renderChartOption(data, chart) {
     }]
     option.tooltip = { trigger: 'item' }
   }
-
+  
   if (chart.type === 'radar') {
     delete option.xAxis
     delete option.yAxis
@@ -372,7 +374,7 @@ function renderChartOption(data, chart) {
       data: [{ value: yData, name: chart.yField }]
     }]
   }
-
+  
   if (chart.type === 'scatter') {
     option.series = [{
       type: 'scatter',
@@ -383,7 +385,7 @@ function renderChartOption(data, chart) {
       formatter: (params) => `${chart.xField}: ${params.data[0]}<br/>${chart.yField}: ${params.data[1]}`
     }
   }
-
+  
   return { success: true, option }
 }
 
@@ -391,6 +393,35 @@ function renderChart() {
   if (!chartRef.value || !echartsOption.value) return
   if (!chartInstance) chartInstance = echarts.init(chartRef.value)
   chartInstance.setOption(echartsOption.value, true)
+}
+
+// 导出功能
+function exportPNG() {
+  if (!chartInstance) return
+  const url = chartInstance.getDataURL({
+    type: 'png',
+    pixelRatio: 2,
+    backgroundColor: '#fff'
+  })
+  download(url, 'chart.png')
+}
+
+function exportSVG() {
+  if (!chartInstance) return
+  const url = chartInstance.getDataURL({
+    type: 'svg',
+    pixelRatio: 2
+  })
+  download(url, 'chart.svg')
+}
+
+function download(url, filename) {
+  const link = document.createElement('a')
+  link.download = filename
+  link.href = url
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
 }
 
 onMounted(() => {
@@ -417,6 +448,7 @@ watch(echartsOption, () => nextTick(renderChart))
           <span v-if="isDirty" class="dot"></span>
         </div>
         <div class="header-actions">
+          <input type="file" accept=".csv" @change="handleCSVUpload" class="file-input" title="上传 CSV" />
           <select v-model="selectedExample" @change="loadExample" class="example-select">
             <option v-for="ex in examples" :key="ex.name" :value="ex.name">{{ ex.label }}</option>
           </select>
@@ -454,6 +486,8 @@ watch(echartsOption, () => nextTick(renderChart))
 .dot { width: 6px; height: 6px; background: #58a6ff; border-radius: 50%; animation: pulse 2s infinite; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 .header-actions { display: flex; align-items: center; gap: 6px; }
+.file-input { padding: 4px 8px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; font-size: 11px; color: #c9d1d9; cursor: pointer; max-width: 90px; }
+.file-input:hover { border-color: #58a6ff; }
 .example-select { padding: 4px 8px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; font-size: 12px; color: #c9d1d9; cursor: pointer; outline: none; }
 .example-select:hover { border-color: #58a6ff; }
 .btn-refresh { padding: 4px 8px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; cursor: pointer; font-size: 13px; color: #c9d1d9; transition: all 0.2s; }
