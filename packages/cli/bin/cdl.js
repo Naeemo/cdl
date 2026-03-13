@@ -229,6 +229,157 @@ function generateChartHTML(option, format) {
 </html>`;
 }
 
+async function exportFile(args) {
+  const filePath = args[1];
+  if (!filePath) {
+    console.error('Error: Please provide a CDL file path');
+    console.log('Usage: cdl export <file.cdl> --format png --output chart.png');
+    process.exit(1);
+  }
+
+  if (!fs.existsSync(filePath)) {
+    console.error(`Error: File not found: ${filePath}`);
+    process.exit(1);
+  }
+
+  // Parse options
+  let format = 'png';
+  let outputFile = null;
+  let width = 800;
+  let height = 600;
+
+  for (let i = 2; i < args.length; i++) {
+    if (args[i] === '--format' && args[i + 1]) {
+      format = args[i + 1];
+      i++;
+    } else if (args[i] === '--output' && args[i + 1]) {
+      outputFile = args[i + 1];
+      i++;
+    } else if (args[i] === '--width' && args[i + 1]) {
+      width = parseInt(args[i + 1], 10);
+      i++;
+    } else if (args[i] === '--height' && args[i + 1]) {
+      height = parseInt(args[i + 1], 10);
+      i++;
+    }
+  }
+
+  if (!['png', 'svg'].includes(format)) {
+    console.error(`Error: Unsupported format: ${format}. Use 'png' or 'svg'.`);
+    process.exit(1);
+  }
+
+  if (!outputFile) {
+    outputFile = `chart.${format}`;
+  }
+
+  const source = fs.readFileSync(filePath, 'utf-8');
+  const compileResult = compile(source);
+
+  if (!compileResult.success) {
+    console.error('Compilation errors:');
+    compileResult.errors.forEach(e => {
+      console.error(`  Line ${e.line}, Col ${e.column}: ${e.message}`);
+    });
+    process.exit(1);
+  }
+
+  const renderResult = render(compileResult.result);
+
+  if (!renderResult.success) {
+    console.error(`Render error: ${renderResult.error}`);
+    process.exit(1);
+  }
+
+  // Create a simple HTML page with ECharts
+  const echartsConfig = JSON.stringify(renderResult.option);
+  const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"><\/script>
+  <style>
+    body { margin: 0; padding: 0; background: #fff; }
+    #chart { width: ${width}px; height: ${height}px; }
+  </style>
+</head>
+<body>
+  <div id="chart"></div>
+  <script>
+    const chart = echarts.init(document.getElementById('chart'), null, {
+      renderer: '${format === 'svg' ? 'svg' : 'canvas'}'
+    });
+    const option = ${echartsConfig};
+    chart.setOption(option);
+    
+    // Wait for animation to complete
+    setTimeout(() => {
+      const dataURL = chart.getDataURL({
+        type: '${format}',
+        pixelRatio: 2,
+        backgroundColor: '#fff'
+      });
+      console.log('DATAURL:' + dataURL);
+    }, 500);
+  <\/script>
+</body>
+</html>`;
+
+  // Try to use Puppeteer if available, otherwise fallback to simple file export
+  let puppeteer;
+  try {
+    puppeteer = require('puppeteer');
+  } catch (e) {
+    // Puppeteer not available, use fallback
+  }
+
+  if (puppeteer) {
+    try {
+      const browser = await puppeteer.launch({
+        headless: 'new',
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+      const page = await browser.newPage();
+      await page.setViewport({ width, height });
+      await page.setContent(htmlContent);
+      
+      // Wait for chart to render
+      await page.waitForFunction(() => {
+        const logs = window._consoleLogs || [];
+        return logs.some(log => log.startsWith('DATAURL:'));
+      }, { timeout: 10000 });
+
+      // Get data URL from console
+      const dataURL = await page.evaluate(() => {
+        const logs = window._consoleLogs || [];
+        const log = logs.find(l => l.startsWith('DATAURL:'));
+        return log ? log.replace('DATAURL:', '') : null;
+      });
+
+      if (dataURL) {
+        const base64Data = dataURL.replace(/^data:image\/(png|svg\+xml);base64,/, '');
+        fs.writeFileSync(outputFile, Buffer.from(base64Data, 'base64'));
+        console.log(`✓ Exported to: ${outputFile}`);
+        console.log(`  Format: ${format.toUpperCase()}`);
+        console.log(`  Size: ${width}x${height}`);
+      }
+
+      await browser.close();
+    } catch (error) {
+      console.error(`Export error: ${error.message}`);
+      process.exit(1);
+    }
+  } else {
+    // Fallback: Export as HTML with instructions
+    const htmlOutputFile = outputFile.replace(/\.(png|svg)$/, '.html');
+    fs.writeFileSync(htmlOutputFile, htmlContent.replace(/<\\/script>/g, '</script>'));
+    console.log(`⚠ Puppeteer not available. Exported as HTML instead.`);
+    console.log(`  HTML file: ${htmlOutputFile}`);
+    console.log(`  Open this file in a browser and use the browser console to get the chart image.`);
+    console.log(`  To enable direct PNG/SVG export, install puppeteer: npm install -g puppeteer`);
+  }
+}
+
 async function nlCommand(args) {
   const description = args[1];
   if (!description) {
