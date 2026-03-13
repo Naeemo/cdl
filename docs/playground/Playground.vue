@@ -416,16 +416,20 @@ watch(echartsOption, () => {
 .playground {
   display: flex;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: 600px;
   background: #0d1117;
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid #30363d;
+  box-sizing: border-box;
 }
 
 /* 左侧面板 */
 .editor-pane {
   width: 50%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   background: #0d1117;
@@ -538,6 +542,7 @@ watch(echartsOption, () => {
 /* 右侧面板 */
 .preview-pane {
   width: 50%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   background: #ffffff;

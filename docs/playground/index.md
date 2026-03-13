@@ -6,4 +6,14 @@ layout: page
 import Playground from './Playground.vue'
 </script>
 
-<Playground />
+<div class="vp-raw">
+  <Playground />
+</div>
+
+<style>
+.vp-raw {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+</style>
