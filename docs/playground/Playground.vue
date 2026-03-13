@@ -17,7 +17,7 @@ Chart 月度销售 {
     type line
     x month
     y sales
-    
+
     @style "平滑曲线"
     @color "#4fc3f7"
     @title "月度销售趋势"
@@ -157,7 +157,7 @@ function refresh() {
 async function run() {
   loading.value = true
   error.value = ''
-  
+
   try {
     const result = compileCDL(cdlCode.value)
     if (!result.success) {
@@ -165,17 +165,17 @@ async function run() {
       echartsOption.value = null
       return
     }
-    
+
     const renderResult = renderChartOption(result.data, result.chart)
     if (!renderResult.success) {
       error.value = renderResult.error
       echartsOption.value = null
       return
     }
-    
+
     echartsOption.value = renderResult.option
     isDirty.value = false
-    
+
     await nextTick()
     renderChart()
   } catch (e) {
@@ -195,17 +195,17 @@ function compileCDL(source) {
   let inChart = false
   let braceCount = 0
   let expectingDataName = false
-  
+
   for (const rawLine of lines) {
     const line = rawLine.trim()
-    
+
     // Data 开始（@lang(data) 单独一行）
     if (!inData && !inChart && line === '@lang(data)') {
       expectingDataName = true
       continue
     }
-    
-    // 期望 DataName { 
+
+    // 期望 DataName {
     if (expectingDataName) {
       const m = line.match(/^(\w+)\s*\{/)
       if (m) {
@@ -222,12 +222,12 @@ function compileCDL(source) {
       }
       continue
     }
-    
+
     // Data 内部
     if (inData && !inChart) {
       braceCount += (line.match(/\{/g) || []).length
       braceCount -= (line.match(/\}/g) || []).length
-      
+
       if (braceCount <= 0) {
         inData = false
         continue
@@ -235,7 +235,7 @@ function compileCDL(source) {
       dataLines.push(line)
       continue
     }
-    
+
     // Chart 开始
     if (!inData && !inChart && line.startsWith('Chart')) {
       inChart = true
@@ -249,7 +249,7 @@ function compileCDL(source) {
       }
       continue
     }
-    
+
     // Chart 内部
     if (inChart) {
       braceCount += (line.match(/\{/g) || []).length
@@ -262,11 +262,40 @@ function compileCDL(source) {
       chartLines.push(line)
     }
   }
-  
+
+  // 导出功能
+  function exportPNG() {
+    if (!chartInstance) return
+    const url = chartInstance.getDataURL({
+      type: 'png',
+      pixelRatio: 2,
+      backgroundColor: '#fff'
+    })
+    download(url, 'chart.png')
+  }
+
+  function exportSVG() {
+    if (!chartInstance) return
+    const url = chartInstance.getDataURL({
+      type: 'svg',
+      pixelRatio: 2
+    })
+    download(url, 'chart.svg')
+  }
+
+  function download(url, filename) {
+    const link = document.createElement('a')
+    link.download = filename
+    link.href = url
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   if (!dataName) return { success: false, error: '未找到数据定义' }
   if (dataLines.length < 2) return { success: false, error: '数据需要表头和数据行' }
   if (chartLines.length === 0) return { success: false, error: '未找到 Chart 定义' }
-  
+
   // 解析数据
   const headers = dataLines[0].split(',').map(h => h.trim())
   const rows = dataLines.slice(1).map(line => {
@@ -277,14 +306,14 @@ function compileCDL(source) {
     })
     return row
   })
-  
+
   // 解析 Chart
   const chartText = chartLines.join('\n')
   const useMatch = chartText.match(/use\s+(\w+)/)
   if (!useMatch || useMatch[1] !== dataName) {
     return { success: false, error: `Chart 必须使用数据源 ${dataName}` }
   }
-  
+
   return {
     success: true,
     data: { name: dataName, headers, rows },
@@ -302,7 +331,7 @@ function compileCDL(source) {
 function renderChartOption(data, chart) {
   const xData = data.rows.map(r => r[chart.xField])
   const yData = data.rows.map(r => r[chart.yField])
-  
+
   const option = {
     animation: true,
     title: chart.title ? { text: chart.title, left: 'center' } : undefined,
@@ -318,7 +347,7 @@ function renderChartOption(data, chart) {
     }],
     color: chart.color ? [chart.color] : undefined
   }
-  
+
   if (chart.type === 'pie') {
     delete option.xAxis
     delete option.yAxis
@@ -330,7 +359,7 @@ function renderChartOption(data, chart) {
     }]
     option.tooltip = { trigger: 'item' }
   }
-  
+
   if (chart.type === 'radar') {
     delete option.xAxis
     delete option.yAxis
@@ -343,7 +372,7 @@ function renderChartOption(data, chart) {
       data: [{ value: yData, name: chart.yField }]
     }]
   }
-  
+
   if (chart.type === 'scatter') {
     option.series = [{
       type: 'scatter',
@@ -354,7 +383,7 @@ function renderChartOption(data, chart) {
       formatter: (params) => `${chart.xField}: ${params.data[0]}<br/>${chart.yField}: ${params.data[1]}`
     }
   }
-  
+
   return { success: true, option }
 }
 
@@ -396,11 +425,15 @@ watch(echartsOption, () => nextTick(renderChart))
       </div>
       <textarea v-model="cdlCode" class="code-editor" placeholder="输入 CDL 代码..." spellcheck="false" />
     </div>
-    
+
     <div class="preview-pane">
       <div class="pane-header">
         <span class="title">预览</span>
-        <div v-if="loading" class="loading-dot"></div>
+        <div class="header-actions">
+          <button class="btn-export" @click="exportPNG" title="导出 PNG">PNG</button>
+          <button class="btn-export" @click="exportSVG" title="导出 SVG">SVG</button>
+          <div v-if="loading" class="loading-dot"></div>
+        </div>
       </div>
       <div class="preview-content">
         <div v-if="error" class="error-message">{{ error }}</div>
@@ -427,6 +460,10 @@ watch(echartsOption, () => nextTick(renderChart))
 .btn-refresh:hover { background: #30363d; border-color: #58a6ff; }
 .btn-refresh .icon { display: inline-block; transition: transform 0.3s; }
 .btn-refresh:hover .icon { transform: rotate(180deg); }
+.btn-export { padding: 4px 10px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; cursor: pointer; font-size: 11px; color: #c9d1d9; transition: all 0.2s; }
+.btn-export:hover { background: #30363d; border-color: #58a6ff; }
+.preview-pane .btn-export { background: #f6f8fa; border-color: #d0d7de; color: #24292f; }
+.preview-pane .btn-export:hover { background: #fff; border-color: #0969da; }
 .code-editor { flex: 1; padding: 12px; border: none; outline: none; font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', monospace; font-size: 13px; line-height: 1.5; resize: none; background: #0d1117; color: #c9d1d9; tab-size: 4; min-height: 0; }
 .code-editor::placeholder { color: #484f58; }
 .preview-pane { width: 50%; min-width: 0; display: flex; flex-direction: column; background: #ffffff; }
