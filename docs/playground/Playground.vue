@@ -1,52 +1,3 @@
-<template>
-  <div class="playground">
-    <!-- 左侧编辑器 -->
-    <div class="editor-pane">
-      <div class="pane-header">
-        <div class="header-left">
-          <span class="title">CDL</span>
-          <span v-if="isDirty" class="dot"></span>
-        </div>
-        <div class="header-actions">
-          <select v-model="selectedExample" @change="loadExample" class="example-select">
-            <option value="">示例</option>
-            <option v-for="ex in examples" :key="ex.name" :value="ex.name">
-              {{ ex.label }}
-            </option>
-          </select>
-          <button class="btn-refresh" @click="refresh" title="重新渲染">
-            <span class="icon">↻</span>
-          </button>
-        </div>
-      </div>
-      <textarea
-        v-model="cdlCode"
-        class="code-editor"
-        placeholder="输入 CDL 代码..."
-        spellcheck="false"
-      />
-    </div>
-    
-    <!-- 右侧预览 -->
-    <div class="preview-pane">
-      <div class="pane-header">
-        <span class="title">预览</span>
-        <div v-if="loading" class="loading-dot"></div>
-      </div>
-      
-      <div class="preview-content">
-        <div v-if="error" class="error-message">
-          {{ error }}
-        </div>
-        <div v-else-if="echartsOption" ref="chartRef" class="chart-container"></div>
-        <div v-else class="placeholder">
-          输入 CDL 代码查看图表
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup>
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import * as echarts from 'echarts'
@@ -184,7 +135,6 @@ Chart {
 }`
 }
 
-// 自动编译渲染（带防抖）
 let debounceTimer = null
 watch(cdlCode, () => {
   isDirty.value = true
@@ -209,14 +159,14 @@ async function run() {
   error.value = ''
   
   try {
-    const result = mockCompile(cdlCode.value)
+    const result = compileCDL(cdlCode.value)
     if (!result.success) {
       error.value = result.error
       echartsOption.value = null
       return
     }
     
-    const renderResult = mockRender(result.ast)
+    const renderResult = renderChartOption(result.data, result.chart)
     if (!renderResult.success) {
       error.value = renderResult.error
       echartsOption.value = null
@@ -236,41 +186,116 @@ async function run() {
   }
 }
 
-function mockCompile(source) {
-  // Find Data block - match balanced braces
-  const dataStart = source.search(/@lang\(data\)\s+/)
-  if (dataStart === -1) {
-    return { success: false, error: '未找到数据定义，需要 @lang(data) DataName { ... }' }
+function compileCDL(source) {
+  // Remove comments
+  const cleanSource = source.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '')
+  
+  // Parse Data block
+  const dataRegex = /@lang\(data\)\s+(\w+)\s*\{([\s\S]*?)\}(?=\s*$|\s*\n\s*Chart)/
+  const dataMatch = cleanSource.match(dataRegex)
+  
+  if (!dataMatch) {
+    // Try simpler approach - find Data block by counting braces
+    const dataStartIdx = cleanSource.indexOf('@lang(data)')
+    if (dataStartIdx === -1) {
+      return { success: false, error: '未找到数据定义' }
+    }
+    
+    const nameMatch = cleanSource.slice(dataStartIdx).match(/@lang\(data\)\s+(\w+)\s*\{/)
+    if (!nameMatch) {
+      return { success: false, error: '数据定义格式错误' }
+    }
+    
+    const dataName = nameMatch[1]
+    const openBraceIdx = dataStartIdx + cleanSource.slice(dataStartIdx).indexOf('{')
+    let braceCount = 1
+    let closeIdx = openBraceIdx + 1
+    
+    while (braceCount > 0 && closeIdx < cleanSource.length) {
+      if (cleanSource[closeIdx] === '{') braceCount++
+      if (cleanSource[closeIdx] === '}') braceCount--
+      if (braceCount > 0) closeIdx++
+    }
+    
+    if (braceCount !== 0) {
+      return { success: false, error: '数据定义不完整' }
+    }
+    
+    const dataContent = cleanSource.slice(openBraceIdx + 1, closeIdx).trim()
+    const lines = dataContent.split('\n').map(l => l.trim()).filter(l => l)
+    
+    if (lines.length < 2) {
+      return { success: false, error: '数据需要表头和数据行' }
+    }
+    
+    const headers = lines[0].split(',').map(h => h.trim())
+    const rows = lines.slice(1).map(line => {
+      const values = line.split(',').map(v => v.trim())
+      const row = {}
+      headers.forEach((h, i) => {
+        const val = values[i]
+        row[h] = isNaN(Number(val)) ? val : Number(val)
+      })
+      return row
+    })
+    
+    // Parse Chart block
+    const chartIdx = cleanSource.indexOf('Chart', closeIdx)
+    if (chartIdx === -1) {
+      return { success: false, error: '未找到 Chart 定义' }
+    }
+    
+    const chartOpenIdx = cleanSource.indexOf('{', chartIdx)
+    if (chartOpenIdx === -1) {
+      return { success: false, error: 'Chart 定义格式错误' }
+    }
+    
+    let chartBraceCount = 1
+    let chartCloseIdx = chartOpenIdx + 1
+    
+    while (chartBraceCount > 0 && chartCloseIdx < cleanSource.length) {
+      if (cleanSource[chartCloseIdx] === '{') chartBraceCount++
+      if (cleanSource[chartCloseIdx] === '}') chartBraceCount--
+      if (chartBraceCount > 0) chartCloseIdx++
+    }
+    
+    if (chartBraceCount !== 0) {
+      return { success: false, error: 'Chart 定义不完整' }
+    }
+    
+    const chartContent = cleanSource.slice(chartOpenIdx + 1, chartCloseIdx)
+    
+    const useMatch = chartContent.match(/use\s+(\w+)/)
+    if (!useMatch || useMatch[1] !== dataName) {
+      return { success: false, error: `Chart 必须使用数据源 ${dataName}` }
+    }
+    
+    const typeMatch = chartContent.match(/type\s+(\w+)/)
+    const chartType = typeMatch ? typeMatch[1] : 'line'
+    
+    const xMatch = chartContent.match(/x\s+(\w+)/)
+    const yMatch = chartContent.match(/y\s+(\w+)/)
+    
+    return {
+      success: true,
+      data: { name: dataName, headers, rows },
+      chart: {
+        type: chartType,
+        xField: xMatch?.[1] || headers[0],
+        yField: yMatch?.[1] || headers[1] || headers[0],
+        title: chartContent.match(/@title\s+"([^"]+)"/)?.[1],
+        style: chartContent.match(/@style\s+"([^"]+)"/)?.[1],
+        color: chartContent.match(/@color\s+"([^"]+)"/)?.[1]
+      }
+    }
   }
   
-  // Extract data name and content
-  const afterData = source.slice(dataStart)
-  const dataNameMatch = afterData.match(/@lang\(data\)\s+(\w+)\s*\{/)
-  if (!dataNameMatch) {
-    return { success: false, error: '数据定义格式错误' }
-  }
-  
-  const dataName = dataNameMatch[1]
-  const braceStart = afterData.indexOf('{') + 1
-  
-  // Find matching closing brace
-  let braceCount = 1
-  let pos = braceStart
-  while (braceCount > 0 && pos < afterData.length) {
-    if (afterData[pos] === '{') braceCount++
-    if (afterData[pos] === '}') braceCount--
-    pos++
-  }
-  
-  if (braceCount > 0) {
-    return { success: false, error: '数据定义缺少结束括号 }' }
-  }
-  
-  const dataContent = afterData.slice(braceStart, pos - 1).trim()
-  const dataLines = dataContent.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('//'))
+  // Original regex approach
+  const dataName = dataMatch[1]
+  const dataLines = dataMatch[2].trim().split('\n').map(l => l.trim()).filter(l => l)
   
   if (dataLines.length < 2) {
-    return { success: false, error: '数据至少需要表头和一行数据' }
+    return { success: false, error: '数据需要表头和数据行' }
   }
   
   const headers = dataLines[0].split(',').map(h => h.trim())
@@ -278,138 +303,97 @@ function mockCompile(source) {
     const values = line.split(',').map(v => v.trim())
     const row = {}
     headers.forEach((h, i) => {
-      const val = values[i]
-      row[h] = isNaN(Number(val)) ? val : Number(val)
+      row[h] = isNaN(Number(values[i])) ? values[i] : Number(values[i])
     })
     return row
   })
   
-  // Find Chart block with balanced braces
-  const chartIdx = source.search(/Chart\s+(?:[^\s{]+\s*)?\{/)
-  if (chartIdx === -1) {
+  // Find Chart after Data
+  const afterData = cleanSource.slice(cleanSource.indexOf(dataMatch[0]) + dataMatch[0].length)
+  const chartMatch = afterData.match(/Chart\s+(?:\w+\s+)?\{([\s\S]*?)\}(?=\s*$|\s*\n)/)
+  
+  if (!chartMatch) {
     return { success: false, error: '未找到 Chart 定义' }
   }
   
-  const chartStart = chartIdx + source.slice(chartIdx).indexOf('{') + 1
-  let chartBraceCount = 1
-  let chartPos = chartStart
-  while (chartBraceCount > 0 && chartPos < source.length) {
-    if (source[chartPos] === '{') chartBraceCount++
-    if (source[chartPos] === '}') chartBraceCount--
-    chartPos++
-  }
-  
-  if (chartBraceCount > 0) {
-    return { success: false, error: 'Chart 定义缺少结束括号 }' }
-  }
-  
-  const chartContent = source.slice(chartStart, chartPos - 1)
-  
+  const chartContent = chartMatch[1]
   const useMatch = chartContent.match(/use\s+(\w+)/)
+  
   if (!useMatch || useMatch[1] !== dataName) {
     return { success: false, error: `Chart 必须使用数据源 ${dataName}` }
   }
   
   const typeMatch = chartContent.match(/type\s+(\w+)/)
-  const chartType = typeMatch ? typeMatch[1] : 'line'
-  
   const xMatch = chartContent.match(/x\s+(\w+)/)
   const yMatch = chartContent.match(/y\s+(\w+)/)
   
-  const xField = xMatch?.[1] || headers[0]
-  const yField = yMatch?.[1] || headers[1] || headers[0]
-  
-  const titleMatch = source.match(/@title\s+"([^"]+)"/)
-  const styleMatch = source.match(/@style\s+"([^"]+)"/)
-  const colorMatch = source.match(/@color\s+"([^"]+)"/)
-  
   return {
     success: true,
-    ast: {
-      dataName,
-      headers,
-      rows,
-      chartType,
-      xField,
-      yField,
-      hints: {
-        title: titleMatch?.[1],
-        style: styleMatch?.[1],
-        color: colorMatch?.[1]
-      }
+    data: { name: dataName, headers, rows },
+    chart: {
+      type: typeMatch?.[1] || 'line',
+      xField: xMatch?.[1] || headers[0],
+      yField: yMatch?.[1] || headers[1] || headers[0],
+      title: chartContent.match(/@title\s+"([^"]+)"/)?.[1],
+      style: chartContent.match(/@style\s+"([^"]+)"/)?.[1],
+      color: chartContent.match(/@color\s+"([^"]+)"/)?.[1]
     }
   }
 }
 
-function mockRender(ast) {
-  const { rows, xField, yField, chartType, hints } = ast
-  
-  const xData = rows.map(r => r[xField])
-  const yData = rows.map(r => r[yField])
+function renderChartOption(data, chart) {
+  const xData = data.rows.map(r => r[chart.xField])
+  const yData = data.rows.map(r => r[chart.yField])
   
   const option = {
     animation: true,
-    title: hints?.title ? { text: hints.title, left: 'center' } : undefined,
+    title: chart.title ? { text: chart.title, left: 'center' } : undefined,
     tooltip: { trigger: 'axis' },
     grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-    xAxis: { 
-      type: 'category', 
-      data: xData 
-    },
+    xAxis: { type: 'category', data: xData },
     yAxis: { type: 'value' },
     series: [{
-      type: chartType === 'area' ? 'line' : chartType,
+      type: chart.type === 'area' ? 'line' : chart.type,
       data: yData,
-      smooth: hints?.style?.includes('平滑'),
-      areaStyle: chartType === 'area' ? {} : undefined
+      smooth: chart.style?.includes('平滑'),
+      areaStyle: chart.type === 'area' ? {} : undefined
     }],
-    color: hints?.color ? [hints.color] : undefined
+    color: chart.color ? [chart.color] : undefined
   }
   
-  if (chartType === 'pie') {
+  if (chart.type === 'pie') {
     delete option.xAxis
     delete option.yAxis
     delete option.grid
     option.series = [{
       type: 'pie',
-      radius: hints?.style?.includes('环形') ? ['40%', '70%'] : '60%',
-      data: rows.map(r => ({ 
-        name: r[xField], 
-        value: r[yField] 
-      }))
+      radius: chart.style?.includes('环形') ? ['40%', '70%'] : '60%',
+      data: data.rows.map(r => ({ name: r[chart.xField], value: r[chart.yField] }))
     }]
     option.tooltip = { trigger: 'item' }
   }
   
-  if (chartType === 'radar') {
+  if (chart.type === 'radar') {
     delete option.xAxis
     delete option.yAxis
     const maxValue = Math.max(...yData) * 1.2
     option.radar = {
-      indicator: rows.map(r => ({ 
-        name: r[xField], 
-        max: maxValue 
-      }))
+      indicator: data.rows.map(r => ({ name: r[chart.xField], max: maxValue }))
     }
     option.series = [{
       type: 'radar',
-      data: [{ 
-        value: rows.map(r => r[yField]), 
-        name: yField 
-      }]
+      data: [{ value: yData, name: chart.yField }]
     }]
   }
   
-  if (chartType === 'scatter') {
+  if (chart.type === 'scatter') {
     option.series = [{
       type: 'scatter',
-      data: rows.map(r => [r[xField], r[yField]]),
+      data: data.rows.map(r => [r[chart.xField], r[chart.yField]]),
       symbolSize: 15
     }]
     option.tooltip = {
-      formatter: (params) => {
-        return `${xField}: ${params.data[0]}<br/>${yField}: ${params.data[1]}`
-      }
+      formatter: (params) => `${chart.xField}: ${params.data[0]}<br/>${chart.yField}: ${params.data[1]}`
     }
   }
   
@@ -428,9 +412,7 @@ function renderChart() {
 
 onMounted(() => {
   run()
-  window.addEventListener('resize', () => {
-    chartInstance?.resize()
-  })
+  window.addEventListener('resize', () => chartInstance?.resize())
 })
 
 onUnmounted(() => {
@@ -440,15 +422,54 @@ onUnmounted(() => {
   }
 })
 
-watch(echartsOption, () => {
-  nextTick(renderChart)
-})
+watch(echartsOption, () => nextTick(renderChart))
 </script>
 
+<template>
+  <div class="playground">
+    <div class="editor-pane">
+      <div class="pane-header">
+        <div class="header-left">
+          <span class="title">CDL</span>
+          <span v-if="isDirty" class="dot"></span>
+        </div>
+        <div class="header-actions">
+          <select v-model="selectedExample" @change="loadExample" class="example-select">
+            <option value="">示例</option>
+            <option v-for="ex in examples" :key="ex.name" :value="ex.name">
+              {{ ex.label }}
+            </option>
+          </select>
+          <button class="btn-refresh" @click="refresh" title="重新渲染">
+            <span class="icon">↻</span>
+          </button>
+        </div>
+      </div>
+      <textarea
+        v-model="cdlCode"
+        class="code-editor"
+        placeholder="输入 CDL 代码..."
+        spellcheck="false"
+      />
+    </div>
+    
+    <div class="preview-pane">
+      <div class="pane-header">
+        <span class="title">预览</span>
+        <div v-if="loading" class="loading-dot"></div>
+      </div>
+      
+      <div class="preview-content">
+        <div v-if="error" class="error-message">{{ error }}</div>
+        <div v-else-if="echartsOption" ref="chartRef" class="chart-container"></div>
+        <div v-else class="placeholder">输入 CDL 代码查看图表</div>
+      </div>
+    </div>
+  </div>
+</template>
+
 <style scoped>
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 .playground {
   display: flex;
@@ -460,7 +481,6 @@ watch(echartsOption, () => {
   border: 1px solid #30363d;
 }
 
-/* 左侧面板 */
 .editor-pane {
   width: 50%;
   min-width: 0;
@@ -481,11 +501,7 @@ watch(echartsOption, () => {
   flex-shrink: 0;
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+.header-left { display: flex; align-items: center; gap: 8px; }
 
 .title {
   font-weight: 600;
@@ -508,11 +524,7 @@ watch(echartsOption, () => {
   50% { opacity: 0.5; }
 }
 
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
+.header-actions { display: flex; align-items: center; gap: 6px; }
 
 .example-select {
   padding: 4px 8px;
@@ -525,9 +537,7 @@ watch(echartsOption, () => {
   outline: none;
 }
 
-.example-select:hover {
-  border-color: #58a6ff;
-}
+.example-select:hover { border-color: #58a6ff; }
 
 .btn-refresh {
   padding: 4px 8px;
@@ -550,9 +560,7 @@ watch(echartsOption, () => {
   transition: transform 0.3s;
 }
 
-.btn-refresh:hover .icon {
-  transform: rotate(180deg);
-}
+.btn-refresh:hover .icon { transform: rotate(180deg); }
 
 .code-editor {
   flex: 1;
@@ -569,11 +577,8 @@ watch(echartsOption, () => {
   min-height: 0;
 }
 
-.code-editor::placeholder {
-  color: #484f58;
-}
+.code-editor::placeholder { color: #484f58; }
 
-/* 右侧面板 */
 .preview-pane {
   width: 50%;
   min-width: 0;
@@ -587,9 +592,7 @@ watch(echartsOption, () => {
   border-bottom: 1px solid #d0d7de;
 }
 
-.preview-pane .title {
-  color: #24292f;
-}
+.preview-pane .title { color: #24292f; }
 
 .loading-dot {
   width: 6px;
