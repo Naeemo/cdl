@@ -25,12 +25,18 @@ Commands:
   batch <dir>            Batch export all .cdl files in directory
   validate <file.cdl>    Validate CDL syntax
   init                   Create a sample CDL file
+  template               List or use templates
   nl "<description>"     Generate CDL from natural language
   help                   Show this help message
 
 Global Options:
   --verbose, -v          Enable verbose output with detailed logs
   --ast                  Show AST structure in compile/render commands
+
+Template Command:
+  cdl template                    List available templates
+  cdl template sales/monthly      Use sales/monthly-trend template
+  cdl template bar --output my.cdl  Use bar template with custom output
 
 Export Command Options:
   cdl export example.cdl --format png --output chart.png
@@ -821,6 +827,62 @@ async function previewFile(filePath) {
   });
 }
 
+function templateCommand(args) {
+  const templatesDir = path.join(__dirname, '../../templates');
+  
+  // Available templates
+  const templates = {
+    'sales/monthly': { category: 'sales', name: 'monthly-trend.chart', desc: '月度销售趋势 - 折线图' },
+    'sales/region': { category: 'sales', name: 'region-pie.chart', desc: '区域销售占比 - 饼图' },
+    'user/growth': { category: 'user', name: 'growth-area.chart', desc: '用户增长趋势 - 面积图' },
+    'kpi/dashboard': { category: 'kpi', name: 'dashboard.chart', desc: 'KPI 仪表盘' },
+  };
+
+  const subcommand = args[1];
+
+  // List templates
+  if (!subcommand || subcommand === 'list') {
+    console.log('\n📋 Available Templates:\n');
+    Object.entries(templates).forEach(([key, info]) => {
+      console.log(`  ${key.padEnd(20)} ${info.desc}`);
+    });
+    console.log('\nUsage: cdl template <name> [--output file.cdl]');
+    console.log('       cdl template sales/monthly --output mychart.cdl');
+    return;
+  }
+
+  // Use template
+  const templateKey = subcommand;
+  const template = templates[templateKey];
+  
+  if (!template) {
+    console.error(`Error: Template "${templateKey}" not found`);
+    console.log('\nAvailable templates:');
+    Object.keys(templates).forEach(k => console.log(`  - ${k}`));
+    process.exit(1);
+  }
+
+  // Parse output option
+  let outputFile = `${templateKey.replace('/', '-')}.cdl`;
+  for (let i = 2; i < args.length; i++) {
+    if (args[i] === '--output' && args[i + 1]) {
+      outputFile = args[i + 1];
+      i++;
+    }
+  }
+
+  const templatePath = path.join(templatesDir, template.category, template.name);
+  
+  if (!fs.existsSync(templatePath)) {
+    console.error(`Error: Template file not found: ${templatePath}`);
+    process.exit(1);
+  }
+
+  const content = fs.readFileSync(templatePath, 'utf-8');
+  fs.writeFileSync(outputFile, content);
+  console.log(`✓ Template applied: ${templateKey} -> ${outputFile}`);
+}
+
 switch (command) {
   case 'compile':
     compileFile(args);
@@ -842,6 +904,9 @@ switch (command) {
     break;
   case 'init':
     initSample(args);
+    break;
+  case 'template':
+    templateCommand(args);
     break;
   case 'nl':
     nlCommand(args);
