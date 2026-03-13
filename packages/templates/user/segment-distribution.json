@@ -1,0 +1,15 @@
+{
+  "name": "segment-distribution",
+  "title": "User Distribution by Segment",
+  "description": "Pie chart showing user distribution across different market segments",
+  "tags": ["users", "segments", "pie", "distribution", "market"],
+  "category": "user",
+  "author": "CDL Team",
+  "version": "1.0.0",
+  "charts": ["segment_distribution", "segment_bar"],
+  "useCases": [
+    "Market analysis",
+    "User profiling",
+    "Go-to-market strategy"
+  ]
+}

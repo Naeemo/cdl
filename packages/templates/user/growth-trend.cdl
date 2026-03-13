@@ -1,0 +1,35 @@
+// Template: User Growth Trend
+// Category: Users
+// Description: Area chart showing user growth over time with active/registered split
+
+@lang(data)
+def user_growth = {
+  month, registered, active, churned
+  Jan, 10000, 8500, 200
+  Feb, 12000, 9800, 300
+  Mar, 14500, 11500, 350
+  Apr, 16800, 13200, 400
+  May, 19500, 15100, 450
+  Jun, 22000, 17200, 500
+}
+
+chart user_growth_trend {
+  type: area
+  data: user_growth
+  x: month
+  y: registered
+  stack: true
+  @title("User Growth Over Time")
+  @style("平滑")
+  @color("#4fc3f7", "#29b6f6")
+}
+
+chart active_users {
+  type: line
+  data: user_growth
+  x: month
+  y: active
+  @title("Monthly Active Users (MAU)")
+  @style("平滑", "标记")
+  @color("#66bb6a")
+}

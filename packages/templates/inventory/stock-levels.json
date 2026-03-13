@@ -1,0 +1,15 @@
+{
+  "name": "stock-levels",
+  "title": "Stock Levels by Product",
+  "description": "Bar chart showing current stock levels vs reorder points",
+  "tags": ["inventory", "stock", "reorder", "warehouse", "supply"],
+  "category": "inventory",
+  "author": "CDL Team",
+  "version": "1.0.0",
+  "charts": ["stock_levels", "turnover"],
+  "useCases": [
+    "Inventory management",
+    "Supply chain",
+    "Warehouse operations"
+  ]
+}

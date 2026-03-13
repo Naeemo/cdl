@@ -1,0 +1,33 @@
+// Template: Expense Breakdown
+// Category: Financial
+// Description: Pie and bar charts showing expense distribution
+
+@lang(data)
+def expenses = {
+  category, amount, percentage
+  "Salaries", 580000, 58.0
+  "Marketing", 150000, 15.0
+  "Technology", 120000, 12.0
+  "Operations", 100000, 10.0
+  "Admin", 50000, 5.0
+}
+
+chart expense_pie {
+  type: pie
+  data: expenses
+  x: category
+  y: amount
+  @title("Expense Breakdown")
+  @style("环形")
+  @color("#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f")
+}
+
+chart expense_bars {
+  type: bar
+  data: expenses
+  x: category
+  y: percentage
+  @title("Expense Categories (%)")
+  @color("#e15759")
+  @style("紧凑")
+}

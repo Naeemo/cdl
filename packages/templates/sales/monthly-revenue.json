@@ -1,0 +1,15 @@
+{
+  "name": "monthly-revenue",
+  "title": "Monthly Revenue Trend",
+  "description": "Line chart showing monthly revenue trends with year-over-year comparison",
+  "tags": ["sales", "revenue", "trend", "line", "combo"],
+  "category": "sales",
+  "author": "CDL Team",
+  "version": "1.0.0",
+  "charts": ["monthly_revenue", "yoy_comparison"],
+  "useCases": [
+    "Executive dashboards",
+    "Sales reports",
+    "Financial presentations"
+  ]
+}

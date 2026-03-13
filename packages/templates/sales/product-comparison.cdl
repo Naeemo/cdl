@@ -1,0 +1,36 @@
+// Template: Product Sales Comparison
+// Category: Sales
+// Description: Bar chart comparing sales across different products
+
+@lang(data)
+def products = {
+  product, sales, target, growth
+  "Product A", 450, 400, 12.5
+  "Product B", 380, 350, 8.6
+  "Product C", 520, 500, 4.0
+  "Product D", 290, 300, -3.3
+  "Product E", 410, 380, 7.9
+}
+
+chart product_comparison {
+  type: bar
+  data: products
+  x: product
+  y: sales
+  @title("Product Sales Performance")
+  @style("紧凑")
+  @color("#59a14f")
+  @layout("图例右")
+}
+
+chart target_vs_actual {
+  type: combo
+  data: products
+  x: product
+  series: [
+    { name: "Actual", type: bar, y: sales },
+    { name: "Target", type: line, y: target }
+  ]
+  @title("Target vs Actual Sales")
+  @color("#4e79a7", "#e15759")
+}

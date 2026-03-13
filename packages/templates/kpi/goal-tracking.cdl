@@ -1,0 +1,35 @@
+// Template: Goal Tracking
+// Category: KPI
+// Description: Progress tracking charts for goals and targets
+
+@lang(data)
+def goals = {
+  goal, current, target, progress_pct
+  "Q1 Revenue", 2850000, 3000000, 95.0
+  "New Signups", 2450, 2500, 98.0
+  "Feature Adoption", 72, 80, 90.0
+  "CSAT Score", 4.2, 4.5, 93.3
+  "Bug Fix Rate", 95, 90, 105.6
+}
+
+chart goal_progress {
+  type: bar
+  data: goals
+  x: goal
+  y: progress_pct
+  @title("Goal Progress (%)")
+  @color("#59a14f")
+  @style("紧凑")
+}
+
+chart target_comparison {
+  type: combo
+  data: goals
+  x: goal
+  series: [
+    { name: "Current", type: bar, y: current },
+    { name: "Target", type: line, y: target }
+  ]
+  @title("Current vs Target")
+  @color("#4e79a7", "#e15759")
+}

@@ -1,18 +1,35 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.defaultThemes = void 0;
 exports.render = render;
+exports.defaultThemes = {
+    light: {
+        primary: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4'],
+        background: '#ffffff',
+        text: '#333333',
+        grid: '#e0e0e0',
+    },
+    dark: {
+        primary: ['#4992ff', '#7cffb2', '#fddd60', '#ff6e76', '#58d9f9', '#05c091', '#ff8a45', '#8d48e3'],
+        background: '#1a1a2e',
+        text: '#e0e0e0',
+        grid: '#333344',
+    },
+};
 /**
  * CDL ECharts Renderer
  * Convert CDL AST to ECharts option
  */
-function render(cdlFile) {
+function render(cdlFile, themeName) {
     if (cdlFile.charts.length === 0) {
         return { success: false, error: 'No chart definition found' };
     }
     const chart = cdlFile.charts[0];
     const dataMap = buildDataMap(cdlFile.data);
+    // Support @theme directive from CDL file or parameter
+    const effectiveTheme = themeName || cdlFile.theme || 'light';
     try {
-        const option = convertChartToECharts(chart, dataMap);
+        const option = convertChartToECharts(chart, dataMap, effectiveTheme);
         return { success: true, option };
     }
     catch (e) {
@@ -29,10 +46,16 @@ function buildDataMap(dataDefinitions) {
     }
     return map;
 }
-function convertChartToECharts(chart, dataMap) {
+function convertChartToECharts(chart, dataMap, themeName = 'light') {
+    const theme = exports.defaultThemes[themeName] || exports.defaultThemes.light;
     const option = {
         animation: true,
         animationDuration: 1000,
+        backgroundColor: theme.background,
+        textStyle: {
+            color: theme.text,
+        },
+        color: theme.primary,
     };
     // Get data from first data source
     const dataDef = chart.dataSources.length > 0 ? dataMap.get(chart.dataSources[0]) : undefined;

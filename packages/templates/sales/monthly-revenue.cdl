@@ -1,0 +1,37 @@
+// Template: Monthly Revenue Trend
+// Category: Sales
+// Description: Line chart showing monthly revenue trends with year-over-year comparison
+
+@lang(data)
+def sales_2024 = {
+  month, revenue, last_year
+  Jan, 125000, 110000
+  Feb, 132000, 115000
+  Mar, 148000, 128000
+  Apr, 155000, 135000
+  May, 162000, 142000
+  Jun, 175000, 150000
+}
+
+chart monthly_revenue {
+  type: line
+  data: sales_2024
+  x: month
+  y: revenue
+  @title("Monthly Revenue 2024")
+  @style("平滑", "标记")
+  @color("#4e79a7", #f28e2c")
+  @animation("从左滑入")
+}
+
+chart yoy_comparison {
+  type: combo
+  data: sales_2024
+  x: month
+  series: [
+    { name: "2024", type: line, y: revenue, axis: left },
+    { name: "2023", type: bar, y: last_year, axis: left }
+  ]
+  @title("Year-over-Year Revenue Comparison")
+  @style("图例底部")
+}

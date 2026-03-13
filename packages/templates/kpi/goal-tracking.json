@@ -1,0 +1,15 @@
+{
+  "name": "goal-tracking",
+  "title": "Goal Tracking",
+  "description": "Progress tracking charts for goals and targets",
+  "tags": ["kpi", "goals", "targets", "progress", "tracking"],
+  "category": "kpi",
+  "author": "CDL Team",
+  "version": "1.0.0",
+  "charts": ["goal_progress", "target_comparison"],
+  "useCases": [
+    "OKR tracking",
+    "Performance management",
+    "Quarterly reviews"
+  ]
+}

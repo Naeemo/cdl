@@ -45,7 +45,15 @@ export interface ChartDefinition {
 export interface CDLFile {
     data: DataDefinition[];
     charts: ChartDefinition[];
+    theme?: string;
 }
+export interface ThemeColors {
+    primary: string[];
+    background?: string;
+    text?: string;
+    grid?: string;
+}
+export declare const defaultThemes: Record<string, ThemeColors>;
 export interface EChartsOption {
     title?: {
         text?: string;
@@ -78,6 +86,10 @@ export interface EChartsOption {
     animationDuration?: number;
     radar?: any;
     visualMap?: any;
+    backgroundColor?: string;
+    textStyle?: {
+        color?: string;
+    };
 }
 export interface RenderResult {
     success: boolean;
@@ -88,5 +100,5 @@ export interface RenderResult {
  * CDL ECharts Renderer
  * Convert CDL AST to ECharts option
  */
-export declare function render(cdlFile: CDLFile): RenderResult;
+export declare function render(cdlFile: CDLFile, themeName?: string): RenderResult;
 //# sourceMappingURL=index.d.ts.map

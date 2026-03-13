@@ -1,0 +1,15 @@
+{
+  "name": "growth-trend",
+  "title": "User Growth Trend",
+  "description": "Area chart showing user growth over time with active/registered split",
+  "tags": ["users", "growth", "mau", "area", "trend"],
+  "category": "user",
+  "author": "CDL Team",
+  "version": "1.0.0",
+  "charts": ["user_growth_trend", "active_users"],
+  "useCases": [
+    "Product analytics",
+    "Growth dashboards",
+    "Investor reports"
+  ]
+}

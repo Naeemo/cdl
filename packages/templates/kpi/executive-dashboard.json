@@ -1,0 +1,15 @@
+{
+  "name": "executive-dashboard",
+  "title": "Executive KPI Dashboard",
+  "description": "Multi-metric KPI dashboard with key business indicators",
+  "tags": ["kpi", "dashboard", "executive", "metrics", "radar"],
+  "category": "kpi",
+  "author": "CDL Team",
+  "version": "1.0.0",
+  "charts": ["kpi_bars", "kpi_radar"],
+  "useCases": [
+    "Executive reporting",
+    "Board presentations",
+    "Strategic reviews"
+  ]
+}

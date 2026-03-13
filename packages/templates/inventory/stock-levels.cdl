@@ -1,0 +1,35 @@
+// Template: Stock Levels by Product
+// Category: Inventory
+// Description: Bar chart showing current stock levels vs reorder points
+
+@lang(data)
+def stock = {
+  product, current, reorder_point, max_capacity, turnover_days
+  "Widget A", 450, 200, 800, 15
+  "Widget B", 120, 150, 500, 45
+  "Gadget X", 850, 300, 1000, 12
+  "Gadget Y", 320, 250, 600, 22
+  "Accessory Z", 180, 100, 400, 30
+}
+
+chart stock_levels {
+  type: combo
+  data: stock
+  x: product
+  series: [
+    { name: "Current Stock", type: bar, y: current },
+    { name: "Reorder Point", type: line, y: reorder_point }
+  ]
+  @title("Stock Levels vs Reorder Points")
+  @color("#4e79a7", "#e15759")
+}
+
+chart turnover {
+  type: bar
+  data: stock
+  x: product
+  y: turnover_days
+  @title("Inventory Turnover (Days)")
+  @color("#59a14f")
+  @style("紧凑")
+}

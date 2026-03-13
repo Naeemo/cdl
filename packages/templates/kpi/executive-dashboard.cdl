@@ -1,0 +1,33 @@
+// Template: Executive KPI Dashboard
+// Category: KPI
+// Description: Multi-metric KPI dashboard with key business indicators
+
+@lang(data)
+def kpi_metrics = {
+  metric, current, target, last_month, yoy_change
+  "Revenue", 1250000, 1200000, 1180000, 15.2
+  "New Customers", 850, 800, 780, 22.5
+  "Churn Rate", 5.2, 5.0, 5.5, -5.4
+  "NPS Score", 72, 70, 68, 5.9
+  "CAC", 125, 130, 128, -2.3
+  "LTV", 2450, 2400, 2380, 2.9
+}
+
+chart kpi_bars {
+  type: bar
+  data: kpi_metrics
+  x: metric
+  y: current
+  @title("Current Month KPI Performance")
+  @color("#4e79a7")
+  @style("紧凑")
+}
+
+chart kpi_radar {
+  type: radar
+  data: kpi_metrics
+  x: metric
+  y: current
+  @title("KPI Radar Overview")
+  @color("#59a14f")
+}

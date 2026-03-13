@@ -1,0 +1,36 @@
+// Template: Profit & Loss Overview
+// Category: Financial
+// Description: Financial P&L visualization with revenue, costs and profit trends
+
+@lang(data)
+def financials = {
+  month, revenue, cogs, opex, gross_profit, net_profit
+  Q1, 3200000, 1280000, 960000, 1920000, 960000
+  Q2, 3850000, 1540000, 1155000, 2310000, 1155000
+  Q3, 4100000, 1640000, 1230000, 2460000, 1230000
+  Q4, 4550000, 1820000, 1365000, 2730000, 1365000
+}
+
+chart revenue_costs {
+  type: combo
+  data: financials
+  x: month
+  series: [
+    { name: "Revenue", type: bar, y: revenue },
+    { name: "COGS", type: bar, y: cogs },
+    { name: "OpEx", type: bar, y: opex }
+  ]
+  @title("Revenue vs Costs by Quarter")
+  @color("#4e79a7", "#e15759", "#f28e2c")
+  @style("堆叠")
+}
+
+chart profit_trend {
+  type: line
+  data: financials
+  x: month
+  y: net_profit
+  @title("Net Profit Trend")
+  @style("平滑", "标记")
+  @color("#59a14f")
+}

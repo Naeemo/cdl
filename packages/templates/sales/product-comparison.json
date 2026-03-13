@@ -1,0 +1,15 @@
+{
+  "name": "product-comparison",
+  "title": "Product Sales Comparison",
+  "description": "Bar chart comparing sales across different products with target tracking",
+  "tags": ["sales", "products", "comparison", "bar", "target"],
+  "category": "sales",
+  "author": "CDL Team",
+  "version": "1.0.0",
+  "charts": ["product_comparison", "target_vs_actual"],
+  "useCases": [
+    "Product management",
+    "Sales analysis",
+    "Performance reviews"
+  ]
+}

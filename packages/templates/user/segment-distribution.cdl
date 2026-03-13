@@ -1,0 +1,31 @@
+// Template: User Distribution by Segment
+// Category: Users
+// Description: Pie chart showing user distribution across segments
+
+@lang(data)
+def user_segments = {
+  segment, users, percentage
+  "Enterprise", 850, 8.5
+  "SMB", 3200, 32.0
+  "Startup", 4100, 41.0
+  "Personal", 1850, 18.5
+}
+
+chart segment_distribution {
+  type: pie
+  data: user_segments
+  x: segment
+  y: users
+  @title("User Distribution by Segment")
+  @style("环形")
+  @color("#4e79a7", "#f28e2c", "#e15759", "#76b7b2")
+}
+
+chart segment_bar {
+  type: bar
+  data: user_segments
+  x: segment
+  y: percentage
+  @title("Segment Percentage")
+  @color("#59a14f")
+}

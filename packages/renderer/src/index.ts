@@ -61,7 +61,31 @@ export interface ChartDefinition {
 export interface CDLFile {
   data: DataDefinition[];
   charts: ChartDefinition[];
+  theme?: string;
 }
+
+// Theme configuration
+export interface ThemeColors {
+  primary: string[];
+  background?: string;
+  text?: string;
+  grid?: string;
+}
+
+export const defaultThemes: Record<string, ThemeColors> = {
+  light: {
+    primary: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4'],
+    background: '#ffffff',
+    text: '#333333',
+    grid: '#e0e0e0',
+  },
+  dark: {
+    primary: ['#4992ff', '#7cffb2', '#fddd60', '#ff6e76', '#58d9f9', '#05c091', '#ff8a45', '#8d48e3'],
+    background: '#1a1a2e',
+    text: '#e0e0e0',
+    grid: '#333344',
+  },
+};
 
 export interface EChartsOption {
   title?: {
@@ -95,6 +119,10 @@ export interface EChartsOption {
   animationDuration?: number;
   radar?: any;
   visualMap?: any;
+  backgroundColor?: string;
+  textStyle?: {
+    color?: string;
+  };
 }
 
 export interface RenderResult {
@@ -107,16 +135,19 @@ export interface RenderResult {
  * CDL ECharts Renderer
  * Convert CDL AST to ECharts option
  */
-export function render(cdlFile: CDLFile): RenderResult {
+export function render(cdlFile: CDLFile, themeName?: string): RenderResult {
   if (cdlFile.charts.length === 0) {
     return { success: false, error: 'No chart definition found' };
   }
 
   const chart = cdlFile.charts[0];
   const dataMap = buildDataMap(cdlFile.data);
+  
+  // Support @theme directive from CDL file or parameter
+  const effectiveTheme = themeName || cdlFile.theme || 'light';
 
   try {
-    const option = convertChartToECharts(chart, dataMap);
+    const option = convertChartToECharts(chart, dataMap, effectiveTheme);
     return { success: true, option };
   } catch (e) {
     return { 
@@ -136,11 +167,19 @@ function buildDataMap(dataDefinitions: DataDefinition[]): Map<string, DataDefini
 
 function convertChartToECharts(
   chart: ChartDefinition, 
-  dataMap: Map<string, DataDefinition>
+  dataMap: Map<string, DataDefinition>,
+  themeName: string = 'light'
 ): EChartsOption {
+  const theme = defaultThemes[themeName] || defaultThemes.light;
+  
   const option: EChartsOption = {
     animation: true,
     animationDuration: 1000,
+    backgroundColor: theme.background,
+    textStyle: {
+      color: theme.text,
+    },
+    color: theme.primary,
   };
 
   // Get data from first data source

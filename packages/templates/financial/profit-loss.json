@@ -1,0 +1,15 @@
+{
+  "name": "profit-loss",
+  "title": "Profit & Loss Overview",
+  "description": "Financial P&L visualization with revenue, costs and profit trends",
+  "tags": ["financial", "pnl", "revenue", "costs", "profit"],
+  "category": "financial",
+  "author": "CDL Team",
+  "version": "1.0.0",
+  "charts": ["revenue_costs", "profit_trend"],
+  "useCases": [
+    "Financial reporting",
+    "Board meetings",
+    "Investor updates"
+  ]
+}
