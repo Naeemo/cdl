@@ -49,26 +49,26 @@ export async function fetchRestData(options: FetchOptions): Promise<FetchResult>
     if (contentType.includes('application/json')) {
       const json: unknown = await response.json();
       // 处理常见的 API 响应格式
-      let data: unknown = json;
+      let data: unknown[] | undefined;
       if (Array.isArray(json)) {
-        data = json;
+        data = json as unknown[];
       } else if (typeof json === 'object' && json !== null) {
         const obj = json as Record<string, unknown>;
         if (Array.isArray(obj.data)) {
-          data = obj.data;
+          data = obj.data as unknown[];
         } else if (Array.isArray(obj.results)) {
-          data = obj.results;
+          data = obj.results as unknown[];
         } else if (Array.isArray(obj.items)) {
-          data = obj.items;
+          data = obj.items as unknown[];
         }
       }
       
       if (Array.isArray(data) && data.length > 0) {
         const first = data[0] as Record<string, unknown>;
         const headers = Object.keys(first);
-        return { success: true, data: data as unknown[], headers };
+        return { success: true, data, headers };
       }
-      return { success: true, data: Array.isArray(data) ? (data as unknown[]) : [], headers: [] };
+      return { success: true, data: data || [], headers: [] };
     }
 
     // CSV 响应
