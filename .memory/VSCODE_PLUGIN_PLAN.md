@@ -29,18 +29,19 @@
 - [x] CHANGELOG.md
 - [x] .vscodeignore
 
-### Phase 5: 集成真实编译器 ⏳ 待开发
-- [ ] 集成 @cdl/compiler
-- [ ] 集成 @cdl/renderer-echarts
-- [ ] 真实预览渲染
+### Phase 5: 集成真实编译器 ✅ 已完成
+- [x] 集成 @cdl/compiler
+- [x] 集成 @cdl/renderer-echarts
+- [x] 真实预览渲染
+- [x] 错误处理和主题支持
 
-### Phase 6: 发布 ⏳ 待开发
-- [ ] 打包 vsix
-- [ ] VS Code Marketplace 发布
+### Phase 6: 发布 🔄 进行中
+- [ ] 构建并测试 vsix
+- [ ] VS Code Marketplace 发布准备
 
 ## 当前阶段
-Phase 4 已完成，等待 Phase 5 指令
+Phase 6 - 打包和发布
 
 ## 状态
-✅ Phase 1-4 完成 (80%)
-⏳ Phase 5-6 待开发
+✅ Phase 1-5 完成 (95%)
+🔄 Phase 6 进行中
