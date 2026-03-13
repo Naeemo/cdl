@@ -1,0 +1,39 @@
+{
+  "name": "@cdl/react",
+  "version": "0.2.0",
+  "description": "CDL React component - Render charts from CDL code in React applications",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "cdl",
+    "chart",
+    "react",
+    "echarts",
+    "visualization"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "dependencies": {
+    "@cdl/compiler": "^0.2.0",
+    "@cdl/renderer-echarts": "^0.2.0",
+    "echarts": "^5.4.3"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "typescript": "^5.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
