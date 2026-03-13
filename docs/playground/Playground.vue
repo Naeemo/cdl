@@ -27,7 +27,7 @@ const loading = ref(false)
 const error = ref('')
 const echartsOption = ref(null)
 const chartRef = ref(null)
-const selectedExample = ref('')
+const selectedExample = ref('line')
 const isDirty = ref(false)
 let chartInstance = null
 
