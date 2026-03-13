@@ -237,14 +237,15 @@ async function run() {
 }
 
 function mockCompile(source) {
-  const dataMatch = source.match(/@lang\(data\)\s+(\w+)\s*\{([^}]+)\}/)
+  // Match @lang(data) DataName { ... } with multiline content
+  const dataMatch = source.match(/@lang\(data\)\s+(\w+)\s*\{([\s\S]*?)\n\}/)
   if (!dataMatch) {
     return { success: false, error: '未找到数据定义，需要 @lang(data) DataName { ... }' }
   }
   
   const dataName = dataMatch[1]
   const dataContent = dataMatch[2].trim()
-  const dataLines = dataContent.split('\n').map(l => l.trim()).filter(l => l)
+  const dataLines = dataContent.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('//'))
   
   if (dataLines.length < 2) {
     return { success: false, error: '数据至少需要表头和一行数据' }
@@ -261,7 +262,8 @@ function mockCompile(source) {
     return row
   })
   
-  const chartMatch = source.match(/Chart\s+(?:\w+\s+)?\{([^}]+)\}/s)
+  // Match Chart block with multiline content
+  const chartMatch = source.match(/Chart\s+(?:\w+\s+)?\{([\s\S]*?)\n\}/)
   if (!chartMatch) {
     return { success: false, error: '未找到 Chart 定义' }
   }

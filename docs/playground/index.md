@@ -1,19 +1,21 @@
----
-layout: page
----
-
 <script setup>
 import Playground from './Playground.vue'
 </script>
 
-<div class="vp-raw">
+<div class="playground-container">
   <Playground />
 </div>
 
 <style>
-.vp-raw {
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
+.playground-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+@media (max-width: 768px) {
+  .playground-container {
+    padding: 0 16px;
+  }
 }
 </style>
