@@ -285,7 +285,7 @@ function mockCompile(source) {
   })
   
   // Find Chart block with balanced braces
-  const chartIdx = source.search(/Chart\s+(?:\w+\s+)?\{/)
+  const chartIdx = source.search(/Chart\s+(?:[^\s{]+\s*)?\{/)
   if (chartIdx === -1) {
     return { success: false, error: '未找到 Chart 定义' }
   }
