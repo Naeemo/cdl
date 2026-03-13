@@ -237,14 +237,36 @@ async function run() {
 }
 
 function mockCompile(source) {
-  // Match @lang(data) DataName { ... } with multiline content (allow no trailing newline)
-  const dataMatch = source.match(/@lang\(data\)\s+(\w+)\s*\{([\s\S]*?)\}/)
-  if (!dataMatch) {
+  // Find Data block - match balanced braces
+  const dataStart = source.search(/@lang\(data\)\s+/)
+  if (dataStart === -1) {
     return { success: false, error: '未找到数据定义，需要 @lang(data) DataName { ... }' }
   }
   
-  const dataName = dataMatch[1]
-  const dataContent = dataMatch[2].trim()
+  // Extract data name and content
+  const afterData = source.slice(dataStart)
+  const dataNameMatch = afterData.match(/@lang\(data\)\s+(\w+)\s*\{/)
+  if (!dataNameMatch) {
+    return { success: false, error: '数据定义格式错误' }
+  }
+  
+  const dataName = dataNameMatch[1]
+  const braceStart = afterData.indexOf('{') + 1
+  
+  // Find matching closing brace
+  let braceCount = 1
+  let pos = braceStart
+  while (braceCount > 0 && pos < afterData.length) {
+    if (afterData[pos] === '{') braceCount++
+    if (afterData[pos] === '}') braceCount--
+    pos++
+  }
+  
+  if (braceCount > 0) {
+    return { success: false, error: '数据定义缺少结束括号 }' }
+  }
+  
+  const dataContent = afterData.slice(braceStart, pos - 1).trim()
   const dataLines = dataContent.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('//'))
   
   if (dataLines.length < 2) {
@@ -262,13 +284,22 @@ function mockCompile(source) {
     return row
   })
   
-  // Match Chart block with multiline content
-  const chartMatch = source.match(/Chart\s+(?:\w+\s+)?\{([\s\S]*?)\}/)
+  // Find Chart block with balanced braces
+  const chartMatch = source.match(/Chart\s+(?:\w+\s+)?\{/)
   if (!chartMatch) {
     return { success: false, error: '未找到 Chart 定义' }
   }
   
-  const chartContent = chartMatch[1]
+  const chartStart = source.indexOf(chartMatch[0]) + chartMatch[0].length
+  let chartBraceCount = 1
+  let chartPos = chartStart
+  while (chartBraceCount > 0 && chartPos < source.length) {
+    if (source[chartPos] === '{') chartBraceCount++
+    if (source[chartPos] === '}') chartBraceCount--
+    chartPos++
+  }
+  
+  const chartContent = source.slice(chartStart, chartPos - 1)
   
   const useMatch = chartContent.match(/use\s+(\w+)/)
   if (!useMatch || useMatch[1] !== dataName) {
