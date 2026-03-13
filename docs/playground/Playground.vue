@@ -151,7 +151,28 @@ function loadExample() {
 }
 
 // CSV 上传处理
-function handleCSVUpload(event) {
+function handlePaste(event) {
+  const text = event.clipboardData.getData('text')
+  // 检测是否为 CSV 格式（包含逗号和换行）
+  if (text.includes(',') && text.includes('\n') && !text.includes('{')) {
+    event.preventDefault()
+    const lines = text.trim().split('\n')
+    if (lines.length < 2) return
+    
+    const dataName = 'PastedData'
+    const headers = lines[0].split(',').map(h => h.trim())
+    const dataLines = lines.slice(1, 11)
+    
+    let cdl = `@lang(data)\n${dataName} {\n    ${headers.join(',')}\n`
+    dataLines.forEach(line => {
+      cdl += `    ${line.trim()}\n`
+    })
+    cdl += `}\n\nChart {\n    use ${dataName}\n    type line\n    x ${headers[0]}\n    y ${headers[1] || headers[0]}\n}`
+    
+    cdlCode.value = cdl
+    run()
+  }
+}
   const file = event.target.files[0]
   if (!file) return
   
@@ -455,7 +476,7 @@ watch(echartsOption, () => nextTick(renderChart))
           <button class="btn-refresh" @click="refresh" title="重新渲染"><span class="icon">↻</span></button>
         </div>
       </div>
-      <textarea v-model="cdlCode" class="code-editor" placeholder="输入 CDL 代码..." spellcheck="false" />
+      <textarea v-model="cdlCode" class="code-editor" placeholder="输入 CDL 代码...或粘贴 CSV" spellcheck="false" @paste="handlePaste" />
     </div>
 
     <div class="preview-pane">
