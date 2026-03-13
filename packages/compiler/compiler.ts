@@ -215,8 +215,10 @@ function parseDataBlock(
   const config: DataSourceConfig = {};
   if (directives.source) {
     config.source = String(directives.source);
-    // 检测是否为 REST API URL
-    if (config.source.match(/^https?:\/\//)) {
+    // 检测数据源类型
+    if (config.source.match(/^wss?:\/\//)) {
+      directives.lang = 'websocket';
+    } else if (config.source.match(/^https?:\/\//)) {
       directives.lang = 'rest';
     }
   }

@@ -29,6 +29,8 @@ const echartsOption = ref(null)
 const chartRef = ref(null)
 const selectedExample = ref('line')
 const isDirty = ref(false)
+const autoRefresh = ref(false)
+const autoRefreshInterval = ref(null)
 let chartInstance = null
 
 const examples = [
@@ -207,6 +209,21 @@ function handleCSVUpload(event) {
 
 function refresh() {
   run()
+}
+
+// 自动刷新控制
+function toggleAutoRefresh() {
+  autoRefresh.value = !autoRefresh.value
+  if (autoRefresh.value) {
+    autoRefreshInterval.value = setInterval(() => {
+      if (!loading.value) {
+        run()
+      }
+    }, 5000) // 每5秒刷新
+  } else {
+    clearInterval(autoRefreshInterval.value)
+    autoRefreshInterval.value = null
+  }
 }
 
 async function run() {
@@ -454,6 +471,9 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  if (autoRefreshInterval.value) {
+    clearInterval(autoRefreshInterval.value)
+  }
   if (chartInstance) {
     chartInstance.dispose()
     chartInstance = null
@@ -473,6 +493,14 @@ watch(echartsOption, () => nextTick(renderChart))
         </div>
         <div class="header-actions">
           <input type="file" accept=".csv" @change="handleCSVUpload" class="file-input" title="上传 CSV" />
+          <button 
+            class="btn-auto-refresh" 
+            :class="{ active: autoRefresh }"
+            @click="toggleAutoRefresh" 
+            :title="autoRefresh ? '停止自动刷新' : '开启自动刷新(5s)'"
+          >
+            {{ autoRefresh ? '⏸' : '▶' }}
+          </button>
           <select v-model="selectedExample" @change="loadExample" class="example-select">
             <option v-for="ex in examples" :key="ex.name" :value="ex.name">{{ ex.label }}</option>
           </select>
@@ -514,6 +542,9 @@ watch(echartsOption, () => nextTick(renderChart))
 .file-input:hover { border-color: #58a6ff; }
 .example-select { padding: 4px 8px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; font-size: 12px; color: #c9d1d9; cursor: pointer; outline: none; }
 .example-select:hover { border-color: #58a6ff; }
+.btn-auto-refresh { padding: 4px 8px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; cursor: pointer; font-size: 12px; color: #c9d1d9; transition: all 0.2s; }
+.btn-auto-refresh:hover { background: #30363d; border-color: #58a6ff; }
+.btn-auto-refresh.active { background: #238636; border-color: #238636; }
 .btn-refresh { padding: 4px 8px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; cursor: pointer; font-size: 13px; color: #c9d1d9; transition: all 0.2s; }
 .btn-refresh:hover { background: #30363d; border-color: #58a6ff; }
 .btn-refresh .icon { display: inline-block; transition: transform 0.3s; }

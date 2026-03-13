@@ -47,24 +47,28 @@ export async function fetchRestData(options: FetchOptions): Promise<FetchResult>
     
     // JSON 响应
     if (contentType.includes('application/json')) {
-      const json = await response.json();
+      const json: unknown = await response.json();
       // 处理常见的 API 响应格式
-      let data = json;
+      let data: unknown = json;
       if (Array.isArray(json)) {
         data = json;
-      } else if (json.data && Array.isArray(json.data)) {
-        data = json.data;
-      } else if (json.results && Array.isArray(json.results)) {
-        data = json.results;
-      } else if (json.items && Array.isArray(json.items)) {
-        data = json.items;
+      } else if (typeof json === 'object' && json !== null) {
+        const obj = json as Record<string, unknown>;
+        if (Array.isArray(obj.data)) {
+          data = obj.data;
+        } else if (Array.isArray(obj.results)) {
+          data = obj.results;
+        } else if (Array.isArray(obj.items)) {
+          data = obj.items;
+        }
       }
       
-      if (data.length > 0) {
-        const headers = Object.keys(data[0]);
-        return { success: true, data, headers };
+      if (Array.isArray(data) && data.length > 0) {
+        const first = data[0] as Record<string, unknown>;
+        const headers = Object.keys(first);
+        return { success: true, data: data as unknown[], headers };
       }
-      return { success: true, data: [], headers: [] };
+      return { success: true, data: Array.isArray(data) ? (data as unknown[]) : [], headers: [] };
     }
 
     // CSV 响应

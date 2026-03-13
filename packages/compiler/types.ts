@@ -5,7 +5,7 @@
 
 // ===== 数据源相关 =====
 
-export type QueryLanguage = 'sql' | 'dax' | 'data' | 'rest';
+export type QueryLanguage = 'sql' | 'dax' | 'data' | 'rest' | 'websocket';
 
 export interface DataSourceConfig {
   source?: string;      // @source('...')
