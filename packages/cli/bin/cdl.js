@@ -24,6 +24,7 @@ Commands:
   export <file.cdl>      Export chart to PNG/SVG/PDF
   batch <dir>            Batch export all .cdl files in directory
   validate <file.cdl>    Validate CDL syntax
+  benchmark <file.cdl>   Run performance benchmark
   init                   Create a sample CDL file
   template               List or use templates
   nl "<description>"     Generate CDL from natural language
@@ -32,6 +33,10 @@ Commands:
 Global Options:
   --verbose, -v          Enable verbose output with detailed logs
   --ast                  Show AST structure in compile/render commands
+
+Benchmark Command:
+  cdl benchmark example.cdl         Run performance analysis
+  cdl benchmark example.cdl --verbose   Show detailed metrics
 
 Template Command:
   cdl template                    List available templates
@@ -883,6 +888,89 @@ function templateCommand(args) {
   console.log(`✓ Template applied: ${templateKey} -> ${outputFile}`);
 }
 
+async function benchmarkCommand(args) {
+  const filePath = args[1];
+  
+  if (!filePath) {
+    console.error('Error: Please provide a CDL file');
+    console.log('Usage: cdl benchmark <file.cdl> [--iterations 10]');
+    process.exit(1);
+  }
+  
+  if (!fs.existsSync(filePath)) {
+    console.error(`Error: File not found: ${filePath}`);
+    process.exit(1);
+  }
+
+  const source = fs.readFileSync(filePath, 'utf-8');
+  const iterations = args.includes('--iterations') 
+    ? parseInt(args[args.indexOf('--iterations') + 1]) || 10 
+    : 10;
+
+  console.log(`Running ${iterations} iterations...\n`);
+
+  const times = {
+    compile: [] as number[],
+    render: [] as number[],
+    total: [] as number[]
+  };
+
+  for (let i = 0; i < iterations; i++) {
+    const start = Date.now();
+    const compileStart = Date.now();
+    const compileResult = compile(source);
+    const compileTime = Date.now() - compileStart;
+    
+    if (!compileResult.success) {
+      console.error('Compilation failed:', compileResult.errors);
+      process.exit(1);
+    }
+    
+    const renderStart = Date.now();
+    const renderResult = render(compileResult.result);
+    const renderTime = Date.now() - renderStart;
+    const totalTime = Date.now() - start;
+    
+    times.compile.push(compileTime);
+    times.render.push(renderTime);
+    times.total.push(totalTime);
+  }
+
+  // Calculate statistics
+  const stats = {
+    compile: {
+      min: Math.min(...times.compile),
+      max: Math.max(...times.compile),
+      avg: times.compile.reduce((a, b) => a + b, 0) / times.compile.length
+    },
+    render: {
+      min: Math.min(...times.render),
+      max: Math.max(...times.render),
+      avg: times.render.reduce((a, b) => a + b, 0) / times.render.length
+    },
+    total: {
+      min: Math.min(...times.total),
+      max: Math.max(...times.total),
+      avg: times.total.reduce((a, b) => a + b, 0) / times.total.length
+    }
+  };
+
+  console.log('📊 Performance Benchmark Results\n');
+  console.log('Compile:');
+  console.log(`  Min: ${stats.compile.min.toFixed(2)}ms`);
+  console.log(`  Max: ${stats.compile.max.toFixed(2)}ms`);
+  console.log(`  Avg: ${stats.compile.avg.toFixed(2)}ms`);
+  console.log('\nRender:');
+  console.log(`  Min: ${stats.render.min.toFixed(2)}ms`);
+  console.log(`  Max: ${stats.render.max.toFixed(2)}ms`);
+  console.log(`  Avg: ${stats.render.avg.toFixed(2)}ms`);
+  console.log('\nTotal:');
+  console.log(`  Min: ${stats.total.min.toFixed(2)}ms`);
+  console.log(`  Max: ${stats.total.max.toFixed(2)}ms`);
+  console.log(`  Avg: ${stats.total.avg.toFixed(2)}ms`);
+  console.log(`  Throughput: ${(1000 / stats.total.avg).toFixed(1)} charts/sec`);
+}
+
 switch (command) {
   case 'compile':
     compileFile(args);
@@ -907,6 +995,9 @@ switch (command) {
     break;
   case 'template':
     templateCommand(args);
+    break;
+  case 'benchmark':
+    benchmarkCommand(args);
     break;
   case 'nl':
     nlCommand(args);
