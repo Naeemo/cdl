@@ -35,13 +35,46 @@
 - [x] 真实预览渲染
 - [x] 错误处理和主题支持
 
-### Phase 6: 发布 🔄 进行中
-- [ ] 构建并测试 vsix
-- [ ] VS Code Marketplace 发布准备
+### Phase 6: 发布 ✅ 已完成
+- [x] 添加 package/publish scripts
+- [x] 添加 LICENSE
+- [x] 更新 .vscodeignore
+- [x] 所有文件提交到仓库
 
-## 当前阶段
-Phase 6 - 打包和发布
+## 当前状态
+✅ 所有阶段完成 (100%)
 
-## 状态
-✅ Phase 1-5 完成 (95%)
-🔄 Phase 6 进行中
+## 使用方法
+
+### 开发调试
+```bash
+cd packages/vscode-extension
+npm install
+npm run compile
+# 按 F5 启动调试
+```
+
+### 打包
+```bash
+cd packages/vscode-extension
+npm run package
+# 生成 cdl-vscode-0.1.0.vsix
+```
+
+### 安装
+```bash
+code --install-extension cdl-vscode-0.1.0.vsix
+```
+
+### 发布到 Marketplace
+```bash
+npm run publish
+```
+
+## 功能特性
+- 🎨 语法高亮
+- ✨ 代码片段
+- 🖼️ 图表预览 (Ctrl+Shift+V)
+- 📦 编译为 JSON
+- 📊 导出 ECharts 配置
+- 🌓 支持亮色/暗色主题
