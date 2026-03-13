@@ -147,19 +147,49 @@ function renderFile(filePath) {
   }
 }
 
-function validateFile(filePath) {
+function validateFile(filePath, args = []) {
+  if (!filePath) {
+    console.error('Error: Please provide a CDL file');
+    process.exit(1);
+  }
+  
   if (!fs.existsSync(filePath)) {
     console.error(`Error: File not found: ${filePath}`);
     process.exit(1);
   }
 
+  const isVerbose = args.includes('--verbose') || args.includes('-v');
   const source = fs.readFileSync(filePath, 'utf-8');
+  
+  if (isVerbose) {
+    console.log(`📄 Validating: ${filePath}`);
+    console.log(`📊 Source: ${source.length} characters, ${source.split('\n').length} lines`);
+    console.log('');
+  }
+  
   const result = compile(source);
 
   if (result.success) {
     console.log('✓ Valid CDL file');
     console.log(`  Data sources: ${result.result.data.length}`);
     console.log(`  Charts: ${result.result.charts.length}`);
+    
+    if (isVerbose) {
+      console.log('\n📋 Data sources:');
+      result.result.data.forEach((d, i) => {
+        console.log(`  [${i + 1}] ${d.name} (${d.lang})`);
+        if (d.config.source) {
+          console.log(`      Source: ${d.config.source}`);
+        }
+      });
+      
+      console.log('\n📈 Charts:');
+      result.result.charts.forEach((c, i) => {
+        console.log(`  [${i + 1}] ${c.name || 'Unnamed'} (${c.chartType})`);
+        console.log(`      Data: ${c.dataSources.join(', ')}`);
+        console.log(`      Mapping: x=${c.x}, y=${c.y}`);
+      });
+    }
   } else {
     console.log('✗ Invalid CDL file');
     result.errors.forEach(e => {
@@ -808,7 +838,7 @@ switch (command) {
     previewFile(args[1]);
     break;
   case 'validate':
-    validateFile(args[1]);
+    validateFile(args[1], args);
     break;
   case 'init':
     initSample(args);
