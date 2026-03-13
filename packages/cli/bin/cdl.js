@@ -169,8 +169,9 @@ function validateFile(filePath) {
   }
 }
 
-function initSample() {
-  const sample = `@lang(data)
+function initSample(args) {
+  const templates = {
+    line: `@lang(data)
 SalesData {
     month,amount
     1月,100
@@ -185,10 +186,126 @@ Chart 月度销售 {
     y amount
     @style "平滑曲线"
     @title "月度销售趋势"
-}`;
+}`,
+    bar: `@lang(data)
+RegionData {
+    region,sales
+    华北,120
+    华南,200
+    华东,180
+}
 
-  fs.writeFileSync('example.cdl', sample);
-  console.log('Created example.cdl');
+Chart 区域销售 {
+    use RegionData
+    type bar
+    x region
+    y sales
+    @color "#667eea"
+    @title "各区域销售额"
+}`,
+    pie: `@lang(data)
+CategoryData {
+    name,value
+    食品,30
+    服装,45
+    电子,25
+}
+
+Chart 分类占比 {
+    use CategoryData
+    type pie
+    x name
+    y value
+    @style "环形"
+    @title "商品分类占比"
+}`,
+    scatter: `@lang(data)
+PriceData {
+    price,sales
+    10,100
+    20,80
+    30,60
+    40,40
+}
+
+Chart 价格销量关系 {
+    use PriceData
+    type scatter
+    x price
+    y sales
+    @title "价格与销量关系"
+}`,
+    radar: `@lang(data)
+SkillData {
+    skill,score
+    技术,90
+    沟通,80
+    管理,70
+    创新,85
+}
+
+Chart 能力雷达 {
+    use SkillData
+    type radar
+    x skill
+    y score
+    @color "#9b59b6"
+    @title "团队能力评估"
+}`,
+    sql: `@lang(sql)
+@source('https://api.example.com/sales')
+SalesData {
+    SELECT month, SUM(amount) as total
+    FROM sales
+    WHERE year = 2024
+    GROUP BY month
+}
+
+Chart 月度销售 {
+    use SalesData
+    type line
+    x month
+    y total
+    @title "2024年月度销售"
+}`,
+    rest: `@lang(rest)
+@source('https://jsonplaceholder.typicode.com/posts')
+PostData {
+    // REST API data will be fetched automatically
+}
+
+Chart 文章统计 {
+    use PostData
+    type bar
+    x userId
+    y id
+    @title "各用户文章数"
+}`
+  };
+
+  // Parse template option
+  let template = 'line';
+  let outputFile = 'example.cdl';
+  
+  for (let i = 1; i < args.length; i++) {
+    if (args[i] === '--template' && args[i + 1]) {
+      template = args[i + 1];
+      i++;
+    } else if (args[i] === '--output' && args[i + 1]) {
+      outputFile = args[i + 1];
+      i++;
+    }
+  }
+
+  if (!templates[template]) {
+    console.error(`Error: Unknown template "${template}"`);
+    console.log(`Available templates: ${Object.keys(templates).join(', ')}`);
+    process.exit(1);
+  }
+
+  fs.writeFileSync(outputFile, templates[template]);
+  console.log(`✓ Created ${outputFile} (template: ${template})`);
+  console.log(`  Type: cdl compile ${outputFile} to verify`);
 }
 
 async function exportFile(args) {
@@ -403,25 +520,29 @@ async function exportFile(args) {
       await page.setContent(htmlContent);
       
       // Wait for chart to render
-      await page.waitForFunction(() => {
-        const logs = window._consoleLogs || [];
-        return logs.some(log => log.startsWith('DATAURL:'));
-      }, { timeout: 10000 });
-
-      // Get data URL from console
-      const dataURL = await page.evaluate(() => {
-        const logs = window._consoleLogs || [];
-        const log = logs.find(l => l.startsWith('DATAURL:'));
-        return log ? log.replace('DATAURL:', '') : null;
-      });
-
-      if (dataURL) {
-        const base64Data = dataURL.replace(/^data:image\/(png|svg\+xml);base64,/, '');
-        fs.writeFileSync(outputFile, Buffer.from(base64Data, 'base64'));
-        console.log(`✓ Exported to: ${outputFile}`);
-        console.log(`  Format: ${format.toUpperCase()}`);
-        console.log(`  Size: ${width}x${height}`);
+      await page.waitForTimeout(1000);
+      
+      // Take screenshot or get SVG
+      if (format === 'png') {
+        await page.screenshot({ 
+          path: outputFile,
+          fullPage: false,
+          clip: { x: 0, y: 0, width, height }
+        });
+      } else {
+        // For SVG, get the SVG element content
+        const svgContent = await page.evaluate(() => {
+          const svg = document.querySelector('svg');
+          return svg ? svg.outerHTML : null;
+        });
+        if (svgContent) {
+          fs.writeFileSync(outputFile, svgContent);
+        }
       }
+      
+      console.log(`✓ Exported to: ${outputFile}`);
+      console.log(`  Format: ${format.toUpperCase()}`);
+      console.log(`  Size: ${width}x${height}`);
 
       await browser.close();
     } catch (error) {
@@ -589,9 +710,90 @@ async function batchExport(args) {
   console.log('Note: Open HTML files in browser and save as image manually');
 }
 
+async function previewFile(filePath) {
+  if (!filePath) {
+    console.error('Error: Please provide a CDL file');
+    console.log('Usage: cdl preview <file.cdl> [--port 8080]');
+    process.exit(1);
+  }
+
+  if (!fs.existsSync(filePath)) {
+    console.error(`Error: File not found: ${filePath}`);
+    process.exit(1);
+  }
+
+  const source = fs.readFileSync(filePath, 'utf-8');
+  const compileResult = compile(source);
+
+  if (!compileResult.success) {
+    console.error('Compilation errors:');
+    compileResult.errors.forEach(e => {
+      console.error(`  Line ${e.line}, Col ${e.column}: ${e.message}`);
+    });
+    process.exit(1);
+  }
+
+  const renderResult = render(compileResult.result);
+
+  if (!renderResult.success) {
+    console.error(`Render error: ${renderResult.error}`);
+    process.exit(1);
+  }
+
+  const port = 8080;
+  
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>CDL Preview - ${filePath}</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"><\/script>
+  <style>
+    body { margin: 0; padding: 20px; font-family: system-ui, sans-serif; background: #f5f5f5; }
+    .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    h1 { margin: 0 0 20px 0; font-size: 18px; color: #333; }
+    #chart { width: 100%; height: 500px; }
+    .info { margin-top: 20px; padding: 10px; background: #f0f9ff; border-radius: 4px; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 CDL Preview: ${filePath}</h1>
+    <div id="chart"></div>
+    <div class="info">
+      Data sources: ${compileResult.result.data.length} | 
+      Charts: ${compileResult.result.charts.length} |
+      <a href="/?raw=1">View source</a>
+    </div>
+  </div>
+  <script>
+    const chart = echarts.init(document.getElementById('chart'));
+    chart.setOption(${JSON.stringify(renderResult.option)});
+    window.addEventListener('resize', () => chart.resize());
+  <\/script>
+</body>
+</html>`;
+
+  const server = http.createServer((req, res) => {
+    if (req.url === '/?raw=1') {
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
+      res.end(source);
+    } else {
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(html);
+    }
+  });
+
+  server.listen(port, () => {
+    console.log(`✓ Preview server running at http://localhost:${port}`);
+    console.log(`  File: ${filePath}`);
+    console.log(`  Press Ctrl+C to stop`);
+  });
+}
+
 switch (command) {
   case 'compile':
-    compileFile(args[1]);
+    compileFile(args);
     break;
   case 'render':
     renderFile(args[1]);
@@ -602,11 +804,14 @@ switch (command) {
   case 'batch':
     batchExport(args);
     break;
+  case 'preview':
+    previewFile(args[1]);
+    break;
   case 'validate':
     validateFile(args[1]);
     break;
   case 'init':
-    initSample();
+    initSample(args);
     break;
   case 'nl':
     nlCommand(args);
