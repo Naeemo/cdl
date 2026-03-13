@@ -449,8 +449,8 @@ watch(echartsOption, () => {
 .playground {
   display: flex;
   width: 100%;
-  max-width: 100%;
-  min-width: 0;
+  max-width: 960px;
+  margin: 0 auto;
   height: 600px;
   background: #0d1117;
   border-radius: 8px;
