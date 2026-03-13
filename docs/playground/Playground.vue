@@ -195,19 +195,33 @@ function compileCDL(source) {
   let inData = false
   let inChart = false
   let braceCount = 0
+  let expectingDataName = false
   
   for (const rawLine of lines) {
     const line = rawLine.trim()
     
-    // Data 开始
-    if (!inData && !inChart && line.startsWith('@lang(data)')) {
-      const m = line.match(/@lang\(data\)\s+(\w+)\s*\{/)
+    // Data 开始（@lang(data) 单独一行）
+    if (!inData && !inChart && line === '@lang(data)') {
+      expectingDataName = true
+      continue
+    }
+    
+    // 期望 DataName { 
+    if (expectingDataName) {
+      const m = line.match(/^(\w+)\s*\{/)
       if (m) {
         dataName = m[1]
         inData = true
-        braceCount = line.split('{').length - 1 - (line.split('}').length - 1)
-        continue
+        expectingDataName = false
+        braceCount = 1
+        // 检查同一行是否有内容
+        const contentStart = line.indexOf('{')
+        if (contentStart !== -1 && contentStart < line.length - 1) {
+          const afterBrace = line.slice(contentStart + 1).trim()
+          if (afterBrace) dataLines.push(afterBrace)
+        }
       }
+      continue
     }
     
     // Data 内部
@@ -228,6 +242,12 @@ function compileCDL(source) {
       inChart = true
       braceCount = line.split('{').length - 1 - (line.split('}').length - 1)
       if (braceCount <= 0 && line.includes('{')) braceCount = 1
+      // 如果这一行有内容（除了Chart和{），也要处理
+      const contentStart = line.indexOf('{')
+      if (contentStart !== -1 && contentStart < line.length - 1) {
+        const afterBrace = line.slice(contentStart + 1).trim()
+        if (afterBrace) chartLines.push(afterBrace)
+      }
       continue
     }
     
@@ -237,6 +257,16 @@ function compileCDL(source) {
       braceCount -= (line.match(/\}/g) || []).length
       
       if (braceCount <= 0) {
+        inChart = false
+        continue
+      }
+      chartLines.push(line)
+    }
+  }
+  
+  if (!dataName) return { success: false, error: '未找到数据定义' }
+  if (dataLines.length < 2) return { success: false, error: '数据需要表头和数据行' }
+  if (chartLines.length === 0) return { success: false, error: '未找到 Chart 定义' }
         inChart = false
         continue
       }
@@ -370,7 +400,6 @@ watch(echartsOption, () => nextTick(renderChart))
         </div>
         <div class="header-actions">
           <select v-model="selectedExample" @change="loadExample" class="example-select">
-            <option value="">示例</option>
             <option v-for="ex in examples" :key="ex.name" :value="ex.name">{{ ex.label }}</option>
           </select>
           <button class="btn-refresh" @click="refresh" title="重新渲染"><span class="icon">↻</span></button>
