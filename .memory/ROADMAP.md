@@ -19,10 +19,21 @@
 - [x] WebSocket 数据源 (@source('wss://...'))
 - [x] Playground 自动刷新机制 (5秒间隔)
 
-## P4: 其他（待启动）
-- [ ] D3 渲染器
-- [ ] 模板市场
-- [ ] 主题系统
+## P4: 其他（已完成 ✅）
+- [x] D3 渲染器 (packages/renderer-d3)
+- [x] 模板市场 (packages/templates)
+- [x] 主题系统 (packages/themes)
 
-## 当前阶段
-P3 ✅ 已完成 - 实时数据支持完成
+---
+
+## 🎉 全部完成
+
+所有优先级任务已开发完成！
+
+当前可用功能：
+- 编译器：支持 SQL/DAX/Data/REST/WebSocket 数据源
+- 渲染器：ECharts + D3 双引擎
+- CLI：compile/render/export/batch/validate/nl 命令
+- Playground：实时编辑、自动刷新、文件上传
+- 模板：销售/用户/KPI/财务/库存 预置模板
+- 主题：6 套内置主题
