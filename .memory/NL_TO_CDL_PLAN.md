@@ -44,3 +44,4 @@
 - [ ] 生成历史记录
 - [ ] 更多图表类型的 NL 识别
 - [ ] VS Code 插件
+# Trigger rebuild Fri Mar 13 11:24:34 AM CST 2026
