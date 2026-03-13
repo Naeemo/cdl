@@ -47,13 +47,14 @@
         <div v-if="error" class="error-message">
           {{ error }}
         </div>
-        <div v-else-if="echartsOption" ref="chartRef" class="chart-container" />
+        <div v-else-if="echartsOption" ref="chartRef" class="chart-container"></div>
         <div v-else class="placeholder">
           输入 CDL 代码查看图表
         </div>
       </div>
     </div>
   </div>
+</div>
 </template>
 
 <script setup>
