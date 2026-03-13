@@ -1,0 +1,23 @@
+// 用户增长趋势 - 面积图
+@lang(data)
+UserGrowth {
+    date,newUsers,activeUsers
+    周一,120,890
+    周二,145,920
+    周三,180,980
+    周四,160,1050
+    周五,200,1120
+    周六,280,1350
+    周日,250,1280
+}
+
+Chart 用户增长 {
+    use UserGrowth
+    type area
+    x date
+    y newUsers
+    
+    @title "每日新增用户"
+    @color "#00e676"
+    @style "渐变填充"
+}

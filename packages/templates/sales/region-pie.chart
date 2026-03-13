@@ -1,0 +1,20 @@
+// 区域销售占比 - 饼图
+@lang(data)
+RegionSales {
+    region,amount
+    华北,350
+    华南,420
+    华东,380
+    华西,280
+    华中,320
+}
+
+Chart 区域销售占比 {
+    use RegionSales
+    type pie
+    x region
+    y amount
+    
+    @title "各区域销售占比"
+    @style "环形"
+}

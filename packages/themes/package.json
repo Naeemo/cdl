@@ -1,0 +1,42 @@
+{
+  "name": "@cdl/themes",
+  "version": "0.1.0",
+  "description": "CDL Theme System - Reusable theme configurations for CDL charts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/",
+    "src/",
+    "themes/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "node dist/test.js",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Naeemo/cdl.git",
+    "directory": "packages/themes"
+  },
+  "bugs": {
+    "url": "https://github.com/Naeemo/cdl/issues"
+  },
+  "homepage": "https://github.com/Naeemo/cdl/tree/main/packages/themes#readme",
+  "keywords": [
+    "cdl",
+    "chart",
+    "theme",
+    "styling",
+    "color",
+    "design"
+  ],
+  "author": "Naeemo <naeemo@qq.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.0"
+  }
+}

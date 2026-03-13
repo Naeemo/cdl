@@ -1,0 +1,22 @@
+// 月度销售趋势 - 折线图
+@lang(data)
+MonthlySales {
+    month,amount,lastYear
+    1月,120,100
+    2月,150,130
+    3月,180,160
+    4月,200,180
+    5月,220,200
+    6月,250,230
+}
+
+Chart 月度销售对比 {
+    use MonthlySales
+    type line
+    x month
+    y amount
+    
+    @title "月度销售趋势"
+    @color "#4fc3f7"
+    @style "平滑曲线"
+}

@@ -1,0 +1,33 @@
+{
+  "name": "@cdl/templates",
+  "version": "0.1.0",
+  "description": "CDL Chart Templates - Ready-to-use chart templates for common business scenarios",
+  "main": "index.js",
+  "files": [
+    "sales/",
+    "user/",
+    "kpi/",
+    "financial/",
+    "inventory/",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Naeemo/cdl.git",
+    "directory": "packages/templates"
+  },
+  "bugs": {
+    "url": "https://github.com/Naeemo/cdl/issues"
+  },
+  "homepage": "https://github.com/Naeemo/cdl/tree/main/packages/templates#readme",
+  "keywords": [
+    "cdl",
+    "chart",
+    "templates",
+    "dashboard",
+    "business",
+    "analytics"
+  ],
+  "author": "Naeemo <naeemo@qq.com>",
+  "license": "MIT"
+}
