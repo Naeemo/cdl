@@ -213,7 +213,13 @@ function parseDataBlock(
   }
   
   const config: DataSourceConfig = {};
-  if (directives.source) config.source = String(directives.source);
+  if (directives.source) {
+    config.source = String(directives.source);
+    // 检测是否为 REST API URL
+    if (config.source.match(/^https?:\/\//)) {
+      directives.lang = 'rest';
+    }
+  }
   if (directives.timeout) config.timeout = Number(directives.timeout);
   if (directives.cache) config.cache = Number(directives.cache);
   
