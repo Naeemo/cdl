@@ -1,60 +1,37 @@
 <template>
   <div class="playground">
-    <div class="left-panel">
-      <!-- Natural Language Input -->
-      <div class="nl-section">
-        <div class="pane-header">
-          <span class="title">🤖 自然语言生成</span>
+    <!-- 左侧编辑器 -->
+    <div class="editor-pane">
+      <div class="pane-header">
+        <div class="header-left">
+          <span class="title">CDL</span>
+          <span v-if="isDirty" class="dot"></span>
         </div>
-        <div class="nl-input-area">
-          <input
-            v-model="nlInput"
-            class="nl-input"
-            placeholder="描述你想要的图表，例如：最近6个月销售额折线图，蓝色..."
-            @keyup.enter="generateFromNL"
-          />
-          <button 
-            class="btn-generate" 
-            @click="generateFromNL" 
-            :disabled="nlLoading || !nlInput.trim()"
-          >
-            {{ nlLoading ? '生成中...' : '✨ 生成 CDL' }}
+        <div class="header-actions">
+          <select v-model="selectedExample" @change="loadExample" class="example-select">
+            <option value="">示例</option>
+            <option v-for="ex in examples" :key="ex.name" :value="ex.name">
+              {{ ex.label }}
+            </option>
+          </select>
+          <button class="btn-refresh" @click="refresh" title="重新渲染">
+            <span class="icon">↻</span>
           </button>
         </div>
-        <div v-if="nlError" class="nl-error">{{ nlError }}</div>
       </div>
-
-      <!-- CDL Editor -->
-      <div class="editor-pane">
-        <div class="pane-header">
-          <span class="title">CDL</span>
-          <div class="header-actions">
-            <button class="btn-secondary" @click="clearCode">清空</button>
-            <button class="btn-run" @click="run" :disabled="loading">
-              {{ loading ? '运行中...' : '▶ 运行' }}
-            </button>
-          </div>
-        </div>
-        <textarea
-          v-model="cdlCode"
-          class="code-editor"
-          placeholder="输入 CDL 代码..."
-          spellcheck="false"
-        />
-      </div>
+      <textarea
+        v-model="cdlCode"
+        class="code-editor"
+        placeholder="输入 CDL 代码..."
+        spellcheck="false"
+      />
     </div>
     
-    <div class="divider" />
-    
+    <!-- 右侧预览 -->
     <div class="preview-pane">
       <div class="pane-header">
         <span class="title">预览</span>
-        <select v-model="selectedExample" @change="loadExample" class="example-select">
-          <option value="">选择示例...</option>
-          <option v-for="ex in examples" :key="ex.name" :value="ex.name">
-            {{ ex.label }}
-          </option>
-        </select>
+        <div v-if="loading" class="loading-dot"></div>
       </div>
       
       <div class="preview-content">
@@ -63,8 +40,7 @@
         </div>
         <div v-else-if="echartsOption" ref="chartRef" class="chart-container" />
         <div v-else class="placeholder">
-          点击「运行」预览图表<br/>
-          或输入自然语言描述生成 CDL
+          输入 CDL 代码查看图表
         </div>
       </div>
     </div>
@@ -75,12 +51,6 @@
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import * as echarts from 'echarts'
 
-// Natural Language
-const nlInput = ref('')
-const nlLoading = ref(false)
-const nlError = ref('')
-
-// CDL Editor
 const cdlCode = ref(`@lang(data)
 SalesData {
     month,sales
@@ -107,15 +77,16 @@ const error = ref('')
 const echartsOption = ref(null)
 const chartRef = ref(null)
 const selectedExample = ref('')
+const isDirty = ref(false)
 let chartInstance = null
 
 const examples = [
-  { name: 'line', label: '📈 折线图' },
-  { name: 'bar', label: '📊 柱状图' },
+  { name: 'line', label: '📈 折线' },
+  { name: 'bar', label: '📊 柱状' },
   { name: 'pie', label: '🥧 饼图' },
-  { name: 'scatter', label: '⚪ 散点图' },
-  { name: 'area', label: '🌊 面积图' },
-  { name: 'radar', label: '🕸️ 雷达图' },
+  { name: 'scatter', label: '⚪ 散点' },
+  { name: 'area', label: '🌊 面积' },
+  { name: 'radar', label: '🕸️ 雷达' },
 ]
 
 const exampleCodes = {
@@ -213,172 +184,24 @@ Chart {
 }`
 }
 
-function clearCode() {
-  cdlCode.value = ''
-}
+// 自动编译渲染（带防抖）
+let debounceTimer = null
+watch(cdlCode, () => {
+  isDirty.value = true
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    run()
+  }, 300)
+})
 
 function loadExample() {
   if (selectedExample.value && exampleCodes[selectedExample.value]) {
     cdlCode.value = exampleCodes[selectedExample.value]
-    run()
   }
 }
 
-// Natural Language to CDL Generation
-async function generateFromNL() {
-  if (!nlInput.value.trim()) return
-  
-  nlLoading.value = true
-  nlError.value = ''
-  
-  try {
-    const generated = await mockNLToCDL(nlInput.value.trim())
-    cdlCode.value = generated
-    // Auto run after generation
-    await run()
-  } catch (e) {
-    nlError.value = e.message || '生成失败'
-  } finally {
-    nlLoading.value = false
-  }
-}
-
-// Mock NL to CDL conversion (in real app, would call API)
-async function mockNLToCDL(description) {
-  // Simulate API delay
-  await new Promise(r => setTimeout(r, 500))
-  
-  const desc = description.toLowerCase()
-  
-  // Simple pattern matching for demo
-  if (desc.includes('饼') || desc.includes('占比') || desc.includes('比例')) {
-    const isRing = desc.includes('环')
-    return `@lang(data)
-CategoryData {
-    category,value
-    类别A,35
-    类别B,25
-    类别C,20
-    类别D,20
-}
-
-Chart 数据分布 {
-    use CategoryData
-    type pie
-    x category
-    y value
-    ${isRing ? '@style "环形"' : ''}
-    @title "${description.slice(0, 20)}"
-}`
-  }
-  
-  if (desc.includes('柱') || desc.includes('条')) {
-    return `@lang(data)
-RegionData {
-    region,sales
-    华北,120
-    华南,200
-    华东,180
-    华西,150
-}
-
-Chart 区域对比 {
-    use RegionData
-    type bar
-    x region
-    y sales
-    @title "${description.slice(0, 20)}"
-}`
-  }
-  
-  if (desc.includes('散点') || desc.includes('分布')) {
-    return `@lang(data)
-ScatterData {
-    x,y
-    10,20
-    20,35
-    30,30
-    40,45
-    50,40
-}
-
-Chart 散点分布 {
-    use ScatterData
-    type scatter
-    x x
-    y y
-    @title "${description.slice(0, 20)}"
-}`
-  }
-  
-  if (desc.includes('雷达') || desc.includes('能力') || desc.includes('评分')) {
-    return `@lang(data)
-RadarData {
-    dimension,score
-    技术,85
-    沟通,75
-    管理,80
-    创新,90
-    执行,70
-}
-
-Chart 能力评估 {
-    use RadarData
-    type radar
-    x dimension
-    y score
-    @title "${description.slice(0, 20)}"
-}`
-  }
-  
-  if (desc.includes('面积') || desc.includes('区域')) {
-    return `@lang(data)
-TrendData {
-    month,value
-    1月,100
-    2月,120
-    3月,150
-    4月,140
-    5月,180
-    6月,200
-}
-
-Chart 趋势面积 {
-    use TrendData
-    type area
-    x month
-    y value
-    @style "渐变填充"
-    @title "${description.slice(0, 20)}"
-}`
-  }
-  
-  // Default to line chart
-  const isSmooth = desc.includes('平滑') || desc.includes('曲线')
-  const color = desc.includes('蓝') ? '#4fc3f7' : 
-                desc.includes('红') ? '#ef5350' : 
-                desc.includes('绿') ? '#66bb6a' : '#4fc3f7'
-  
-  return `@lang(data)
-SalesData {
-    month,sales
-    1月,100
-    2月,150
-    3月,120
-    4月,180
-    5月,200
-    6月,220
-}
-
-Chart 销售趋势 {
-    use SalesData
-    type line
-    x month
-    y sales
-    ${isSmooth ? '@style "平滑曲线"' : ''}
-    @color "${color}"
-    @title "${description.slice(0, 20)}"
-}`
+function refresh() {
+  run()
 }
 
 async function run() {
@@ -401,6 +224,7 @@ async function run() {
     }
     
     echartsOption.value = renderResult.option
+    isDirty.value = false
     
     await nextTick()
     renderChart()
@@ -574,7 +398,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (chartInstance) {
-    chartInstance.dispose()
+    instance.dispose()
     chartInstance = null
   }
 })
@@ -585,151 +409,108 @@ watch(echartsOption, () => {
 </script>
 
 <style scoped>
+* {
+  box-sizing: border-box;
+}
+
 .playground {
   display: flex;
-  height: calc(100vh - 64px);
-  background: #f5f5f5;
+  width: 100vw;
+  height: 100vh;
+  background: #0d1117;
+  overflow: hidden;
 }
 
-.left-panel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  background: white;
-}
-
-.nl-section {
-  border-bottom: 1px solid #e8e8e8;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.nl-section .pane-header {
-  background: transparent;
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-  color: white;
-}
-
-.nl-section .title {
-  color: white;
-}
-
-.nl-input-area {
-  display: flex;
-  gap: 8px;
-  padding: 12px 16px;
-}
-
-.nl-input {
-  flex: 1;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  background: rgba(255,255,255,0.95);
-  color: #333;
-  outline: none;
-}
-
-.nl-input::placeholder {
-  color: #999;
-}
-
-.btn-generate {
-  padding: 10px 20px;
-  background: #4fc3f7;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
-  transition: background 0.2s;
-}
-
-.btn-generate:hover {
-  background: #29b6f6;
-}
-
-.btn-generate:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.nl-error {
-  padding: 8px 16px;
-  color: #ffccc7;
-  font-size: 13px;
-  background: rgba(255,0,0,0.2);
-}
-
+/* 左侧面板 */
 .editor-pane {
-  flex: 1;
+  width: 50%;
   display: flex;
   flex-direction: column;
-  background: white;
-  min-height: 0;
+  background: #0d1117;
+  border-right: 1px solid #30363d;
 }
 
 .pane-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  background: #fafafa;
-  border-bottom: 1px solid #e8e8e8;
+  padding: 8px 16px;
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  height: 44px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .title {
   font-weight: 600;
-  font-size: 14px;
-  color: #333;
+  font-size: 13px;
+  color: #c9d1d9;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  background: #58a6ff;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 .header-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
 }
 
-.btn-secondary {
-  padding: 6px 12px;
-  background: #f0f0f0;
-  color: #666;
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.btn-secondary:hover {
-  background: #e8e8e8;
-}
-
-.btn-run {
-  padding: 6px 16px;
-  background: #4fc3f7;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.btn-run:hover {
-  background: #29b6f6;
-}
-
-.btn-run:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
 .example-select {
-  padding: 4px 12px;
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  font-size: 13px;
+  padding: 4px 10px;
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #c9d1d9;
+  cursor: pointer;
+  outline: none;
+}
+
+.example-select:hover {
+  border-color: #58a6ff;
+}
+
+.btn-refresh {
+  padding: 6px 10px;
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #c9d1d9;
+  transition: all 0.2s;
+}
+
+.btn-refresh:hover {
+  background: #30363d;
+  border-color: #58a6ff;
+}
+
+.btn-refresh .icon {
+  display: inline-block;
+  transition: transform 0.3s;
+}
+
+.btn-refresh:hover .icon {
+  transform: rotate(180deg);
 }
 
 .code-editor {
@@ -737,55 +518,79 @@ watch(echartsOption, () => {
   padding: 16px;
   border: none;
   outline: none;
-  font-family: 'Monaco', 'Menlo', monospace;
+  font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', monospace;
   font-size: 14px;
   line-height: 1.6;
   resize: none;
-  background: #fafafa;
-  color: #333;
+  background: #0d1117;
+  color: #c9d1d9;
+  tab-size: 4;
 }
 
-.divider {
-  width: 4px;
-  background: #e8e8e8;
-  cursor: col-resize;
+.code-editor::placeholder {
+  color: #484f58;
 }
 
+/* 右侧面板 */
 .preview-pane {
-  flex: 1;
+  width: 50%;
   display: flex;
   flex-direction: column;
-  background: white;
+  background: #ffffff;
+}
+
+.preview-pane .pane-header {
+  background: #f6f8fa;
+  border-bottom: 1px solid #d0d7de;
+}
+
+.preview-pane .title {
+  color: #24292f;
+}
+
+.loading-dot {
+  width: 8px;
+  height: 8px;
+  background: #0969da;
+  border-radius: 50%;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
 }
 
 .preview-content {
   flex: 1;
-  padding: 16px;
+  padding: 24px;
   overflow: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .chart-container {
+  flex: 1;
+  min-height: 0;
   width: 100%;
-  height: 400px;
 }
 
 .placeholder {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 400px;
-  color: #999;
+  color: #8c959f;
   font-size: 14px;
-  text-align: center;
-  line-height: 1.8;
 }
 
 .error-message {
   padding: 16px;
   background: #fff2f0;
   border: 1px solid #ffccc7;
-  border-radius: 4px;
-  color: #ff4d4f;
+  border-radius: 8px;
+  color: #cf222e;
   font-size: 13px;
+  margin-bottom: 16px;
 }
 </style>
