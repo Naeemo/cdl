@@ -186,118 +186,69 @@ async function run() {
   }
 }
 
+// 极简行解析器
 function compileCDL(source) {
-  // Remove comments
-  const cleanSource = source.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '')
+  const lines = source.split('\n')
+  let dataName = ''
+  let dataLines = []
+  let chartLines = []
+  let inData = false
+  let inChart = false
+  let braceCount = 0
   
-  // Parse Data block
-  const dataRegex = /@lang\(data\)\s+(\w+)\s*\{([\s\S]*?)\}(?=\s*$|\s*\n\s*Chart)/
-  const dataMatch = cleanSource.match(dataRegex)
-  
-  if (!dataMatch) {
-    // Try simpler approach - find Data block by counting braces
-    const dataStartIdx = cleanSource.indexOf('@lang(data)')
-    if (dataStartIdx === -1) {
-      return { success: false, error: '未找到数据定义' }
-    }
+  for (const rawLine of lines) {
+    const line = rawLine.trim()
     
-    const nameMatch = cleanSource.slice(dataStartIdx).match(/@lang\(data\)\s+(\w+)\s*\{/)
-    if (!nameMatch) {
-      return { success: false, error: '数据定义格式错误' }
-    }
-    
-    const dataName = nameMatch[1]
-    const openBraceIdx = dataStartIdx + cleanSource.slice(dataStartIdx).indexOf('{')
-    let braceCount = 1
-    let closeIdx = openBraceIdx + 1
-    
-    while (braceCount > 0 && closeIdx < cleanSource.length) {
-      if (cleanSource[closeIdx] === '{') braceCount++
-      if (cleanSource[closeIdx] === '}') braceCount--
-      if (braceCount > 0) closeIdx++
-    }
-    
-    if (braceCount !== 0) {
-      return { success: false, error: '数据定义不完整' }
-    }
-    
-    const dataContent = cleanSource.slice(openBraceIdx + 1, closeIdx).trim()
-    const lines = dataContent.split('\n').map(l => l.trim()).filter(l => l)
-    
-    if (lines.length < 2) {
-      return { success: false, error: '数据需要表头和数据行' }
-    }
-    
-    const headers = lines[0].split(',').map(h => h.trim())
-    const rows = lines.slice(1).map(line => {
-      const values = line.split(',').map(v => v.trim())
-      const row = {}
-      headers.forEach((h, i) => {
-        const val = values[i]
-        row[h] = isNaN(Number(val)) ? val : Number(val)
-      })
-      return row
-    })
-    
-    // Parse Chart block
-    const chartIdx = cleanSource.indexOf('Chart', closeIdx)
-    if (chartIdx === -1) {
-      return { success: false, error: '未找到 Chart 定义' }
-    }
-    
-    const chartOpenIdx = cleanSource.indexOf('{', chartIdx)
-    if (chartOpenIdx === -1) {
-      return { success: false, error: 'Chart 定义格式错误' }
-    }
-    
-    let chartBraceCount = 1
-    let chartCloseIdx = chartOpenIdx + 1
-    
-    while (chartBraceCount > 0 && chartCloseIdx < cleanSource.length) {
-      if (cleanSource[chartCloseIdx] === '{') chartBraceCount++
-      if (cleanSource[chartCloseIdx] === '}') chartBraceCount--
-      if (chartBraceCount > 0) chartCloseIdx++
-    }
-    
-    if (chartBraceCount !== 0) {
-      return { success: false, error: 'Chart 定义不完整' }
-    }
-    
-    const chartContent = cleanSource.slice(chartOpenIdx + 1, chartCloseIdx)
-    
-    const useMatch = chartContent.match(/use\s+(\w+)/)
-    if (!useMatch || useMatch[1] !== dataName) {
-      return { success: false, error: `Chart 必须使用数据源 ${dataName}` }
-    }
-    
-    const typeMatch = chartContent.match(/type\s+(\w+)/)
-    const chartType = typeMatch ? typeMatch[1] : 'line'
-    
-    const xMatch = chartContent.match(/x\s+(\w+)/)
-    const yMatch = chartContent.match(/y\s+(\w+)/)
-    
-    return {
-      success: true,
-      data: { name: dataName, headers, rows },
-      chart: {
-        type: chartType,
-        xField: xMatch?.[1] || headers[0],
-        yField: yMatch?.[1] || headers[1] || headers[0],
-        title: chartContent.match(/@title\s+"([^"]+)"/)?.[1],
-        style: chartContent.match(/@style\s+"([^"]+)"/)?.[1],
-        color: chartContent.match(/@color\s+"([^"]+)"/)?.[1]
+    // Data 开始
+    if (!inData && !inChart && line.startsWith('@lang(data)')) {
+      const m = line.match(/@lang\(data\)\s+(\w+)\s*\{/)
+      if (m) {
+        dataName = m[1]
+        inData = true
+        braceCount = line.split('{').length - 1 - (line.split('}').length - 1)
+        continue
       }
     }
+    
+    // Data 内部
+    if (inData && !inChart) {
+      braceCount += (line.match(/\{/g) || []).length
+      braceCount -= (line.match(/\}/g) || []).length
+      
+      if (braceCount <= 0) {
+        inData = false
+        continue
+      }
+      dataLines.push(line)
+      continue
+    }
+    
+    // Chart 开始
+    if (!inData && !inChart && line.startsWith('Chart')) {
+      inChart = true
+      braceCount = line.split('{').length - 1 - (line.split('}').length - 1)
+      if (braceCount <= 0 && line.includes('{')) braceCount = 1
+      continue
+    }
+    
+    // Chart 内部
+    if (inChart) {
+      braceCount += (line.match(/\{/g) || []).length
+      braceCount -= (line.match(/\}/g) || []).length
+      
+      if (braceCount <= 0) {
+        inChart = false
+        continue
+      }
+      chartLines.push(line)
+    }
   }
   
-  // Original regex approach
-  const dataName = dataMatch[1]
-  const dataLines = dataMatch[2].trim().split('\n').map(l => l.trim()).filter(l => l)
+  if (!dataName) return { success: false, error: '未找到数据定义' }
+  if (dataLines.length < 2) return { success: false, error: '数据需要表头和数据行' }
+  if (chartLines.length === 0) return { success: false, error: '未找到 Chart 定义' }
   
-  if (dataLines.length < 2) {
-    return { success: false, error: '数据需要表头和数据行' }
-  }
-  
+  // 解析数据
   const headers = dataLines[0].split(',').map(h => h.trim())
   const rows = dataLines.slice(1).map(line => {
     const values = line.split(',').map(v => v.trim())
@@ -308,35 +259,23 @@ function compileCDL(source) {
     return row
   })
   
-  // Find Chart after Data
-  const afterData = cleanSource.slice(cleanSource.indexOf(dataMatch[0]) + dataMatch[0].length)
-  const chartMatch = afterData.match(/Chart\s+(?:\w+\s+)?\{([\s\S]*?)\}(?=\s*$|\s*\n)/)
-  
-  if (!chartMatch) {
-    return { success: false, error: '未找到 Chart 定义' }
-  }
-  
-  const chartContent = chartMatch[1]
-  const useMatch = chartContent.match(/use\s+(\w+)/)
-  
+  // 解析 Chart
+  const chartText = chartLines.join('\n')
+  const useMatch = chartText.match(/use\s+(\w+)/)
   if (!useMatch || useMatch[1] !== dataName) {
     return { success: false, error: `Chart 必须使用数据源 ${dataName}` }
   }
-  
-  const typeMatch = chartContent.match(/type\s+(\w+)/)
-  const xMatch = chartContent.match(/x\s+(\w+)/)
-  const yMatch = chartContent.match(/y\s+(\w+)/)
   
   return {
     success: true,
     data: { name: dataName, headers, rows },
     chart: {
-      type: typeMatch?.[1] || 'line',
-      xField: xMatch?.[1] || headers[0],
-      yField: yMatch?.[1] || headers[1] || headers[0],
-      title: chartContent.match(/@title\s+"([^"]+)"/)?.[1],
-      style: chartContent.match(/@style\s+"([^"]+)"/)?.[1],
-      color: chartContent.match(/@color\s+"([^"]+)"/)?.[1]
+      type: chartText.match(/type\s+(\w+)/)?.[1] || 'line',
+      xField: chartText.match(/x\s+(\w+)/)?.[1] || headers[0],
+      yField: chartText.match(/y\s+(\w+)/)?.[1] || headers[1] || headers[0],
+      title: chartText.match(/@title\s+"([^"]+)"/)?.[1],
+      style: chartText.match(/@style\s+"([^"]+)"/)?.[1],
+      color: chartText.match(/@color\s+"([^"]+)"/)?.[1]
     }
   }
 }
@@ -402,11 +341,7 @@ function renderChartOption(data, chart) {
 
 function renderChart() {
   if (!chartRef.value || !echartsOption.value) return
-  
-  if (!chartInstance) {
-    chartInstance = echarts.init(chartRef.value)
-  }
-  
+  if (!chartInstance) chartInstance = echarts.init(chartRef.value)
   chartInstance.setOption(echartsOption.value, true)
 }
 
@@ -436,21 +371,12 @@ watch(echartsOption, () => nextTick(renderChart))
         <div class="header-actions">
           <select v-model="selectedExample" @change="loadExample" class="example-select">
             <option value="">示例</option>
-            <option v-for="ex in examples" :key="ex.name" :value="ex.name">
-              {{ ex.label }}
-            </option>
+            <option v-for="ex in examples" :key="ex.name" :value="ex.name">{{ ex.label }}</option>
           </select>
-          <button class="btn-refresh" @click="refresh" title="重新渲染">
-            <span class="icon">↻</span>
-          </button>
+          <button class="btn-refresh" @click="refresh" title="重新渲染"><span class="icon">↻</span></button>
         </div>
       </div>
-      <textarea
-        v-model="cdlCode"
-        class="code-editor"
-        placeholder="输入 CDL 代码..."
-        spellcheck="false"
-      />
+      <textarea v-model="cdlCode" class="code-editor" placeholder="输入 CDL 代码..." spellcheck="false" />
     </div>
     
     <div class="preview-pane">
@@ -458,7 +384,6 @@ watch(echartsOption, () => nextTick(renderChart))
         <span class="title">预览</span>
         <div v-if="loading" class="loading-dot"></div>
       </div>
-      
       <div class="preview-content">
         <div v-if="error" class="error-message">{{ error }}</div>
         <div v-else-if="echartsOption" ref="chartRef" class="chart-container"></div>
@@ -470,192 +395,30 @@ watch(echartsOption, () => nextTick(renderChart))
 
 <style scoped>
 * { box-sizing: border-box; }
-
-.playground {
-  display: flex;
-  width: 100%;
-  height: 600px;
-  background: #0d1117;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid #30363d;
-}
-
-.editor-pane {
-  width: 50%;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  background: #0d1117;
-  border-right: 1px solid #30363d;
-}
-
-.pane-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  background: #161b22;
-  border-bottom: 1px solid #30363d;
-  height: 40px;
-  flex-shrink: 0;
-}
-
+.playground { display: flex; width: 100%; height: 600px; background: #0d1117; border-radius: 8px; overflow: hidden; border: 1px solid #30363d; }
+.editor-pane { width: 50%; min-width: 0; display: flex; flex-direction: column; background: #0d1117; border-right: 1px solid #30363d; }
+.pane-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #161b22; border-bottom: 1px solid #30363d; height: 40px; flex-shrink: 0; }
 .header-left { display: flex; align-items: center; gap: 8px; }
-
-.title {
-  font-weight: 600;
-  font-size: 12px;
-  color: #c9d1d9;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.dot {
-  width: 6px;
-  height: 6px;
-  background: #58a6ff;
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
+.title { font-weight: 600; font-size: 12px; color: #c9d1d9; text-transform: uppercase; letter-spacing: 0.5px; }
+.dot { width: 6px; height: 6px; background: #58a6ff; border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 .header-actions { display: flex; align-items: center; gap: 6px; }
-
-.example-select {
-  padding: 4px 8px;
-  background: #21262d;
-  border: 1px solid #30363d;
-  border-radius: 4px;
-  font-size: 12px;
-  color: #c9d1d9;
-  cursor: pointer;
-  outline: none;
-}
-
+.example-select { padding: 4px 8px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; font-size: 12px; color: #c9d1d9; cursor: pointer; outline: none; }
 .example-select:hover { border-color: #58a6ff; }
-
-.btn-refresh {
-  padding: 4px 8px;
-  background: #21262d;
-  border: 1px solid #30363d;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
-  color: #c9d1d9;
-  transition: all 0.2s;
-}
-
-.btn-refresh:hover {
-  background: #30363d;
-  border-color: #58a6ff;
-}
-
-.btn-refresh .icon {
-  display: inline-block;
-  transition: transform 0.3s;
-}
-
+.btn-refresh { padding: 4px 8px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; cursor: pointer; font-size: 13px; color: #c9d1d9; transition: all 0.2s; }
+.btn-refresh:hover { background: #30363d; border-color: #58a6ff; }
+.btn-refresh .icon { display: inline-block; transition: transform 0.3s; }
 .btn-refresh:hover .icon { transform: rotate(180deg); }
-
-.code-editor {
-  flex: 1;
-  padding: 12px;
-  border: none;
-  outline: none;
-  font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', monospace;
-  font-size: 13px;
-  line-height: 1.5;
-  resize: none;
-  background: #0d1117;
-  color: #c9d1d9;
-  tab-size: 4;
-  min-height: 0;
-}
-
+.code-editor { flex: 1; padding: 12px; border: none; outline: none; font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', monospace; font-size: 13px; line-height: 1.5; resize: none; background: #0d1117; color: #c9d1d9; tab-size: 4; min-height: 0; }
 .code-editor::placeholder { color: #484f58; }
-
-.preview-pane {
-  width: 50%;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  background: #ffffff;
-}
-
-.preview-pane .pane-header {
-  background: #f6f8fa;
-  border-bottom: 1px solid #d0d7de;
-}
-
+.preview-pane { width: 50%; min-width: 0; display: flex; flex-direction: column; background: #ffffff; }
+.preview-pane .pane-header { background: #f6f8fa; border-bottom: 1px solid #d0d7de; }
 .preview-pane .title { color: #24292f; }
-
-.loading-dot {
-  width: 6px;
-  height: 6px;
-  background: #0969da;
-  border-radius: 50%;
-  animation: blink 1s infinite;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 1; }
-}
-
-.preview-content {
-  flex: 1;
-  padding: 16px;
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.chart-container {
-  flex: 1;
-  min-height: 200px;
-  width: 100%;
-}
-
-.placeholder {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #8c959f;
-  font-size: 13px;
-}
-
-.error-message {
-  padding: 12px;
-  background: #fff2f0;
-  border: 1px solid #ffccc7;
-  border-radius: 6px;
-  color: #cf222e;
-  font-size: 12px;
-  margin-bottom: 12px;
-}
-
-@media (max-width: 768px) {
-  .playground {
-    flex-direction: column;
-    height: 800px;
-  }
-  
-  .editor-pane,
-  .preview-pane {
-    width: 100%;
-    height: 50%;
-  }
-  
-  .editor-pane {
-    border-right: none;
-    border-bottom: 1px solid #30363d;
-  }
-}
+.loading-dot { width: 6px; height: 6px; background: #0969da; border-radius: 50%; animation: blink 1s infinite; }
+@keyframes blink { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+.preview-content { flex: 1; padding: 16px; overflow: auto; display: flex; flex-direction: column; min-height: 0; }
+.chart-container { flex: 1; min-height: 200px; width: 100%; }
+.placeholder { flex: 1; display: flex; align-items: center; justify-content: center; color: #8c959f; font-size: 13px; }
+.error-message { padding: 12px; background: #fff2f0; border: 1px solid #ffccc7; border-radius: 6px; color: #cf222e; font-size: 12px; margin-bottom: 12px; }
+@media (max-width: 768px) { .playground { flex-direction: column; height: 800px; } .editor-pane, .preview-pane { width: 100%; height: 50%; } .editor-pane { border-right: none; border-bottom: 1px solid #30363d; } }
 </style>
