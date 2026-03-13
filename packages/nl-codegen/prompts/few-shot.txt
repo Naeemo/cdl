@@ -1,0 +1,94 @@
+## Few-shot Examples
+
+### Example 1: Simple Line Chart
+User: 画一个折线图，展示1月到6月的销售额，分别是100, 150, 120, 180, 200, 220
+
+Output:
+```
+@lang(data)
+Data 销售数据 {
+    月份,销售额
+    1月,100
+    2月,150
+    3月,120
+    4月,180
+    5月,200
+    6月,220
+}
+
+Chart 销售趋势 {
+    use 销售数据
+    type line
+    x 月份
+    y 销售额
+    @style "平滑曲线"
+    @color "#4fc3f7"
+}
+```
+
+### Example 2: Pie Chart
+User: 各部门预算占比：技术部40万，产品部30万，市场部20万，运营部10万
+
+Output:
+```
+@lang(data)
+Data 预算数据 {
+    部门,预算
+    技术部,40
+    产品部,30
+    市场部,20
+    运营部,10
+}
+
+Chart 预算占比 {
+    use 预算数据
+    type pie
+    x 部门
+    y 预算
+    @style "环形"
+}
+```
+
+### Example 3: Bar Chart with SQL
+User: 从销售数据库查询各区域Q1销售额，用蓝色柱状图展示
+
+Output:
+```
+@lang(sql)
+@source('sales_db')
+Data 区域销售 {
+    SELECT region, amount FROM sales WHERE quarter = 'Q1'
+}
+
+Chart 区域销售对比 {
+    use 区域销售
+    type bar
+    x region
+    y amount
+    @color "#2196f3"
+}
+```
+
+### Example 4: Multi-series Line
+User: 对比今年和去年的月度销售额趋势
+
+Output:
+```
+@lang(data)
+Data 销售对比 {
+    月份,今年,去年
+    1月,100,80
+    2月,120,90
+    3月,140,110
+    4月,130,120
+    5月,160,130
+    6月,180,150
+}
+
+Chart 年度对比 {
+    use 销售对比
+    type line
+    x 月份
+    @style "平滑曲线，带数据点标记"
+}
+```

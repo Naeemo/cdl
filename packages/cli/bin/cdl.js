@@ -20,12 +20,18 @@ Commands:
   render <file.cdl>      Render CDL to ECharts option JSON
   validate <file.cdl>    Validate CDL syntax
   init                   Create a sample CDL file
+  nl "<description>"     Generate CDL from natural language
   help                   Show this help message
+
+NL Command Options:
+  cdl nl "show sales trend" --api-key <key>
+  cdl nl "pie chart of budget" --output output.cdl
 
 Examples:
   cdl compile example.cdl > output.json
   cdl render example.cdl > echarts.json
   cdl validate example.cdl
+  cdl nl "line chart of monthly sales, blue color" --api-key $KIMI_API_KEY
 `);
 }
 
@@ -120,6 +126,67 @@ Chart 月度销售 {
   console.log('Created example.cdl');
 }
 
+async function nlCommand(args) {
+  const description = args[1];
+  if (!description) {
+    console.error('Error: Please provide a description');
+    console.log('Usage: cdl nl "<description>" --api-key <key>');
+    process.exit(1);
+  }
+
+  // Parse options
+  let apiKey = process.env.KIMI_API_KEY || process.env.OPENAI_API_KEY;
+  let outputFile = null;
+  let model = 'kimi-k2p5';
+
+  for (let i = 2; i < args.length; i++) {
+    if (args[i] === '--api-key' && args[i + 1]) {
+      apiKey = args[i + 1];
+      i++;
+    } else if (args[i] === '--output' && args[i + 1]) {
+      outputFile = args[i + 1];
+      i++;
+    } else if (args[i] === '--model' && args[i + 1]) {
+      model = args[i + 1];
+      i++;
+    }
+  }
+
+  if (!apiKey) {
+    console.error('Error: API key required. Set KIMI_API_KEY env var or use --api-key');
+    process.exit(1);
+  }
+
+  console.log('Generating CDL from natural language...');
+  console.log(`Description: ${description}`);
+
+  try {
+    // Dynamic import for ESM module
+    const { nlToCDL } = await import('@cdl/nl-codegen');
+    const result = await nlToCDL(description, {
+      apiKey,
+      model,
+    });
+
+    if (result.success) {
+      if (outputFile) {
+        fs.writeFileSync(outputFile, result.cdl);
+        console.log(`✓ Generated CDL saved to: ${outputFile}`);
+      } else {
+        console.log('\n--- Generated CDL ---\n');
+        console.log(result.cdl);
+        console.log('\n--- End ---');
+      }
+    } else {
+      console.error(`✗ Error: ${result.error}`);
+      process.exit(1);
+    }
+  } catch (error) {
+    console.error(`✗ Error: ${error.message}`);
+    process.exit(1);
+  }
+}
+
 switch (command) {
   case 'compile':
     compileFile(args[1]);
@@ -132,6 +199,9 @@ switch (command) {
     break;
   case 'init':
     initSample();
+    break;
+  case 'nl':
+    nlCommand(args);
     break;
   case 'help':
   case '--help':
