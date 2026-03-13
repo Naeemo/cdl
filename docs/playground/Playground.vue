@@ -1,16 +1,7 @@
 <template>
-  <div class="playground-container">
-    <!-- 简单导航栏 -->
-    <div class="nav-bar">
-      <a href="/cdl/" class="nav-logo">← CDL</a>
-      <span class="nav-title">Playground</span>
-      <a href="/cdl/guide/" class="nav-link">文档</a>
-      <a href="/cdl/examples/" class="nav-link">示例</a>
-    </div>
-    
-    <div class="playground">
-      <!-- 左侧编辑器 -->
-      <div class="editor-pane">
+  <div class="playground">
+    <!-- 左侧编辑器 -->
+    <div class="editor-pane">
       <div class="pane-header">
         <div class="header-left">
           <span class="title">CDL</span>
@@ -54,7 +45,6 @@
       </div>
     </div>
   </div>
-</div>
 </template>
 
 <script setup>
@@ -423,64 +413,14 @@ watch(echartsOption, () => {
   box-sizing: border-box;
 }
 
-.playground-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: #0d1117;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-}
-
-.nav-bar {
-  height: 48px;
-  background: #161b22;
-  border-bottom: 1px solid #30363d;
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  gap: 24px;
-  flex-shrink: 0;
-}
-
-.nav-logo {
-  font-weight: 600;
-  font-size: 16px;
-  color: #58a6ff;
-  text-decoration: none;
-}
-
-.nav-logo:hover {
-  color: #79c0ff;
-}
-
-.nav-title {
-  font-size: 14px;
-  color: #8b949e;
-  flex: 1;
-}
-
-.nav-link {
-  font-size: 13px;
-  color: #c9d1d9;
-  text-decoration: none;
-  padding: 4px 12px;
-  border-radius: 6px;
-}
-
-.nav-link:hover {
-  background: #30363d;
-  color: #fff;
-}
-
 .playground {
   display: flex;
-  flex: 1;
-  min-height: 0;
+  width: 100%;
+  height: 600px;
+  background: #0d1117;
+  border-radius: 8px;
   overflow: hidden;
+  border: 1px solid #30363d;
 }
 
 /* 左侧面板 */
@@ -496,10 +436,11 @@ watch(echartsOption, () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
+  padding: 8px 12px;
   background: #161b22;
   border-bottom: 1px solid #30363d;
-  height: 44px;
+  height: 40px;
+  flex-shrink: 0;
 }
 
 .header-left {
@@ -510,7 +451,7 @@ watch(echartsOption, () => {
 
 .title {
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12px;
   color: #c9d1d9;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -532,14 +473,14 @@ watch(echartsOption, () => {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .example-select {
-  padding: 4px 10px;
+  padding: 4px 8px;
   background: #21262d;
   border: 1px solid #30363d;
-  border-radius: 6px;
+  border-radius: 4px;
   font-size: 12px;
   color: #c9d1d9;
   cursor: pointer;
@@ -551,12 +492,12 @@ watch(echartsOption, () => {
 }
 
 .btn-refresh {
-  padding: 6px 10px;
+  padding: 4px 8px;
   background: #21262d;
   border: 1px solid #30363d;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   color: #c9d1d9;
   transition: all 0.2s;
 }
@@ -577,16 +518,17 @@ watch(echartsOption, () => {
 
 .code-editor {
   flex: 1;
-  padding: 16px;
+  padding: 12px;
   border: none;
   outline: none;
   font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', monospace;
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 13px;
+  line-height: 1.5;
   resize: none;
   background: #0d1117;
   color: #c9d1d9;
   tab-size: 4;
+  min-height: 0;
 }
 
 .code-editor::placeholder {
@@ -611,8 +553,8 @@ watch(echartsOption, () => {
 }
 
 .loading-dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   background: #0969da;
   border-radius: 50%;
   animation: blink 1s infinite;
@@ -625,15 +567,16 @@ watch(echartsOption, () => {
 
 .preview-content {
   flex: 1;
-  padding: 24px;
+  padding: 16px;
   overflow: auto;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .chart-container {
   flex: 1;
-  min-height: 0;
+  min-height: 200px;
   width: 100%;
 }
 
@@ -643,16 +586,34 @@ watch(echartsOption, () => {
   align-items: center;
   justify-content: center;
   color: #8c959f;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .error-message {
-  padding: 16px;
+  padding: 12px;
   background: #fff2f0;
   border: 1px solid #ffccc7;
-  border-radius: 8px;
+  border-radius: 6px;
   color: #cf222e;
-  font-size: 13px;
-  margin-bottom: 16px;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 768px) {
+  .playground {
+    flex-direction: column;
+    height: 800px;
+  }
+  
+  .editor-pane,
+  .preview-pane {
+    width: 100%;
+    height: 50%;
+  }
+  
+  .editor-pane {
+    border-right: none;
+    border-bottom: 1px solid #30363d;
+  }
 }
 </style>
