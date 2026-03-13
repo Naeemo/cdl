@@ -1,0 +1,80 @@
+{
+  "Data Definition": {
+    "prefix": "data",
+    "body": [
+      "@lang(data)",
+      "Data ${1:DataName} {",
+      "    ${2:column1},${3:column2}",
+      "    ${4:value1},${5:value2}",
+      "}",
+      ""
+    ],
+    "description": "Create a data definition block"
+  },
+  "SQL Data Source": {
+    "prefix": "datasql",
+    "body": [
+      "@lang(sql)",
+      "@source('${1:database}')",
+      "Data ${2:DataName} {",
+      "    ${3:SELECT * FROM table}",
+      "}",
+      ""
+    ],
+    "description": "Create a SQL data source"
+  },
+  "Chart Definition": {
+    "prefix": "chart",
+    "body": [
+      "Chart ${1:ChartName} {",
+      "    use ${2:DataName}",
+      "    type ${3|line,bar,pie,scatter,area,radar,heatmap|}",
+      "    x ${4:xField}",
+      "    y ${5:yField}",
+      "}",
+      ""
+    ],
+    "description": "Create a chart definition"
+  },
+  "Styled Chart": {
+    "prefix": "chartstyled",
+    "body": [
+      "Chart ${1:ChartName} {",
+      "    use ${2:DataName}",
+      "    type ${3|line,bar,pie,scatter,area,radar,heatmap|}",
+      "    x ${4:xField}",
+      "    y ${5:yField}",
+      "    ",
+      "    @style \"${6:平滑曲线}\"",
+      "    @color \"${7:#4fc3f7}\"",
+      "    @title \"${8:图表标题}\"",
+      "}",
+      ""
+    ],
+    "description": "Create a styled chart with hints"
+  },
+  "Complete Example": {
+    "prefix": "example",
+    "body": [
+      "@lang(data)",
+      "Data ${1:SalesData} {",
+      "    month,amount",
+      "    1月,100",
+      "    2月,150",
+      "    3月,200",
+      "}",
+      "",
+      "Chart ${2:月度销售} {",
+      "    use ${1:SalesData}",
+      "    type ${3|line,bar,pie|}",
+      "    x month",
+      "    y amount",
+      "    ",
+      "    @style \"平滑曲线\"",
+      "    @color \"#4fc3f7\"",
+      "    @title \"月度销售趋势\"",
+      "}"
+    ],
+    "description": "Complete data + chart example"
+  }
+}

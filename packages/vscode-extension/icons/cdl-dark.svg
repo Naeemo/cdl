@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <rect x="10" y="60" width="20" height="30" fill="#81d4fa" rx="4"/>
+  <rect x="40" y="40" width="20" height="50" fill="#4fc3f7" rx="4"/>
+  <rect x="70" y="20" width="20" height="70" fill="#29b6f6" rx="4"/>
+  <text x="50" y="95" font-family="Arial" font-size="10" fill="#fff" text-anchor="middle">CDL</text>
+</svg>

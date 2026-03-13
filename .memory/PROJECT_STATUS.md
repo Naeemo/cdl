@@ -1,6 +1,6 @@
 # CDL 项目状态
 
-## 当前状态
+## 当前状态 (2026-03-13)
 
 ### 已完成 ✅
 
@@ -19,92 +19,41 @@
   - ✅ @提示层解析
   - ✅ 输出带类型的 JSON AST
 
-#### 3. 示例片段
+#### 3. 渲染器 v0.1
+- 文件: `packages/renderer/src/index.ts`
+- 支持 8 种图表类型: line, bar, pie, scatter, area, combo, radar, heatmap
+- 转换为 ECharts 配置
+
+#### 4. 示例片段
 - 数量: **54 个**
 - 覆盖: SQL(20), DAX(12), 裸数据(22)
-- 图表: line, bar, pie, scatter, area, combo, radar, heatmap, gauge 等
 
-### 编译器输出示例
+#### 5. 自然语言生成 (NL-to-CDL)
+- 包: `packages/nl-codegen/`
+- CLI: `cdl nl "描述"`
+- Playground 集成 ✅
+- Prompt 模板 + few-shot 示例
 
-```bash
-$ npx ts-node compiler.ts examples/sql/line/01_monthly_sales.cdl
-```
+#### 6. 生态工具
+- CLI: `packages/cli/bin/cdl.js`
+- Playground: 在线编辑 + 实时预览
+- 文档站点: VitePress
 
-输出:
-```json
-{
-  "data": [{
-    "type": "data",
-    "name": "MonthlySales",
-    "lang": "sql",
-    "config": { "source": "sales_db" },
-    "query": "SELECT ..."
-  }],
-  "charts": [{
-    "type": "chart",
-    "chartType": "line",
-    "dataSources": ["MonthlySales"],
-    "x": "month",
-    "y": "sales",
-    "hints": {
-      "style": "平滑曲线，带数据点标记",
-      "color": "#4fc3f7"
-    }
-  }]
-}
-```
+### 待完成
 
-### 类型定义概览
+#### 高优先级
+- [ ] **VS Code 插件** - 语法高亮、智能提示、预览
+- [ ] **更多 NL 示例** - 扩展到 20+ 场景
 
-```typescript
-// 数据源
-interface DataDefinition {
-  type: 'data';
-  name: string;
-  lang: 'sql' | 'dax' | 'data';
-  config: { source?, timeout?, cache? };
-  query: string;
-}
+#### 中优先级  
+- [ ] **D3 渲染器** - 除了 ECharts 外的选择
+- [ ] **服务端渲染** - 生成图片/PDF
 
-// 图表
-interface ChartDefinition {
-  type: 'chart';
-  chartType: ChartType;
-  dataSources: string[];
-  x?: string;
-  y?: string;
-  group?: string;
-  stack?: string | boolean;
-  hints: { style?, color?, animation?, title? };
-}
+#### 低优先级
+- [ ] **数据连接池** - SQL 数据源连接管理
+- [ ] **图表模板市场** - 分享和复用 CDL 模板
 
-// 编译结果
-interface CompileResult {
-  success: boolean;
-  result?: CDLFile;
-  errors: CompileError[];
-}
-```
-
----
-
-## 待完成
-
-### Phase 3: 代码生成
-- [ ] CDL → ECharts 配置生成器
-- [ ] CDL → D3 配置生成器
-- [ ] 服务端渲染支持
-
-### Phase 4: AI 集成
-- [ ] 自然语言 → CDL 转换
-- [ ] CDL 解释器/文档生成
-
-### Phase 5: 生态工具
-- [ ] VS Code 插件
-- [ ] 在线编辑器
-- [ ] 预览工具
-
----
-
-## 最后更新
-2026-03-11
+### 最近完成
+- 2026-03-13: 修复 GitHub Actions CI (npm 替换 pnpm)
+- 2026-03-13: 完成 NL-to-CDL Playground 集成
+- 2026-03-12: 完成 NL-to-CDL CLI 和核心包

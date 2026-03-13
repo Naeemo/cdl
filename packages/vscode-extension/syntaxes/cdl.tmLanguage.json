@@ -1,0 +1,111 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "CDL",
+  "scopeName": "source.cdl",
+  "fileTypes": [
+    ".cdl"
+  ],
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#annotations"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#identifiers"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.cdl",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.cdl",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "annotations": {
+      "patterns": [
+        {
+          "name": "meta.annotation.cdl",
+          "begin": "(@)(lang|source|style|color|title|animation)",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.annotation.cdl"
+            },
+            "2": {
+              "name": "storage.type.annotation.cdl"
+            }
+          },
+          "end": "$",
+          "patterns": [
+            {
+              "include": "#strings"
+            },
+            {
+              "include": "#parentheses"
+            }
+          ]
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.cdl",
+          "match": "\\b(Data|Chart)\\b"
+        },
+        {
+          "name": "keyword.other.cdl",
+          "match": "\\b(use|type|x|y|group|stack)\\b"
+        },
+        {
+          "name": "constant.language.chart-type.cdl",
+          "match": "\\b(line|bar|pie|scatter|area|combo|radar|heatmap|gauge)\\b"
+        },
+        {
+          "name": "constant.language.query-lang.cdl",
+          "match": "\\b(sql|dax|data)\\b"
+        }
+      ]
+    },
+    "strings": {
+      "name": "string.quoted.double.cdl",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.cdl",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "numbers": {
+      "name": "constant.numeric.cdl",
+      "match": "\\b\\d+(\\.\\d+)?\\b"
+    },
+    "identifiers": {
+      "name": "variable.other.cdl",
+      "match": "[a-zA-Z_][a-zA-Z0-9_]*"
+    },
+    "parentheses": {
+      "name": "punctuation.parentheses.cdl",
+      "match": "[()]"
+    }
+  }
+}
