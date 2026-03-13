@@ -16,14 +16,28 @@ import {
   CompileResult,
   CompileError,
 } from './types';
+import { validateWithHints, formatErrorForCLI, FriendlyError } from './error-hints';
 
 // ===== 公开 API =====
 
 /**
- * 编译 CDL 源码为 AST
+ * 编译 CDL 源码为 AST（带友好错误提示）
  */
 export function compile(source: string): CompileResult {
-  const errors: CompileError[] = [];
+  // 先进行静态分析检查
+  const hints = validateWithHints(source);
+  const errors: CompileError[] = hints.map(h => ({
+    line: h.line,
+    column: h.column,
+    message: h.message,
+    severity: h.severity
+  }));
+  
+  // 如果有严重错误，直接返回
+  const criticalErrors = hints.filter(h => h.severity === 'error');
+  if (criticalErrors.length > 0) {
+    return { success: false, errors };
+  }
   
   try {
     // Step 1: Strip comments
@@ -31,21 +45,25 @@ export function compile(source: string): CompileResult {
     
     // Step 2: Parse
     const file = parseCDL(cleanSource, errors);
+    
+    // 合并错误
+    const allErrors = [...errors, ...hints.filter(h => h.severity === 'warning')];
 
     if (errors.length > 0) {
-      return { success: false, errors };
+      return { success: false, errors: allErrors };
     }
 
-    return { success: true, result: file, errors: [] };
+    return { success: true, result: file, errors: allErrors };
   } catch (e) {
+    const error: CompileError = {
+      line: 0,
+      column: 0,
+      message: e instanceof Error ? e.message : 'Unknown error',
+      severity: 'error',
+    };
     return {
       success: false,
-      errors: [{
-        line: 0,
-        column: 0,
-        message: e instanceof Error ? e.message : 'Unknown error',
-        severity: 'error',
-      }],
+      errors: [error],
     };
   }
 }
@@ -357,10 +375,18 @@ if (require.main === module) {
   if (result.success) {
     console.log(JSON.stringify(result.result, null, 2));
   } else {
-    console.error('Compilation errors:');
-    result.errors.forEach(e => {
-      console.error(`  Line ${e.line}, Col ${e.column}: ${e.message}`);
+    console.error('\n❌ Compilation failed with errors:\n');
+    result.errors.forEach((e, i) => {
+      const friendly = formatErrorForCLI({
+        line: e.line,
+        column: e.column,
+        message: e.message,
+        severity: e.severity,
+        code: 'ERROR_' + (i + 1)
+      }, source);
+      console.error(friendly);
     });
+    console.error(`\n💡 Tip: Run with --verbose for more details`);
     process.exit(1);
   }
 }
