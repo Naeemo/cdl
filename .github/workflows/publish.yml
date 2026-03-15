@@ -1,0 +1,80 @@
+name: Publish to NPM
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Install dependencies
+      run: npm install -g pnpm@8.14.1
+
+    - name: Build and publish packages
+      env:
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      run: |
+        # Set up npm auth
+        echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+
+        # Install root dependencies
+        pnpm install --frozen-lockfile=false
+
+        # Build and publish each package
+        echo "Publishing CDL packages to NPM..."
+
+        # Compiler
+        echo "📦 Publishing @cdl/compiler..."
+        cd packages/compiler
+        pnpm install
+        pnpm run build
+        pnpm publish --no-verify-access --access public
+        cd ../..
+
+        # Renderer ECharts
+        echo "📦 Publishing @cdl/renderer-echarts..."
+        cd packages/renderer
+        pnpm install
+        pnpm run build
+        pnpm publish --no-verify-access --access public
+        cd ../..
+
+        # CLI
+        echo "📦 Publishing @cdl/cli..."
+        cd packages/cli
+        pnpm install
+        # CLI doesn't need build, just ensure dependencies are linked
+        pnpm publish --no-verify-access --access public
+        cd ../..
+
+        echo "✅ All packages published successfully!"
+
+    - name: Create GitHub Release Comment
+      if: github.event_name == 'release'
+      run: |
+        echo "🎉 CDL v${{ github.event.release.tag_name }} packages published to NPM!"
+        echo ""
+        echo "📦 Published packages:"
+        echo "  - @cdl/compiler"
+        echo "  - @cdl/renderer-echarts"
+        echo "  - @cdl/cli"
+        echo ""
+        echo "🚀 Installation:"
+        echo "  npm install @cdl/compiler @cdl/renderer-echarts @cdl/cli"
