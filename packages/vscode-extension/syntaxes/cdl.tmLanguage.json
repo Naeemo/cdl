@@ -43,7 +43,7 @@
       "patterns": [
         {
           "name": "meta.annotation.cdl",
-          "begin": "(@)(lang|source|style|color|title|animation)",
+          "begin": "(@)(lang|source|style|color|title|animation|theme|interaction)",
           "beginCaptures": {
             "1": {
               "name": "punctuation.definition.annotation.cdl"
@@ -75,12 +75,20 @@
           "match": "\\b(use|type|x|y|group|stack)\\b"
         },
         {
+          "name": "keyword.other.cdl",
+          "match": "\\b(series|axis)\\b"
+        },
+        {
           "name": "constant.language.chart-type.cdl",
-          "match": "\\b(line|bar|pie|scatter|area|combo|radar|heatmap|gauge)\\b"
+          "match": "\\b(line|bar|pie|scatter|area|combo|radar|heatmap|gauge|candlestick|boxplot|sankey|treemap|wordcloud|liquid|map)\\b"
         },
         {
           "name": "constant.language.query-lang.cdl",
           "match": "\\b(sql|dax|data)\\b"
+        },
+        {
+          "name": "keyword.other.cdl",
+          "match": "\\b(left|right|top|bottom|x2|y2)\\b"
         }
       ]
     },

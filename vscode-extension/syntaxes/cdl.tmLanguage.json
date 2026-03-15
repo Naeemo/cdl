@@ -9,7 +9,8 @@
     { "include": "#keywords" },
     { "include": "#strings" },
     { "include": "#numbers" },
-    { "include": "#identifiers" }
+    { "include": "#identifiers" },
+    { "include": "#v06-features" }
   ],
   "repository": {
     "comments": {
@@ -29,7 +30,7 @@
       "patterns": [
         {
           "name": "meta.annotation.cdl",
-          "match": "(@(lang|source|timeout|cache|style|color|animation|interaction|title|layout))\\s*(\\([^)]*\\))?",
+          "match": "(@(lang|source|timeout|cache|style|color|animation|interaction|title|subtitle|layout|theme|grid))\\s*(\\([^)]*\\))?",
           "captures": {
             "1": { "name": "storage.modifier.cdl" },
             "3": { "name": "meta.annotation.parameters.cdl" }
@@ -49,7 +50,27 @@
         },
         {
           "name": "keyword.other.charttype.cdl",
-          "match": "\\b(line|bar|pie|scatter|area|radar|heatmap|combo|gauge|candlestick|boxplot)\\b"
+          "match": "\\b(line|bar|pie|scatter|area|radar|heatmap|combo|gauge|candlestick|boxplot|sankey|treemap|wordcloud|liquid|map)\\b"
+        }
+      ]
+    },
+    "v06-features": {
+      "patterns": [
+        {
+          "name": "keyword.control.v06.cdl",
+          "match": "^##\\s+(series|axis)\\b"
+        },
+        {
+          "name": "support.type.axis-position.cdl",
+          "match": "\\b(x|y|y2|x2|left|right|top|bottom)\\b"
+        },
+        {
+          "name": "support.constant.axis-type.cdl",
+          "match": "\\b(category|value|time|log)\\b"
+        },
+        {
+          "name": "support.type.series-style.cdl",
+          "match": "\\b(solid|dashed|smooth|marker)\\b"
         }
       ]
     },

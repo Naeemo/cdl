@@ -2,6 +2,37 @@
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import * as echarts from 'echarts'
 
+// 响应式布局状态
+const layoutMode = ref('horizontal')
+const isMobile = ref(false)
+
+const checkBreakpoint = () => {
+  const width = window.innerWidth
+  isMobile.value = width < 768
+  if (isMobile.value && layoutMode.value === 'horizontal') {
+    layoutMode.value = 'vertical'
+  }
+}
+
+onMounted(() => {
+  checkBreakpoint()
+  window.addEventListener('resize', checkBreakpoint)
+  
+  const saved = localStorage.getItem('cdl-playground-layout')
+  if (saved && ['horizontal', 'vertical'].includes(saved)) {
+    layoutMode.value = saved
+  }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkBreakpoint)
+})
+
+const toggleLayout = () => {
+  layoutMode.value = layoutMode.value === 'horizontal' ? 'vertical' : 'horizontal'
+  localStorage.setItem('cdl-playground-layout', layoutMode.value)
+}
+
 // 从 URL 参数或本地存储加载代码
 function getInitialCode() {
   // 1. 优先从 URL 参数加载
@@ -19,27 +50,37 @@ function getInitialCode() {
   const saved = localStorage.getItem('cdl-playground-code')
   if (saved) return saved
   
-  // 3. 默认示例
+  // 3. 默认示例 - v0.6 combo 图表
   return `@lang(data)
 SalesData {
-    month,sales
-    1月,100
-    2月,150
-    3月,200
-    4月,180
-    5月,220
+    month,sales,profit
+    1月,120,15
+    2月,150,18
+    3月,180,22
 }
 
-Chart 月度销售 {
-    use SalesData
-    type line
-    x month
-    y sales
-    
-    @style "平滑曲线"
-    @color "#4fc3f7"
-    @title "月度销售趋势"
-}`
+# 月度销售分析
+
+## combo
+
+## series
+| field | as | type | color | axis | style |
+| --- | --- | --- | --- | --- | --- |
+| sales | 销售额(万元) | bar | #4fc3f7 | left | solid |
+| profit | 利润(万元) | line | #ff9800 | right | smooth |
+
+## axis y
+min: 0
+max: 200
+
+## axis y2
+min: 0
+max: 50
+labelFormatter: "${value}%"
+
+@title "销售额 vs 利润"
+@color "#4fc3f7"
+@interaction "tooltip:shared zoom:inside"`
 }
 
 const cdlCode = ref(getInitialCode())
@@ -64,6 +105,9 @@ const examples = [
   { name: 'scatter', label: '⚪ 散点' },
   { name: 'area', label: '🌊 面积' },
   { name: 'radar', label: '🕸️ 雷达' },
+  { name: 'combo', label: '🔀 组合图(v0.6)' },
+  { name: 'multi-axis', label: '📏 多轴(v0.6)' },
+  { name: 'interaction', label: '🎮 交互(v0.6)' }
 ]
 
 const exampleCodes = {
@@ -158,7 +202,91 @@ Chart {
     x skill
     y score
     @color "#9b59b6"
-}`
+}`,
+  combo: `@lang(data)
+SalesData {
+    month,sales,profit
+    1月,120,15
+    2月,150,18
+    3月,180,22
+}
+
+# 月度销售分析
+
+## combo
+
+## series
+| field | as | type | color | axis | style |
+| --- | --- | --- | --- | --- | --- |
+| sales | 销售额(万元) | bar | #4fc3f7 | left | solid |
+| profit | 利润(万元) | line | #ff9800 | right | smooth |
+
+## axis y
+min: 0
+max: 200
+
+## axis y2
+min: 0
+max: 50
+
+@title "销售额 vs 利润"
+@interaction "tooltip:shared zoom:inside"`,
+  'multi-axis': `@lang(data)
+TrafficData {
+    date,visits,conversions
+    1日,1000,50
+    2日,1200,65
+    3日,1100,58
+}
+
+# 流量转化分析
+
+## combo
+
+## series
+| field | as | type | color | axis |
+| --- | --- | --- | --- | --- |
+| visits | 访问量 | bar | #4fc3f7 | left |
+| conversions | 转化数 | line | #ff9800 | right |
+
+## axis x
+labelRotate: 45
+
+## axis y
+min: 0
+max: 1500
+
+## axis y2
+min: 0
+max: 100
+position: right
+
+@title "流量与转化"
+@interaction "zoom:slider"`,
+  interaction: `@lang(data)
+GrowthData {
+    month,users,revenue
+    1月,100,50
+    2月,150,75
+    3月,220,110
+    4月,300,150
+}
+
+# 用户增长与收入
+
+## combo
+
+## series
+| field | as | type | color |
+| --- | --- | --- | --- |
+| users | 用户数 | line | #4fc3f7 |
+| revenue | 收入(万元) | bar | #ff9800 |
+
+@title "增长趋势"
+@interaction "tooltip:shared brush:true zoom:inside"
+
+## axis y
+splitLine: false`
 }
 
 let debounceTimer = null
@@ -538,12 +666,15 @@ watch(echartsOption, () => nextTick(renderChart))
 </script>
 
 <template>
-  <div class="playground">
+  <div class="playground" :class="layoutMode">
     <div class="editor-pane">
       <div class="pane-header">
         <div class="header-left">
           <span class="title">CDL</span>
           <span v-if="isDirty" class="dot"></span>
+          <button class="btn-layout" @click="toggleLayout" :title="layoutMode === 'horizontal' ? '切换为垂直布局' : '切换为水平布局'">
+            {{ layoutMode === 'horizontal' ? '🔀' : '📱' }}
+          </button>
         </div>
         <div class="header-actions">
           <input type="file" accept=".csv" @change="handleCSVUpload" class="file-input" title="上传 CSV" />
@@ -599,13 +730,30 @@ watch(echartsOption, () => nextTick(renderChart))
 <style scoped>
 * { box-sizing: border-box; }
 .playground { display: flex; width: 100%; height: 600px; background: #0d1117; border-radius: 8px; overflow: hidden; border: 1px solid #30363d; }
-.editor-pane { width: 50%; min-width: 0; display: flex; flex-direction: column; background: #0d1117; border-right: 1px solid #30363d; }
+.playground.horizontal { flex-direction: row; }
+.playground.vertical { flex-direction: column; height: 800px; }
+.editor-pane { 
+  width: 50%; 
+  min-width: 0; 
+  display: flex; 
+  flex-direction: column; 
+  background: #0d1117; 
+  border-right: 1px solid #30363d; 
+}
+.playground.vertical .editor-pane {
+  width: 100%;
+  height: 50%;
+  border-right: none;
+  border-bottom: 1px solid #30363d;
+}
 .pane-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #161b22; border-bottom: 1px solid #30363d; height: 40px; flex-shrink: 0; }
 .header-left { display: flex; align-items: center; gap: 8px; }
 .title { font-weight: 600; font-size: 12px; color: #c9d1d9; text-transform: uppercase; letter-spacing: 0.5px; }
 .dot { width: 6px; height: 6px; background: #58a6ff; border-radius: 50%; animation: pulse 2s infinite; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 .header-actions { display: flex; align-items: center; gap: 6px; }
+.btn-layout { padding: 4px 8px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; cursor: pointer; font-size: 12px; color: #c9d1d9; transition: all 0.2s; }
+.btn-layout:hover { background: #30363d; border-color: #58a6ff; }
 .file-input { padding: 4px 8px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; font-size: 11px; color: #c9d1d9; cursor: pointer; max-width: 90px; }
 .file-input:hover { border-color: #58a6ff; }
 .example-select { padding: 4px 8px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; font-size: 12px; color: #c9d1d9; cursor: pointer; outline: none; }
@@ -623,7 +771,17 @@ watch(echartsOption, () => nextTick(renderChart))
 .preview-pane .btn-export:hover { background: #fff; border-color: #0969da; }
 .code-editor { flex: 1; padding: 12px; border: none; outline: none; font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', monospace; font-size: 13px; line-height: 1.5; resize: none; background: #0d1117; color: #c9d1d9; tab-size: 4; min-height: 0; }
 .code-editor::placeholder { color: #484f58; }
-.preview-pane { width: 50%; min-width: 0; display: flex; flex-direction: column; background: #ffffff; }
+.preview-pane { 
+  width: 50%; 
+  min-width: 0; 
+  display: flex; 
+  flex-direction: column; 
+  background: #ffffff; 
+}
+.playground.vertical .preview-pane {
+  width: 100%;
+  height: 50%;
+}
 .preview-pane .pane-header { background: #f6f8fa; border-bottom: 1px solid #d0d7de; }
 .preview-pane .title { color: #24292f; }
 .loading-dot { width: 6px; height: 6px; background: #0969da; border-radius: 50%; animation: blink 1s infinite; }
@@ -632,7 +790,21 @@ watch(echartsOption, () => nextTick(renderChart))
 .chart-container { flex: 1; min-height: 200px; width: 100%; }
 .placeholder { flex: 1; display: flex; align-items: center; justify-content: center; color: #8c959f; font-size: 13px; }
 .error-message { padding: 12px; background: #fff2f0; border: 1px solid #ffccc7; border-radius: 6px; color: #cf222e; font-size: 12px; margin-bottom: 12px; }
-@media (max-width: 768px) { .playground { flex-direction: column; height: 800px; } .editor-pane, .preview-pane { width: 100%; height: 50%; } .editor-pane { border-right: none; border-bottom: 1px solid #30363d; } }
+@media (max-width: 768px) { 
+  .playground.vertical { 
+    flex-direction: column; 
+    height: 800px; 
+  }
+  .playground.vertical .editor-pane,
+  .playground.vertical .preview-pane {
+    width: 100%;
+    height: 50%;
+  }
+  .playground.vertical .editor-pane {
+    border-right: none;
+    border-bottom: 1px solid #30363d;
+  }
+}
 
 /* 分享模态框 */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }

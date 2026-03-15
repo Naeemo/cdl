@@ -1,172 +1,405 @@
-# 图表类型
+# 图表类型详解
 
-CDL 支持多种常见图表类型，通过 `type` 属性指定。
+## 基础图表
 
-## 支持的图表类型
+### 折线图（line）
 
-| 类型 | 说明 | 适用场景 |
-|------|------|----------|
-| `line` | 折线图 | 趋势变化、时间序列 |
-| `bar` | 柱状图 | 类别对比、排名 |
-| `pie` | 饼图 | 占比分析、构成 |
-| `scatter` | 散点图 | 相关性分析、分布 |
-| `area` | 面积图 | 累积趋势、占比变化 |
-| `radar` | 雷达图 | 多维度评估 |
-| `combo` | 组合图 | 多类型混合展示 |
-| `heatmap` | 热力图 | 矩阵数据、密度分布 |
-
-## 折线图 (line)
+**适用场景**：趋势分析、时间序列、变化追踪
 
 ```cdl
-Chart 趋势 {
-    use SalesData
-    type line
-    x month
-    y sales
-    
-    @style "平滑曲线"
-    @color "#4fc3f7"
-}
+# 月度销售趋势
+
+| 月份 | 销售额 |
+| --- | --- |
+| 1月 | 120 |
+| 2月 | 150 |
+| 3月 | 180 |
+
+## line
+
+@style "smooth"
+@color "#4fc3f7"
 ```
 
-### 多线对比
+**高级配置**（combo 图中）：
 
 ```cdl
-Chart 对比 {
-    use MultiSeriesData
-    type line
-    x month
-    y sales
-    group region    // 按 region 分组，生成多条线
-}
+## series
+| field | as | type | style |
+| --- | --- | --- | --- |
+| 销售额 | 销售额 | line | smooth |
 ```
 
-## 柱状图 (bar)
+---
+
+### 柱状图（bar）
+
+**适用场景**：对比排名、分类数据、数量比较
 
 ```cdl
-Chart 排名 {
-    use CategoryData
-    type bar
-    x category
-    y value
-    
-    @style "横向排列"
-}
+# 产品销量排名
+
+| 产品 | 销量 |
+| --- | --- |
+| A | 200 |
+| B | 150 |
+| C | 120 |
+
+## bar
+
+@color "#4fc3f7"
 ```
 
-### 堆叠柱状图
+**分组柱状图**：
 
 ```cdl
-Chart 堆叠 {
-    use StackedData
-    type bar
-    x month
-    y amount
-    group product
-    stack true
-}
+# 季度销量对比
+
+| 季度 | 产品A | 产品B |
+| --- | --- | --- |
+| Q1 | 100 | 80 |
+| Q2 | 120 | 90 |
+
+## bar
+
+## series
+| field | as | type |
+| --- | --- | --- |
+| 产品A | 产品A | bar |
+| 产品B | 产品B | bar |
 ```
 
-## 饼图 (pie)
+---
+
+### 饼图（pie）
+
+**适用场景**：占比分析、构成分解
 
 ```cdl
-Chart 占比 {
-    use CategoryData
-    type pie
-    x category    // 分类字段
-    y value       // 数值字段
-    
-    @style "环形图"
-    @color "渐变蓝"
-}
+# 市场份额占比
+
+| 厂商 | 占比 |
+| --- | --- |
+| A | 45% |
+| B | 30% |
+| C | 25% |
+
+## pie
+
+@style "donut"
+@color "#4fc3f7"
 ```
 
-## 散点图 (scatter)
+---
+
+### 散点图（scatter）
+
+**适用场景**：相关性分析、分布探索
 
 ```cdl
-Chart 分布 {
-    use CorrelationData
-    type scatter
-    x price
-    y sales
-    group region    // 不同颜色表示不同区域
-}
+# 身高体重关系
+
+| 身高(cm) | 体重(kg) |
+| --- | --- |
+| 170 | 65 |
+| 175 | 72 |
+| 180 | 80 |
+
+## scatter
+
+@color "#4fc3f7"
 ```
 
-## 面积图 (area)
+---
+
+### 面积图（area）
+
+**适用场景**：累积趋势、堆叠占比
 
 ```cdl
-Chart 累积 {
-    use TrendData
-    type area
-    x month
-    y sales
-    stack true      // 堆叠面积图
-}
+# 用户累积增长
+
+| 月份 | 用户数 |
+| --- | --- |
+| 1月 | 1000 |
+| 2月 | 2500 |
+| 3月 | 4500 |
+
+## area
+
+@color "#4fc3f7"
 ```
 
-## 雷达图 (radar)
+---
+
+### 雷达图（radar）
+
+**适用场景**：能力评估、多维对比
 
 ```cdl
-Chart 评估 {
-    use RadarData
-    type radar
-    x dimension     // 维度：如质量、价格、服务...
-    y score         // 分数
-    group product   // 多个产品对比
-}
+# 能力评估
+
+| 维度 | 分数 |
+| --- | --- |
+| 技术 | 90 |
+| 沟通 | 80 |
+| 管理 | 70 |
+| 创新 | 85 |
+| 执行 | 95 |
+
+## radar
+
+@color "#4fc3f7"
 ```
 
-## 组合图 (combo)
+---
+
+## 高级图表
+
+### 组合图（combo）
+
+**适用场景**：双轴对比、混合数据类型
 
 ```cdl
-Chart 混合 {
-    use ComboData
-    type combo
-    x month
-    y sales         // 默认柱状图
-    y line target   // 折线显示目标
-}
+# 销售额与利润率
+
+| 月份 | 销售额 | 利润率 |
+| --- | --- | --- |
+| 1月 | 120 | 12% |
+| 2月 | 150 | 13% |
+| 3月 | 180 | 14% |
+
+## combo
+
+## series
+| field | as | type | color | axis |
+| --- | --- | --- | --- | --- |
+| 销售额 | 销售额(万元) | bar | #4fc3f7 | left |
+| 利润率 | 利润率(%) | line | #ff9800 | right |
+
+## axis y left
+min: 0
+max: 200
+
+## axis y right
+min: 0
+max: 20
+labelFormatter: "${value}%"
 ```
 
-## 热力图 (heatmap)
+---
+
+### 热力图（heatmap）
+
+**适用场景**：矩阵数据、密度分布、相关性矩阵
 
 ```cdl
-Chart 密度 {
-    use MatrixData
-    type heatmap
-    x hour          // X轴：小时
-    y day           // Y轴：星期
-    y value         // 颜色深浅表示数值
-    
-    @color "热力配色"
-}
+# 用户活跃热力图
+
+| 时段 | 周一 | 周二 | 周三 | 周四 | 周五 |
+| --- | --- | --- | --- | --- | --- |
+| 00:00 | 10 | 8 | 12 | 9 | 11 |
+| 06:00 | 30 | 28 | 35 | 32 | 30 |
+| 12:00 | 80 | 85 | 82 | 88 | 90 |
+| 18:00 | 65 | 70 | 68 | 72 | 75 |
+
+## heatmap
+
+@color "#4fc3f7"
 ```
 
-## 图表属性速查
+---
 
-| 属性 | 所有类型 | 说明 |
-|------|----------|------|
-| `type` | ✓ | 图表类型 |
-| `x` | ✓ | X轴字段 |
-| `y` | ✓ | Y轴字段 |
-| `group` | line, bar, scatter, radar | 分组字段，生成多序列 |
-| `stack` | bar, area | 堆叠，true 或字段名 |
+### 仪表盘（gauge）
 
-## 样式提示
-
-使用 `@` 提示层为图表添加视觉样式：
+**适用场景**：KPI 完成率、进度展示
 
 ```cdl
-Chart 示例 {
-    use Data
-    type line
-    x month
-    y sales
-    
-    @style "平滑曲线，带数据点标记"
-    @color "蓝色系渐变"
-    @title "2024年销售趋势"
-    @animation "从左到右绘制"
-}
+# 季度目标完成率
+
+| 指标 | 完成率 |
+| --- | --- |
+| 销售额 | 85% |
+
+## gauge
+
+@color "#4fc3f7"
 ```
+
+---
+
+### 蜡烛图（candlestick）
+
+**适用场景**：金融K线、价格波动
+
+```cdl
+# 股票价格
+
+| 日期 | 开盘 | 收盘 | 最低 | 最高 |
+| --- | --- | --- | --- | --- |
+| 2024-01-01 | 100 | 105 | 98 | 106 |
+| 2024-01-02 | 105 | 103 | 102 | 107 |
+
+## candlestick
+
+@color "#4fc3f7"
+```
+
+---
+
+### 箱线图（boxplot）
+
+**适用场景**：统计分布、异常值检测
+
+```cdl
+# 各组成绩分布
+
+| 组别 | 最小值 | Q1 | 中位数 | Q3 | 最大值 |
+| --- | --- | --- | --- | --- | --- |
+| A | 45 | 60 | 75 | 85 | 95 |
+| B | 50 | 65 | 70 | 80 | 90 |
+
+## boxplot
+
+@color "#4fc3f7"
+```
+
+---
+
+### 桑基图（sankey）
+
+**适用场景**：流向分析、漏斗转化
+
+```cdl
+# 用户转化路径
+
+| 来源 | 目标 | 数值 |
+| --- | --- | --- |
+| 访问 | 注册 | 1000 |
+| 注册 | 付费 | 200 |
+| 访问 | 流失 | 500 |
+
+## sankey
+
+@color "#4fc3f7"
+```
+
+---
+
+### 矩形树图（treemap）
+
+**适用场景**：层次结构、占比分布
+
+```cdl
+# 销售层级
+
+| 类别 | 子类 | 销售额 |
+| --- | --- | --- |
+| 电子 | 手机 | 200 |
+| 电子 | 电脑 | 150 |
+| 服装 | 上衣 | 100 |
+| 服装 | 裤子 | 80 |
+
+## treemap
+
+@color "#4fc3f7"
+```
+
+---
+
+### 词云图（wordcloud）
+
+**适用场景**：关键词频、文本挖掘
+
+```cdl
+# 高频词汇
+
+| 词汇 | 频次 |
+| --- | --- |
+| CDL | 100 |
+| 图表 | 80 |
+| DSL | 60 |
+| ECharts | 50 |
+
+## wordcloud
+
+@color "#4fc3f7"
+```
+
+---
+
+### 水波图（liquid）
+
+**适用场景**：填充进度、水位展示
+
+```cdl
+# 存储空间使用率
+
+| 指标 | 值 |
+| --- | --- |
+| 使用率 | 65% |
+
+## liquid
+
+@color "#4fc3f7"
+```
+
+---
+
+### 地图（map）
+
+**适用场景**：地理分布、区域数据
+
+```cdl
+# 各省份销售额
+
+| 省份 | 销售额 |
+| --- | --- |
+| 北京 | 200 |
+| 上海 | 180 |
+| 广东 | 250 |
+| 浙江 | 150 |
+
+## map
+
+@color "#4fc3f7"
+```
+
+---
+
+## 通用提示层
+
+所有图表类型都支持以下 `@` 指令：
+
+```cdl
+@color "#4fc3f7"       # 主色调
+@style "smooth"        # 样式
+@animation "ease-out"  # 动画
+@title "自定义标题"     # 标题
+@subtitle "副标题"     # 副标题
+@theme "dark"          # 主题
+@grid false            # 网格线
+@layout "compact"      # 布局
+```
+
+---
+
+## 选择指南
+
+| 分析目的 | 推荐图表 | 关键配置 |
+|----------|----------|----------|
+| 趋势分析 | line | `@style "smooth"` |
+| 排名对比 | bar | `## series` 分组 |
+| 占比构成 | pie / treemap | `@style "donut"` / 颜色 |
+| 相关性 | scatter | `@color` 按类别 |
+| 双轴对比 | combo | `## series` + `## axis` |
+| 矩阵密度 | heatmap | `@color` 色带 |
+| 进度展示 | gauge / liquid | 颜色阈值 |
+| 地理分布 | map | 地图数据 |
+| 多维评估 | radar | 维度顺序 |
+| 层次结构 | treemap | 嵌套数据 |
+| 文本挖掘 | wordcloud | 频次权重 |
+
+---
+
+*文档版本：v0.6（规划中）*

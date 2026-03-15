@@ -13,7 +13,7 @@
   },
   "Chart Definition": {
     "prefix": "chart",
-    "description": "Define a chart",
+    "description": "Define a chart (standard syntax)",
     "body": [
       "Chart ${1:ChartName} {",
       "    use ${2:DataName}",
@@ -24,6 +24,93 @@
       "    ${8:@title \"${9:title}\"}",
       "}",
       ""
+    ]
+  },
+  "Quick Chart (Markdown)": {
+    "prefix": "quick",
+    "description": "Create a quick chart using Markdown-style syntax",
+    "body": [
+      "# ${1:Chart Title}",
+      "",
+      "| ${2:xField} | ${3:yField} |",
+      "| --- | --- |",
+      "| ${4:A} | ${5:10} |",
+      "| ${6:B} | ${7:20} |",
+      "",
+      "## ${8|line,bar,pie|}",
+      "",
+      "${9:@color \"#4fc3f7\"}",
+      "${10:@style \"平滑\"}"
+    ]
+  },
+  "Combo Chart (v0.6)": {
+    "prefix": "combo",
+    "description": "Create a combo chart with multiple series (v0.6)",
+    "body": [
+      "# ${1:Chart Title}",
+      "",
+      "| ${2:xField} | ${3:series1} | ${4:series2} |",
+      "| --- | --- | --- |",
+      "| ${5:A} | ${6:120} | ${7:15} |",
+      "| ${8:B} | ${9:150} | ${10:20} |",
+      "| ${11:C} | ${12:180} | ${13:25} |",
+      "",
+      "## combo",
+      "",
+      "## series",
+      "| field | as | type | color | axis | style |",
+      "| --- | --- | --- | --- | --- | --- |",
+      "| ${3:series1} | ${14:Series 1} | bar | ${15:#4fc3f7} | left | solid |",
+      "| ${4:series2} | ${16:Series 2} | line | ${17:#ff9800} | right | smooth |",
+      "",
+      "## axis ${18:x}",
+      "labelRotate: ${19:0}",
+      "",
+      "## axis ${20:y}",
+      "min: ${21:0}",
+      "max: ${22:200}",
+      "",
+      "## axis ${23:y2}",
+      "min: ${24:0}",
+      "max: ${25:50}",
+      "",
+      "@interaction \"tooltip:shared zoom:inside\"",
+      "@color \"${26:#4fc3f7}\""
+    ]
+  },
+  "Multi-Axis Chart (v0.6)": {
+    "prefix": "multiaxis",
+    "description": "Define multiple Y axes (v0.6)",
+    "body": [
+      "## axis y",
+      "min: ${1:0}",
+      "max: ${2:100}",
+      "labelFormatter: \"${3:${value}}\"",
+      "splitLine: ${4:true}",
+      "",
+      "## axis y2",
+      "min: ${5:0}",
+      "max: ${6:100}",
+      "labelFormatter: \"${7:${value}%}\"",
+      "position: right"
+    ]
+  },
+  "Interaction (v0.6)": {
+    "prefix": "interaction",
+    "description": "Define interaction behavior (v0.6)",
+    "body": [
+      "@interaction \"tooltip:${1|shared,single,none|} zoom:${2|inside,slider,true|} brush:${3|true,false|}\""
+    ]
+  },
+  "Series Table (v0.6)": {
+    "prefix": "series",
+    "description": "Define series configuration table (v0.6)",
+    "body": [
+      "## series",
+      "| field | as | type | color | axis | style |",
+      "| --- | --- | --- | --- | --- | --- |",
+      "| ${1:field1} | ${2:Series 1} | ${3|bar,line,area|} | ${4:#4fc3f7} | ${5|left,right|} | ${6|solid,dashed,smooth|} |",
+      "| ${7:field2} | ${8:Series 2} | ${9|bar,line,area|} | ${10:#ff9800} | ${11|left,right|} | ${12|solid,dashed,smooth|} |"
     ]
   },
   "Line Chart": {

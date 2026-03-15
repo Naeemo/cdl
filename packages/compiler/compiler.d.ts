@@ -1,7 +1,20 @@
 /**
- * CDL Compiler v0.2 - Simplified
- * 将 CDL 源码编译为带类型的 JSON AST
+ * CDL Compiler v0.6 - Type Declarations
  */
-import { CompileResult } from './types';
-export declare function compile(source: string): CompileResult;
-//# sourceMappingURL=compiler.d.ts.map
+
+export { compile, validate } from './compiler';
+export type {
+  QueryLanguage,
+  DataSourceConfig,
+  DataDefinition,
+  ChartType,
+  SeriesConfig,
+  AxisConfig,
+  InteractionConfig,
+  ChartHint,
+  ChartDefinition,
+  CDLFile,
+  CompileError,
+  CompileResult,
+  ValidationResult,
+} from './types';

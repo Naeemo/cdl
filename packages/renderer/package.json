@@ -1,7 +1,7 @@
 {
   "name": "@cdl/renderer-echarts",
-  "version": "0.1.0",
-  "description": "ECharts renderer for CDL - Convert CDL AST to ECharts option",
+  "version": "0.6.0",
+  "description": "ECharts renderer for CDL - Convert CDL AST to ECharts option (v0.6)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [

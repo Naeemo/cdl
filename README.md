@@ -15,39 +15,91 @@
 
 ## 什么是 CDL
 
-CDL（Chart Definition Language）是一种用于定义数据图表的领域特定语言（DSL）。
+CDL（Chart Definition Language）是一种用于定义数据图表的领域特定语言（DSL）。它提供三种语法级别，满足从新手到专业开发者的不同需求：
 
+**快速语法**（Markdown 风格）：
 ```cdl
-@lang(sql)
-@source('sales_db')
+# 月度销售额
+
+| 月份 | 销售额 |
+| --- | --- |
+| 1月 | 100 |
+| 2月 | 150 |
+| 3月 | 200 |
+
+## 折线图
+
+@color "#4fc3f7"
+@style "smooth"
+```
+
+**标准语法**（显式声明）：
+```cdl
+@lang(data)
 SalesData {
-    SELECT month, amount FROM sales
+    month,sales
+    1月,100
+    2月,150
+    3月,200
 }
 
 Chart 月度销售 {
     use SalesData
     type line
     x month
-    y amount
+    y sales
     
-    @style "平滑曲线"
     @color "#4fc3f7"
+    @title "2024年销售趋势"
 }
 ```
 
+**高级语法**（v0.6 新增：多系列 + 坐标轴 + 交互）：
+```cdl
+# 销售额与利润
+
+| 月份 | 销售额 | 利润 |
+| --- | --- | --- |
+| 1月 | 120 | 15 |
+| 2月 | 150 | 20 |
+
+## combo
+
+## series
+| field | as | type | color | axis |
+| --- | --- | --- | --- | --- |
+| 销售额 | 销售额 | bar | #4fc3f7 | left |
+| 利润 | 利润 | line | #ff9800 | right |
+
+## axis y right
+min: 0
+max: 50
+
+@interaction "tooltip:shared zoom:inside"
+```
+
+---
+
 ## ✨ 特性
 
-- **📝 简洁声明式** - 类似 Markdown 的语法，专注"要什么"而非"怎么实现"
+- **📝 三种语法级别** - 快速/Markdown、标准、高级（满足不同场景）
 - **🔒 安全交付** - DSL 不携带数据，权限和数据留在服务端
 - **🤖 AI 友好** - 结构化、可验证，LLM 易于生成和修改
 - **🎨 渐进渲染** - 核心层必渲染，@提示层可选解析
-- **📊 导出支持** - PNG/SVG 导出，支持 CLI 和服务端渲染
+- **📊 16+ 图表类型** - line/bar/pie/scatter/area/radar/combo/heatmap 等
+- **⚡ 极简表达** - ECharts option 的极简映射，舍弃低频配置
+- **🎯 智能推断** - 从标题自动识别图表类型，自动映射字段
+- **🔧 精细控制** - v0.6 新增：多系列、坐标轴、交互声明
+
+---
 
 ## 📦 安装
 
 ```bash
 npm install @cdl/compiler @cdl/renderer-echarts
 ```
+
+---
 
 ## 🚀 快速使用
 
@@ -72,10 +124,17 @@ Chart {
 }
 `
 
-const { result } = compile(cdlSource)
-const { option } = render(result)
-// option 是标准的 ECharts 配置
+const { result, errors } = compile(cdlSource)
+if (errors.length > 0) {
+    console.error('编译错误:', errors)
+} else {
+    const { option } = render(result)
+    // option 是标准的 ECharts 配置
+    // 可直接传递给 ECharts 实例
+}
 ```
+
+---
 
 ## 📤 导出图表
 
@@ -87,11 +146,14 @@ const { option } = render(result)
 # 安装 CLI
 npm install -g @cdl/cli
 
-# 导出 PNG
-cdl export example.cdl --format png --output chart.png
+# 验证语法
+cdl validate example.cdl
 
-# 导出 SVG
-cdl export example.cdl --format svg --output chart.svg
+# 编译输出 AST
+cdl compile example.cdl --output ast.json
+
+# 渲染并导出图片（需要 server）
+cdl export example.cdl --format png --output chart.png
 ```
 
 ### 服务端渲染 API
@@ -104,28 +166,55 @@ npm start
 # Body: { "source": "CDL代码", "format": "png" }
 ```
 
+---
+
 ## 📚 文档
 
-- [快速开始](https://naeemo.github.io/cdl/guide/) - 了解 CDL 基础概念和语法
-- [语法规范](https://naeemo.github.io/cdl/guide/syntax) - 完整的语法参考
-- [数据查询](https://naeemo.github.io/cdl/guide/data) - 数据源定义和查询
-- [图表类型](https://naeemo.github.io/cdl/guide/charts) - 支持的图表类型详解
-- [在线体验](https://naeemo.github.io/cdl/playground/) - 实时编辑和预览
-- [示例](https://naeemo.github.io/cdl/examples/line) - 丰富的图表示例
+- [快速开始](https://naeemo.github.io/cdl/guide/) - 三种语法级别详解
+- [语法规范 v0.6](https://naeemo.github.io/cdl/guide/syntax) - 完整语法参考（含高级特性）
+- [数据源定义](./guide/data) - SQL/DAX/内联数据
+- [图表类型](./guide/charts) - 16+ 图表类型及示例
+- [在线体验](../playground/) - 实时编辑和预览
+- [示例代码](../examples/) - 丰富的图表示例
+
+---
 
 ## 🏗️ 项目结构
 
 ```
 cdl/
 ├── packages/
-│   ├── compiler/          # CDL 编译器 - 将 CDL 编译为 AST
-│   ├── renderer-echarts/  # ECharts 渲染器 - 将 AST 转为 ECharts 配置
-│   ├── cli/               # 命令行工具 - 编译、导出等功能
-│   └── server/            # 服务端渲染 - API 服务
+│   ├── compiler/          # @cdl/compiler - CDL 编译器
+│   ├── renderer-echarts/  # @cdl/renderer-echarts - ECharts 渲染器
+│   ├── cli/               # @cdl/cli - 命令行工具
+│   └── server/            # 服务端渲染 API
+├── vscode-extension/      # VS Code 插件（语法高亮、片段）
 ├── docs/                  # VitePress 文档站点
 ├── examples/              # 示例 CDL 文件
-└── .github/workflows/     # GitHub Actions 部署配置
+├── schemas/               # JSON Schema（AST 定义）
+├── GRAMMAR.md             # 完整语法规范（Markdown）
+└── PROMPT.md              # AI 指令模板
 ```
+
+---
+
+## 🗺️ 路线图
+
+### v0.6（进行中）
+- ✅ 多系列精细控制（`## series`）
+- ✅ 坐标轴配置（`## axis`）
+- ✅ 交互声明（`@interaction`）
+- 🔄 编译器支持
+- 🔄 渲染器映射
+- 🔄 文档与示例更新
+
+### 未来规划
+- 数据管道（filter/aggregate）— 不纳入 v0.6
+- 主题系统 — 简化版
+- 响应式布局 — 基础支持
+- D3 渲染器 — 框架已就绪
+
+---
 
 ## 🤝 贡献
 

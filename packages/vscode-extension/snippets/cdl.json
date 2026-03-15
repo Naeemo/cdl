@@ -76,5 +76,59 @@
       "}"
     ],
     "description": "Complete data + chart example"
+  },
+  "Combo Chart (v0.6)": {
+    "prefix": "combo",
+    "body": [
+      "# ${1:图表标题}",
+      "",
+      "| ${2:X轴字段} | ${3:系列1} | ${4:系列2} |",
+      "| --- | --- | --- |",
+      "| ${5:类别A} | ${6:值1} | ${7:值2} |",
+      "| ${8:类别B} | ${9:值3} | ${10:值4} |",
+      "",
+      "## combo",
+      "",
+      "## series",
+      "| field | as | type | color | axis | style |",
+      "| --- | --- | --- | --- | --- | --- |",
+      "| ${3:系列1} | ${11:系列1显示名} | ${12|bar,line,area|} | ${13:#4fc3f7} | ${14|left,right|} | ${15|solid,smooth|} |",
+      "| ${4:系列2} | ${16:系列2显示名} | ${17|line,bar,area|} | ${18:#ff9800} | ${19|right,left|} | ${20|smooth,solid|} |",
+      "",
+      "## axis ${21|y,y2}",
+      "min: ${22:0}",
+      "max: ${23:100}",
+      "",
+      "@interaction \"tooltip:shared zoom:${24|inside,none|}\""
+    ],
+    "description": "v0.6 Combo chart with multi-series and dual axis"
+  },
+  "Multi-axis Configuration (v0.6)": {
+    "prefix": "multiaxis",
+    "body": [
+      "## axis x",
+      "labelRotate: ${1:0}",
+      "type: ${2|category,value|}",
+      "",
+      "## axis y",
+      "min: ${3:0}",
+      "max: ${4:auto}",
+      "labelFormatter: \"${5:}\"",
+      "splitLine: ${6|true,false|}",
+      "",
+      "## axis y2",
+      "min: ${7:0}",
+      "max: ${8:auto}",
+      "position: ${9:right}",
+      "labelFormatter: \"${10:}\""
+    ],
+    "description": "v0.6 Multi-axis configuration for combo charts"
+  },
+  "Interaction (v0.6)": {
+    "prefix": "interaction",
+    "body": [
+      "@interaction \"${1|tooltip:shared,zoom:inside,zoom:slider,brush:true|}\""
+    ],
+    "description": "v0.6 Interaction hints for charts"
   }
 }

@@ -57,9 +57,9 @@ export function activate(context: vscode.ExtensionContext) {
           });
         }
 
-        // Chart types
+        // Chart types (v0.6 - includes combo and all 16+ types)
         if (lineText.match(/type\s*/)) {
-          const types = ['line', 'bar', 'pie', 'scatter', 'area', 'radar', 'heatmap', 'gauge'];
+          const types = ['line', 'bar', 'pie', 'scatter', 'area', 'radar', 'heatmap', 'gauge', 'candlestick', 'boxplot', 'sankey', 'treemap', 'wordcloud', 'liquid', 'map', 'combo'];
           types.forEach(t => {
             const item = new vscode.CompletionItem(t, vscode.CompletionItemKind.Enum);
             item.detail = `${t} 图表`;
@@ -67,8 +67,27 @@ export function activate(context: vscode.ExtensionContext) {
           });
         }
 
+        // v0.6 Keywords - block directives
+        if (lineText.startsWith('##') || lineText.trim() === '##') {
+          const v06Blocks = [
+            { name: '## series', detail: '多系列配置表格', example: '## series\n| field | as | type | color | axis | style |\n| --- | --- | --- | --- | --- | --- |' },
+            { name: '## axis', detail: '坐标轴配置', example: '## axis y\nmin: 0\nmax: 100' },
+            { name: '## axis x', detail: 'X轴配置', example: '## axis x\nlabelRotate: 45' },
+            { name: '## axis y', detail: '左Y轴配置', example: '## axis y\nmin: 0\nmax: 200' },
+            { name: '## axis y2', detail: '右Y轴配置', example: '## axis y2\nposition: right' },
+            { name: '## axis left', detail: '左侧坐标轴', example: '## axis left\nmin: 0' },
+            { name: '## axis right', detail: '右侧坐标轴', example: '## axis right\nposition: right' }
+          ];
+          v06Blocks.forEach(b => {
+            const item = new vscode.CompletionItem(b.name, vscode.CompletionItemKind.Keyword);
+            item.detail = b.detail;
+            item.insertText = b.example;
+            completions.push(item);
+          });
+        }
+
         // Keywords
-        const keywords = ['Data', 'Chart', 'use', 'type', 'x', 'y', 'group', 'stack'];
+        const keywords = ['Data', 'Chart', 'use', 'type', 'x', 'y', 'group', 'stack', 'series', 'axis', 'left', 'right', 'y2'];
         keywords.forEach(kw => {
           const item = new vscode.CompletionItem(kw, vscode.CompletionItemKind.Keyword);
           completions.push(item);
@@ -77,7 +96,7 @@ export function activate(context: vscode.ExtensionContext) {
         return completions;
       }
     },
-    '@', ' ', '
+    '@', ' '
   );
 
   // Register hover provider
@@ -93,12 +112,19 @@ export function activate(context: vscode.ExtensionContext) {
         '@style': '图表样式修饰\n\n常用:\n- "平滑曲线"\n- "渐变填充"\n- "环形"',
         '@color': '指定主题颜色（hex格式）',
         '@title': '设置图表标题',
+        '@interaction': '设置交互行为\n\n支持:\n- tooltip:shared\n- zoom:inside/slider\n- brush:true',
         'Data': '定义数据块\n\n语法: `Data 名称 { ... }`',
         'Chart': '定义图表\n\n语法: `Chart 名称 { ... }`',
         'use': '引用数据源\n\n语法: `use DataName`',
-        'type': '指定图表类型\n\n可选: line, bar, pie, scatter, area, radar',
+        'type': '指定图表类型\n\n可选: line, bar, pie, scatter, area, radar, heatmap, gauge, combo',
         'x': 'X轴字段',
-        'y': 'Y轴字段'
+        'y': 'Y轴字段',
+        'series': 'v0.6 多系列配置\n\n语法:\n## series\n| field | as | type | color | axis | style |\n| --- | --- | --- | --- | --- | --- |',
+        'axis': 'v0.6 坐标轴配置\n\n语法:\n## axis x/y/y2/left/right\nmin: 0\nmax: 100\nlabelFormatter: "${value}"',
+        'combo': 'v0.6 组合图类型（混合柱状/折线/面积等）',
+        'left': '坐标轴位置：左侧',
+        'right': '坐标轴位置：右侧',
+        'y2': '右侧 Y 轴别名'
       };
 
       if (docs[word]) {
@@ -273,7 +299,7 @@ function showPreview(context: vscode.ExtensionContext, document: vscode.TextDocu
 
 function getPreviewHtml(echartsOption: any): string {
   const config = vscode.workspace.getConfiguration('cdl.preview');
-  const theme = config.get('theme', 'light');
+  const theme = config.get<string>('theme', 'light');
   const bgColor = theme === 'dark' ? '#1e1e1e' : '#ffffff';
   const textColor = theme === 'dark' ? '#cccccc' : '#333333';
 

@@ -1,7 +1,7 @@
 {
   "name": "@cdl/compiler",
-  "version": "0.1.0",
-  "description": "CDL compiler - Compile Chart Definition Language to typed JSON AST",
+  "version": "0.6.0",
+  "description": "CDL compiler - Compile Chart Definition Language to typed JSON AST (v0.6)",
   "main": "dist/compiler.js",
   "types": "dist/compiler.d.ts",
   "files": [
@@ -13,6 +13,7 @@
     "build": "tsc --declaration",
     "test": "ts-node compiler.ts line.chart",
     "test:example": "ts-node compiler.ts examples/sql/line/01_monthly_sales.cdl",
+    "test:v06": "ts-node compiler.ts test-combo.cdl",
     "prepublishOnly": "npm run build"
   },
   "repository": {

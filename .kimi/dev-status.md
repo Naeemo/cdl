@@ -1,55 +1,79 @@
-# CDL 开发状态跟踪
+# CDL 开发状态跟踪（v0.6 改造）
 
-## 阶段一：核心能力完善
+## ✅ 编译器改造完成（2026-03-14 12:30）
+- ✅ `## series` 多系列表格解析
+- ✅ `## axis <position>` 坐标轴块解析
+- ✅ `@interaction` 交互声明解析
+- ✅ 快速语法完整支持
+- ✅ 类型推断
+- ✅ 注释剥离、错误处理
 
-### 任务清单
-- [ ] 1. 编译器指令解析 (@title, @color, @style)
-- [ ] 2. 渲染器指令映射
-- [ ] 3. 验证 API (validate)
-- [ ] 4. Playground 修复
-- [ ] 5. NPM 发布 0.1.0
+## ✅ 渲染器改造完成（2026-03-14 12:35）
+- ✅ `series` → ECharts `series` 映射（支持 combo 混合类型）
+- ✅ `axis` → `xAxis/yAxis` 映射（位置自动处理）
+- ✅ `interaction` → `dataZoom/brush` 映射
+- ✅ 向后兼容（旧语法）
+- ✅ 测试通过（test.ts）
 
-# CDL 开发状态跟踪
+## ✅ 端到端集成测试通过（2026-03-14 12:50）
+- ✅ Compiler → Renderer 完整流程
+- ✅ 4/4 v0.6 特性验证通过
+- ✅ 测试文件：`packages/integration-test/test-v06.js`
 
-# CDL 开发状态跟踪
+---
 
-## 阶段一：核心能力完善 ✅ 已完成
-- [x] 编译器指令解析
-- [x] 渲染器数据绑定
-- [x] 验证 API (validate)
-- [x] Playground 修复
-- [x] NPM 发布准备
+## 🚧 工具链更新（进行中）
 
-## 阶段二：Agent 基础设施 ✅ 已完成
-- [x] PROMPT.md - AI 指令模板
-- [x] MCP Server - 工具定义
-- [x] JSON Schema - AST 标准格式
+### CLI 工具（packages/cli）
+**待更新**：
+- [ ] `validate` 命令支持 v0.6 语法
+- [ ] `compile` 命令输出 v0.6 AST
+- [ ] `render` 命令（需要 renderer 依赖）
+- [ ] 帮助文档更新
+- [ ] 示例更新
 
-## 阶段三：IDE 生态 ✅ 已完成
-- [x] VS Code 插件 - 语法高亮
-- [x] VS Code 插件 - 片段补全
-- [x] CLI 工具 - cdl-cli
+### VS Code 插件（vscode-extension）
+**待更新**：
+- [ ] 语法高亮：添加 `## series` / `## axis` 关键字
+- [ ] 代码片段：新增 combo 多轴图表模板
+- [ ] 语言配置更新
 
-### 当前进度
-**完成时间**: 2026-03-12 23:56
-**状态**: 全部完成 ✅
+---
 
-### 项目结构
-```
-cdl/
-├── packages/
-│   ├── compiler/          # @cdl/compiler - CDL 编译器
-│   ├── renderer/          # @cdl/renderer-echarts - ECharts 渲染器
-│   └── cli/               # @cdl/cli - 命令行工具
-├── vscode-extension/      # VS Code 插件
-├── docs/                  # VitePress 文档 + Playground
-├── PROMPT.md              # AI 指令模板
-├── mcp-server.json        # MCP 工具定义
-└── schemas/
-    └── ast.json           # CDL AST JSON Schema
-```
+## 📚 文档与示例
 
-### 备注
-- compiler 包目前使用简单正则解析
-- 需要增强以支持 @指令解析
-- renderer 包需要同步更新以处理这些指令
+### 已完成
+- [x] `GRAMMAR.md` - 完整语法规范 v0.6
+- [x] `docs/guide/syntax.md` - 用户指南更新
+- [x] `docs/guide/index.md` - 快速开始更新
+- [x] `docs/guide/charts.md` - 图表类型详解
+- [x] `docs/examples/line.md` - 折线图示例
+- [x] `docs/examples/bar.md` - 柱状图示例
+- [x] `docs/examples/pie.md` - 饼图示例
+- [x] `README.md` - 项目首页重写（含 v0.6 路线图）
+
+### 待补充
+- [ ] `docs/examples/combo.md` - 组合图示例（v0.6 核心）
+- [ ] `docs/examples/advanced-axis.md` - 多轴配置示例
+- [ ] `docs/examples/interaction.md` - 交互示例
+- [ ] Playground 代码更新（支持新语法）
+
+---
+
+## 🗓️ 后续计划
+
+### v0.6 发布准备
+1. 更新所有子包版本号（0.1.0 → 0.6.0）
+2. 编写 CHANGELOG.md
+3. 发布 NPM 包
+4. 更新 GitHub Releases
+
+### 后续特性（v0.7+）
+- 主题系统（完整自定义）
+- 响应式布局
+- D3 渲染器支持
+- 数据管道（谨慎评估）
+
+---
+
+*最后更新：2026-03-14 12:55*

@@ -1,0 +1,32 @@
+# 销售额与利润分析
+
+| 月份 | 销售额 | 利润 |
+| --- | --- | --- |
+| 1月 | 120 | 15 |
+| 2月 | 150 | 20 |
+| 3月 | 180 | 25 |
+
+## combo
+
+## series
+| field | as | type | color | axis | style |
+| --- | --- | --- | --- | --- | --- |
+| 销售额 | 销售额(万元) | bar | #4fc3f7 | left | solid |
+| 利润 | 利润(万元) | line | #ff9800 | right | smooth |
+
+## axis x
+labelRotate: 45
+
+## axis y
+min: 0
+max: 200
+labelFormatter: "${value}万"
+splitLine: true
+
+## axis y2
+min: 0
+max: 50
+labelFormatter: "${value}%"
+
+@interaction "tooltip:shared zoom:inside"
+@color "#4fc3f7"

@@ -93,7 +93,7 @@ export function analyzeError(
         severity: 'error',
         code: pattern.code,
         suggestion: pattern.suggestion(),
-        fix: pattern.fix?.(context),
+        fix: pattern.fix ? pattern.fix(context) : undefined,
         docs: `https://cdl.dev/docs/errors#${pattern.code.toLowerCase()}`
       };
     }
