@@ -1,0 +1,29 @@
+{
+  "name": "@cdl/ai",
+  "version": "0.1.0",
+  "description": "AI-powered natural language to CDL code generator",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "dependencies": {
+    "openai": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": ["cdl", "chart", "ai", "nlp", "generation"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Naeemo/cdl.git",
+    "directory": "packages/ai"
+  },
+  "bugs": {
+    "url": "https://github.com/Naeemo/cdl/issues"
+  },
+  "homepage": "https://github.com/Naeemo/cdl#readme"
+}

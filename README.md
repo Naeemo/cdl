@@ -154,11 +154,31 @@ cdl compile example.cdl --output ast.json
 
 # 渲染并导出图片（需要 server）
 cdl export example.cdl --format png --output chart.png
+
+# AI 生成 CDL
+cdl nl "月度销售额折线图，蓝色" --api-key $KIMI_API_KEY
+```
+
+### AI 自然语言生成
+```bash
+npm install @cdl/ai
+```
+
+```typescript
+import { nlToCDL } from '@cdl/ai';
+
+const result = await nlToCDL("最近6个月销售额折线图，蓝色", {
+  apiKey: 'your-kimi-api-key'
+});
+
+if (result.success) {
+  console.log(result.cdl);
+}
 ```
 
 ### 服务端渲染 API
 ```bash
-cd packages/server
+cd packages/ssr
 npm install
 npm start
 
@@ -187,7 +207,10 @@ cdl/
 │   ├── compiler/          # @cdl/compiler - CDL 编译器
 │   ├── renderer-echarts/  # @cdl/renderer-echarts - ECharts 渲染器
 │   ├── cli/               # @cdl/cli - 命令行工具
-│   └── server/            # 服务端渲染 API
+│   ├── ssr/               # @cdl/ssr - 服务端渲染服务
+│   ├── ai/                # @cdl/ai - AI 自然语言生成
+│   ├── react/             # @cdl/react - React 组件
+│   └── ...
 ├── vscode-extension/      # VS Code 插件（语法高亮、片段）
 ├── docs/                  # VitePress 文档站点
 ├── examples/              # 示例 CDL 文件

@@ -1,13 +1,13 @@
-# @cdl/nl-codegen
+# @cdl/ai
 
-Natural Language to CDL Code Generator
+AI-Powered Natural Language to CDL Code Generator
 
 将自然语言描述转换为 CDL (Chart Definition Language) 代码。
 
 ## 安装
 
 ```bash
-npm install @cdl/nl-codegen
+npm install @cdl/ai
 ```
 
 ## 使用
@@ -15,7 +15,7 @@ npm install @cdl/nl-codegen
 ### 基础用法
 
 ```typescript
-import { nlToCDL } from '@cdl/nl-codegen';
+import { nlToCDL } from '@cdl/ai';
 
 const result = await nlToCDL("最近6个月销售额折线图，蓝色", {
   apiKey: 'your-kimi-api-key',
@@ -47,7 +47,7 @@ cdl nl "蓝色折线图，显示月度销售趋势" --output chart.cdl
 ### 批量转换
 
 ```typescript
-import { nlToCDLBatch } from '@cdl/nl-codegen';
+import { nlToCDLBatch } from '@cdl/ai';
 
 const descriptions = [
   "销售额折线图",

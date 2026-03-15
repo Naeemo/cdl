@@ -5,8 +5,8 @@
 
 ## 阶段划分
 
-### Phase 1: @cdl/nl-codegen 核心包 ✅ 已完成
-- [x] 创建 packages/nl-codegen 目录结构
+### Phase 1: @cdl/ai 核心包 ✅ 已完成
+- [x] 创建 packages/ai 目录结构
 - [x] 实现 nlToCDL() API
 - [x] 集成 Kimi API
 - [x] CDL 语法验证

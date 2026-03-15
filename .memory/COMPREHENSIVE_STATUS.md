@@ -26,8 +26,8 @@
 | `@cdl/compiler` | 0.1.0 | ✅ 完成 | CDL 源码 → 类型安全 AST |
 | `@cdl/renderer-echarts` | 0.1.0 | ✅ 完成 | AST → ECharts 配置 |
 | `@cdl/cli` | 0.1.0 | ✅ 完成 | 命令行工具（compile/export/validate/nl）|
-| `@cdl/server` | 0.1.0 | ✅ 完成 | 服务端渲染 API (PNG/SVG) |
-| `@cdl/nl-codegen` | 0.1.0 | ✅ 完成 | 自然语言转 CDL |
+| `@cdl/ssr` | 0.1.0 | ✅ 完成 | 服务端渲染 API (PNG/SVG) |
+| `@cdl/ai` | 0.1.0 | ✅ 完成 | AI 自然语言转 CDL |
 
 ### 渲染器支持
 
@@ -56,8 +56,8 @@ cdl/
 │   ├── compiler/          # @cdl/compiler
 │   ├── renderer/          # @cdl/renderer-echarts
 │   ├── cli/               # @cdl/cli
-│   ├── server/            # @cdl/server
-│   ├── nl-codegen/        # @cdl/nl-codegen
+│   ├── ssr/               # @cdl/ssr
+│   ├── ai/                # @cdl/ai
 │   ├── renderer-d3/       # (planned)
 │   ├── templates/         # 模板系统
 │   └── themes/            # 主题配置

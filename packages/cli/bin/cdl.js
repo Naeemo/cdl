@@ -637,7 +637,7 @@ async function nlCommand(args) {
 
   try {
     // Dynamic import for ESM module
-    const { nlToCDL } = await import('@cdl/nl-codegen');
+    const { nlToCDL } = await import('@cdl/ai');
     const result = await nlToCDL(description, {
       apiKey,
       model,

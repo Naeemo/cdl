@@ -14,9 +14,9 @@
     "test": "node bin/cdl.js --help"
   },
   "dependencies": {
-    "@cdl/compiler": "^0.1.0",
-    "@cdl/renderer-echarts": "^0.1.0",
-    "@cdl/nl-codegen": "^0.1.0"
+    "@cdl/compiler": "^0.6.0",
+    "@cdl/renderer-echarts": "^0.6.0",
+    "@cdl/ai": "^0.1.0"
   },
   "author": "Naeemo <naeemo@qq.com>",
   "license": "MIT",
