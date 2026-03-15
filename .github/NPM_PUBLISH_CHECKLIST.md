@@ -2,7 +2,7 @@
 
 ## 📦 核心包（必须发布）
 
-### 1. @cdl/compiler (v0.6.0)
+### 1. @cdl/compiler (v0.1.0)
 **作用**：CDL 编译器 - 将 CDL 源代码编译成 AST
 **NPM**: https://www.npmjs.com/package/@cdl/compiler
 
@@ -19,7 +19,7 @@ npm install @cdl/compiler
 
 ---
 
-### 2. @cdl/renderer-echarts (v0.6.0)
+### 2. @cdl/renderer-echarts (v0.1.0)
 **作用**：ECharts 渲染器 - 将 AST 转换为 ECharts 配置
 **NPM**: https://www.npmjs.com/package/@cdl/renderer-echarts
 
@@ -36,7 +36,7 @@ npm install @cdl/renderer-echarts
 
 ---
 
-### 3. @cdl/cli (v0.6.0)
+### 3. @cdl/cli (v0.1.0)
 **作用**：命令行工具 - 提供 `cdl` 命令
 **NPM**: https://www.npmjs.com/package/@cdl/cli
 

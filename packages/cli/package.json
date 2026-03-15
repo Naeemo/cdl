@@ -1,6 +1,6 @@
 {
   "name": "@cdl/cli",
-  "version": "0.6.0",
+  "version": "0.1.0",
   "description": "CDL Command Line Interface",
   "main": "bin/cdl.js",
   "bin": {
@@ -14,8 +14,8 @@
     "test": "node bin/cdl.js --help"
   },
   "dependencies": {
-    "@cdl/compiler": "^0.6.0",
-    "@cdl/renderer-echarts": "^0.6.0",
+    "@cdl/compiler": "^0.1.0",
+    "@cdl/renderer-echarts": "^0.1.0",
     "@cdl/ai": "^0.1.0"
   },
   "author": "Naeemo <naeemo@qq.com>",

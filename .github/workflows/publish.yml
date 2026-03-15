@@ -64,6 +64,22 @@ jobs:
         pnpm publish --no-verify-access --access public
         cd ../..
 
+        # AI (Natural Language Generator)
+        echo "📦 Publishing @cdl/ai..."
+        cd packages/ai
+        pnpm install
+        pnpm run build
+        pnpm publish --no-verify-access --access public
+        cd ../..
+
+        # SSR (Server-Side Rendering)
+        echo "📦 Publishing @cdl/ssr..."
+        cd packages/ssr
+        pnpm install
+        # SSR doesn't need build, server.js is ready
+        pnpm publish --no-verify-access --access public
+        cd ../..
+
         echo "✅ All packages published successfully!"
 
     - name: Create GitHub Release Comment
@@ -75,6 +91,10 @@ jobs:
         echo "  - @cdl/compiler"
         echo "  - @cdl/renderer-echarts"
         echo "  - @cdl/cli"
+        echo "  - @cdl/ai"
+        echo "  - @cdl/ssr"
         echo ""
         echo "🚀 Installation:"
         echo "  npm install @cdl/compiler @cdl/renderer-echarts @cdl/cli"
+        echo ""
+        echo "📚 Documentation: https://naeemo.github.io/cdl/"

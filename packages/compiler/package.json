@@ -1,7 +1,7 @@
 {
   "name": "@cdl/compiler",
-  "version": "0.6.0",
-  "description": "CDL compiler - Compile Chart Definition Language to typed JSON AST (v0.6)",
+  "version": "0.1.0",
+  "description": "CDL compiler - Compile Chart Definition Language to typed JSON AST",
   "main": "dist/compiler.js",
   "types": "dist/compiler.d.ts",
   "files": [
