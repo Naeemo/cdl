@@ -35,21 +35,21 @@ jobs:
         echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
 
         # Do NOT run root pnpm install - it will try to fetch unpublished packages
-        # Instead, install dependencies inside each package directory
+        # Instead, install dependencies inside each package directory with workspace linking
 
         echo "Publishing CDL packages to NPM..."
 
         # ===== Stage 1: Core packages (no internal deps) =====
         echo "📦 Publishing @naeemo/cdl-compiler..."
         cd packages/compiler
-        pnpm install
+        pnpm install --link-workspace-packages --no-save
         pnpm run build
         pnpm publish --no-verify-access --access public
         cd ../..
 
         echo "📦 Publishing @naeemo/cdl-renderer-echarts..."
         cd packages/renderer
-        pnpm install
+        pnpm install --link-workspace-packages --no-save
         pnpm run build
         pnpm publish --no-verify-access --access public
         cd ../..
@@ -57,74 +57,74 @@ jobs:
         # ===== Stage 2: Packages that depend on core =====
         echo "📦 Publishing @naeemo/cdl-ai..."
         cd packages/ai
-        pnpm install
+        pnpm install --link-workspace-packages --no-save
         pnpm run build
         pnpm publish --no-verify-access --access public
         cd ../..
 
         echo "📦 Publishing @naeemo/cdl-ssr..."
         cd packages/ssr
-        pnpm install
+        pnpm install --link-workspace-packages --no-save
         pnpm publish --no-verify-access --access public
         cd ../..
 
         echo "📦 Publishing @naeemo/cdl-cli..."
         cd packages/cli
-        pnpm install
+        pnpm install --link-workspace-packages --no-save
         pnpm publish --no-verify-access --access public
         cd ../..
 
         # ===== Stage 3: Remaining packages =====
         echo "📦 Publishing @naeemo/cdl-react..."
         cd packages/react
-        pnpm install
+        pnpm install --link-workspace-packages --no-save
         pnpm run build
         pnpm publish --no-verify-access --access public
         cd ../..
 
         echo "📦 Publishing @naeemo/cdl-vue..."
         cd packages/vue
-        pnpm install
+        pnpm install --link-workspace-packages --no-save
         pnpm run build
         pnpm publish --no-verify-access --access public
         cd ../..
 
         echo "📦 Publishing @naeemo/cdl-templates..."
         cd packages/templates
-        pnpm install
+        pnpm install --link-workspace-packages --no-save
         pnpm publish --no-verify-access --access public
         cd ../..
 
         echo "📦 Publishing @naeemo/cdl-themes..."
         cd packages/themes
-        pnpm install
+        pnpm install --link-workspace-packages --no-save
         pnpm run build
         pnpm publish --no-verify-access --access public
         cd ../..
 
         echo "📦 Publishing @naeemo/cdl-renderer-canvas..."
         cd packages/renderer-canvas
-        pnpm install
+        pnpm install --link-workspace-packages --no-save
         pnpm publish --no-verify-access --access public
         cd ../..
 
         echo "📦 Publishing @naeemo/cdl-renderer-d3..."
         cd packages/renderer-d3
-        pnpm install
+        pnpm install --link-workspace-packages --no-save
         pnpm run build
         pnpm publish --no-verify-access --access public
         cd ../..
 
         echo "📦 Publishing @naeemo/cdl-vscode..."
         cd packages/vscode-extension
-        pnpm install
+        pnpm install --link-workspace-packages --no-save
         pnpm run build 2>/dev/null || echo "No build script, skipping"
         pnpm publish --no-verify-access --access public
         cd ../..
 
         echo "📦 Publishing @naeemo/cdl-integration-test..."
         cd packages/integration-test
-        pnpm install
+        pnpm install --link-workspace-packages --no-save
         pnpm publish --no-verify-access --access public
         cd ../..
 
