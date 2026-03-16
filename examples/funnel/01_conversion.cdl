@@ -1,0 +1,18 @@
+@lang(data)
+FunnelData {
+    stage,count
+    访问,1000
+    点击,500
+    加入购物车,200
+    结算,100
+    支付,80
+}
+
+Chart 用户转化漏斗 {
+    use FunnelData
+    type funnel
+    x stage
+    y count
+    @title "用户转化漏斗"
+    @color "#5470c6"
+}

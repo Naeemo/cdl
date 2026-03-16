@@ -1,0 +1,20 @@
+@lang(data)
+SalesData {
+    level1,level2,level3,value
+    公司,技术部,前端,15
+    公司,技术部,后端,12
+    公司,技术部,测试,8
+    公司,产品部,产品经理,5
+    公司,产品部,业务分析,3
+    公司,市场部,销售,20
+    公司,市场部,推广,10
+}
+
+Chart 组织架构旭日图 {
+    use SalesData
+    type sunburst
+    x level2
+    y value
+    group level1
+    @title "组织规模分布"
+}

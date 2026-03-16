@@ -86,7 +86,7 @@ max: 50
 - **🔒 安全交付** - DSL 不携带数据，权限和数据留在服务端
 - **🤖 AI 友好** - 结构化、可验证，LLM 易于生成和修改
 - **🎨 渐进渲染** - 核心层必渲染，@提示层可选解析
-- **📊 16+ 图表类型** - line/bar/pie/scatter/area/radar/combo/heatmap 等
+- **📊 20+ 图表类型** - line/bar/pie/scatter/area/radar/combo/heatmap/funnel/treemap/sunburst/sankey
 - **⚡ 极简表达** - ECharts option 的极简映射，舍弃低频配置
 - **🎯 智能推断** - 从标题自动识别图表类型，自动映射字段
 - **🔧 精细控制** - 支持多系列、坐标轴、交互声明
@@ -193,7 +193,7 @@ npm start
 - [快速开始](https://naeemo.github.io/cdl/guide/) - 三种语法级别详解
 - [语法规范 v0.6](https://naeemo.github.io/cdl/guide/syntax) - 完整语法参考（含高级特性）
 - [数据源定义](./guide/data) - SQL/DAX/内联数据
-- [图表类型](./guide/charts) - 16+ 图表类型及示例
+- [图表类型](./guide/charts) - 20+ 图表类型及示例（包括漏斗图、树图、旭日图、桑基图）
 - [在线体验](../playground/) - 实时编辑和预览
 - [示例代码](../examples/) - 丰富的图表示例
 
@@ -225,18 +225,20 @@ cdl/
 
 ### v0.1 (当前版本) ✅ 已完成
 - ✅ 基础编译器（数据定义 + 图表定义）
-- ✅ ECharts 渲染器（16+ 图表类型）
+- ✅ ECharts 渲染器（20+ 图表类型：line/bar/pie/scatter/area/radar/combo/heatmap/funnel/treemap/sunburst/sankey）
 - ✅ CLI 命令行工具
 - ✅ AI 自然语言生成
 - ✅ 服务端渲染（SSR）
 - ✅ VS Code 插件
 - ✅ 完整文档 + Playground
 
-### 未来规划
-- 主题系统 - 更多自定义选项
-- 响应式布局 - 图表自适应
-- D3 渲染器 - 替代渲染引擎
-- 数据管道 - filter/aggregate 支持
+### v0.2+ 近期规划
+- **交互增强**：数据下钻、联动高亮、动态更新、动画配置
+- **3D 图表**：基于 three.js 的 3D 可视化
+- **主题系统**：更多预设主题 + 自定义配置
+- **响应式布局**：图表自适应容器尺寸
+- **数据管道**：filter/aggregate/sort/limit 链式调用
+- **React/Vue 组件**：升级到 v1.0，完善 TypeScript 类型
 
 ---
 

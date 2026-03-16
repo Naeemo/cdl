@@ -1,6 +1,6 @@
 {
   "name": "@naeemo/cdl-react",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "description": "CDL React component - Render charts from CDL code in React applications",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -26,8 +26,8 @@
     "react-dom": ">=16.8.0"
   },
   "dependencies": {
-    "@naeemo/cdl-compiler": "^0.2.0",
-    "@naeemo/cdl-renderer-echarts": "^0.2.0",
+    "@naeemo/cdl-compiler": "workspace:*",
+    "@naeemo/cdl-renderer-echarts": "workspace:*",
     "echarts": "^5.4.3"
   },
   "devDependencies": {

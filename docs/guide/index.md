@@ -111,14 +111,14 @@ Chart 月度销售 {
 ### 安装
 
 ```bash
-npm install @cdl/compiler @cdl/renderer-echarts
+npm install @naeemo/cdl-compiler @naeemo/cdl-renderer-echarts
 ```
 
 ### 基本使用
 
 ```typescript
-import { compile } from '@cdl/compiler'
-import { render } from '@cdl/renderer-echarts'
+import { compile } from '@naeemo/cdl-compiler'
+import { render } from '@naeemo/cdl-renderer-echarts'
 
 const cdlSource = `
 @lang(data)
@@ -151,7 +151,7 @@ if (errors.length > 0) {
 
 ```bash
 # 安装全局 CLI
-npm install -g @cdl/cli
+npm install -g @naeemo/cdl-cli
 
 # 验证语法
 cdl validate example.cdl

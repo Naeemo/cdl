@@ -1,6 +1,6 @@
 {
   "name": "@naeemo/cdl-vue",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "description": "CDL Vue component - Render charts from CDL code in Vue applications",
   "main": "dist/CDLChart.vue",
   "types": "dist/CDLChart.vue.d.ts",
@@ -25,8 +25,8 @@
     "vue": ">=3.0.0"
   },
   "dependencies": {
-    "@naeemo/cdl-compiler": "^0.2.0",
-    "@naeemo/cdl-renderer-echarts": "^0.2.0",
+    "@naeemo/cdl-compiler": "workspace:*",
+    "@naeemo/cdl-renderer-echarts": "workspace:*",
     "echarts": "^5.4.3"
   },
   "devDependencies": {

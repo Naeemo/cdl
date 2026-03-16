@@ -49,14 +49,14 @@ Chart 月度销售 {
 ## 安装
 
 ```bash
-npm install @cdl/compiler @cdl/renderer-echarts
+npm install @naeemo/cdl-compiler @naeemo/cdl-renderer-echarts
 ```
 
 ## 使用
 
 ```typescript
-import { compile } from '@cdl/compiler'
-import { render } from '@cdl/renderer-echarts'
+import { compile } from '@naeemo/cdl-compiler'
+import { render } from '@naeemo/cdl-renderer-echarts'
 
 const { result } = compile(cdlSource)
 const { option } = render(result)

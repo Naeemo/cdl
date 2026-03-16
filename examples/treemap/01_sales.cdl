@@ -1,0 +1,21 @@
+@lang(data)
+CategorySales {
+    category,subcategory,sales
+    电子产品,手机,50000
+    电子产品,电脑,30000
+    电子产品,平板,15000
+    服装,男装,20000
+    服装,女装,25000
+    服装,童装,8000
+    家居,家具,35000
+    家居,灯具,12000
+}
+
+Chart 销售树图 {
+    use CategorySales
+    type treemap
+    x subcategory
+    y sales
+    group category
+    @title "各类别销售占比"
+}
