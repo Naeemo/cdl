@@ -24,9 +24,6 @@ jobs:
         node-version: '22'
         registry-url: 'https://registry.npmjs.org'
 
-    - name: Install pnpm
-      run: npm install -g pnpm@8.14.1
-
     - name: Build and publish packages
       env:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -35,7 +32,7 @@ jobs:
 
         echo "Publishing CDL packages to NPM..."
 
-        # Stage 1: Core packages (no internal deps or publish first)
+        # Stage 1: Core packages
         echo "📦 Publishing @naeemo/cdl-compiler..."
         cd packages/compiler
         npm install
@@ -148,5 +145,3 @@ jobs:
         echo ""
         echo "🚀 Installation:"
         echo "  npm install @naeemo/cdl-compiler @naeemo/cdl-renderer-echarts @naeemo/cdl-cli"
-        echo ""
-        echo "📚 Documentation: https://naeemo.github.io/cdl/"
