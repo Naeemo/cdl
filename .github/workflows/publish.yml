@@ -34,8 +34,8 @@ jobs:
         # Set up npm auth
         echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
 
-        # Install root dependencies (for build tools only)
-        pnpm install --frozen-lockfile=false --ignore-scripts
+        # Do NOT run root pnpm install - it will try to fetch unpublished packages
+        # Instead, install dependencies inside each package directory
 
         echo "Publishing CDL packages to NPM..."
 
