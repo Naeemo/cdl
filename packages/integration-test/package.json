@@ -1,5 +1,5 @@
 {
-  "name": "@cdl/integration-test",
+  "name": "@naeemo/cdl-integration-test",
   "version": "0.1.0",
   "description": "Integration tests for CDL v0.6",
   "main": "test-v06.js",
@@ -8,7 +8,7 @@
     "test:comprehensive": "node test-comprehensive.js"
   },
   "devDependencies": {
-    "@cdl/compiler": "file:../compiler",
-    "@cdl/renderer-echarts": "file:../renderer"
+    "@naeemo/cdl-compiler": "file:../compiler",
+    "@naeemo/cdl-renderer-echarts": "file:../renderer"
   }
 }

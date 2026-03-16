@@ -1,5 +1,5 @@
 {
-  "name": "@cdl/themes",
+  "name": "@naeemo/cdl-themes",
   "version": "0.1.0",
   "description": "CDL Theme System - Reusable theme configurations for CDL charts",
   "main": "dist/index.js",

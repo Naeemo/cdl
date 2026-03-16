@@ -41,7 +41,7 @@ jobs:
         echo "Publishing CDL packages to NPM..."
 
         # Compiler
-        echo "📦 Publishing @cdl/compiler..."
+        echo "📦 Publishing @naeemo/cdl-compiler..."
         cd packages/compiler
         pnpm install
         pnpm run build
@@ -49,7 +49,7 @@ jobs:
         cd ../..
 
         # Renderer ECharts
-        echo "📦 Publishing @cdl/renderer-echarts..."
+        echo "📦 Publishing @naeemo/cdl-renderer-echarts..."
         cd packages/renderer
         pnpm install
         pnpm run build
@@ -57,7 +57,7 @@ jobs:
         cd ../..
 
         # CLI
-        echo "📦 Publishing @cdl/cli..."
+        echo "📦 Publishing @naeemo/cdl-cli..."
         cd packages/cli
         pnpm install
         # CLI doesn't need build, just ensure dependencies are linked
@@ -65,7 +65,7 @@ jobs:
         cd ../..
 
         # AI (Natural Language Generator)
-        echo "📦 Publishing @cdl/ai..."
+        echo "📦 Publishing @naeemo/cdl-ai..."
         cd packages/ai
         pnpm install
         pnpm run build
@@ -73,7 +73,7 @@ jobs:
         cd ../..
 
         # SSR (Server-Side Rendering)
-        echo "📦 Publishing @cdl/ssr..."
+        echo "📦 Publishing @naeemo/cdl-ssr..."
         cd packages/ssr
         pnpm install
         # SSR doesn't need build, server.js is ready
@@ -88,13 +88,13 @@ jobs:
         echo "🎉 CDL v${{ github.event.release.tag_name }} packages published to NPM!"
         echo ""
         echo "📦 Published packages:"
-        echo "  - @cdl/compiler"
-        echo "  - @cdl/renderer-echarts"
-        echo "  - @cdl/cli"
-        echo "  - @cdl/ai"
-        echo "  - @cdl/ssr"
+        echo "  - @naeemo/cdl-compiler"
+        echo "  - @naeemo/cdl-renderer-echarts"
+        echo "  - @naeemo/cdl-cli"
+        echo "  - @naeemo/cdl-ai"
+        echo "  - @naeemo/cdl-ssr"
         echo ""
         echo "🚀 Installation:"
-        echo "  npm install @cdl/compiler @cdl/renderer-echarts @cdl/cli"
+        echo "  npm install @naeemo/cdl-compiler @naeemo/cdl-renderer-echarts @naeemo/cdl-cli"
         echo ""
         echo "📚 Documentation: https://naeemo.github.io/cdl/"

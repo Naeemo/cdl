@@ -1,5 +1,5 @@
 {
-  "name": "renderer-canvas",
+  "name": "@naeemo/cdl-renderer-canvas",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",

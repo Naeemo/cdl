@@ -1,5 +1,5 @@
 {
-  "name": "@cdl/compiler",
+  "name": "@naeemo/cdl-compiler",
   "version": "0.1.0",
   "description": "CDL compiler - Compile Chart Definition Language to typed JSON AST",
   "main": "dist/compiler.js",

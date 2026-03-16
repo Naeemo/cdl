@@ -96,7 +96,7 @@ max: 50
 ## 📦 安装
 
 ```bash
-npm install @cdl/compiler @cdl/renderer-echarts
+npm install @naeemo/cdl-compiler @naeemo/cdl-renderer-echarts
 ```
 
 ---
@@ -104,8 +104,8 @@ npm install @cdl/compiler @cdl/renderer-echarts
 ## 🚀 快速使用
 
 ```typescript
-import { compile } from '@cdl/compiler'
-import { render } from '@cdl/renderer-echarts'
+import { compile } from '@naeemo/cdl-compiler'
+import { render } from '@naeemo/cdl-renderer-echarts'
 
 const cdlSource = `
 @lang(data)
@@ -144,7 +144,7 @@ if (errors.length > 0) {
 ### CLI 导出
 ```bash
 # 安装 CLI
-npm install -g @cdl/cli
+npm install -g @naeemo/cdl-cli
 
 # 验证语法
 cdl validate example.cdl
@@ -161,11 +161,11 @@ cdl nl "月度销售额折线图，蓝色" --api-key $KIMI_API_KEY
 
 ### AI 自然语言生成
 ```bash
-npm install @cdl/ai
+npm install @naeemo/cdl-ai
 ```
 
 ```typescript
-import { nlToCDL } from '@cdl/ai';
+import { nlToCDL } from '@naeemo/cdl-ai';
 
 const result = await nlToCDL("最近6个月销售额折线图，蓝色", {
   apiKey: 'your-kimi-api-key'
@@ -204,12 +204,12 @@ npm start
 ```
 cdl/
 ├── packages/
-│   ├── compiler/          # @cdl/compiler - CDL 编译器
-│   ├── renderer-echarts/  # @cdl/renderer-echarts - ECharts 渲染器
-│   ├── cli/               # @cdl/cli - 命令行工具
-│   ├── ssr/               # @cdl/ssr - 服务端渲染服务
-│   ├── ai/                # @cdl/ai - AI 自然语言生成
-│   ├── react/             # @cdl/react - React 组件
+│   ├── compiler/          # @naeemo/cdl-compiler - CDL 编译器
+│   ├── renderer-echarts/  # @naeemo/cdl-renderer-echarts - ECharts 渲染器
+│   ├── cli/               # @naeemo/cdl-cli - 命令行工具
+│   ├── ssr/               # @naeemo/cdl-ssr - 服务端渲染服务
+│   ├── ai/                # @naeemo/cdl-ai - AI 自然语言生成
+│   ├── react/             # @naeemo/cdl-react - React 组件
 │   └── ...
 ├── vscode-extension/      # VS Code 插件（语法高亮、片段）
 ├── docs/                  # VitePress 文档站点

@@ -1,5 +1,5 @@
 {
-  "name": "@cdl/ssr",
+  "name": "@naeemo/cdl-ssr",
   "version": "0.1.0",
   "description": "CDL server-side rendering and export service",
   "main": "server.js",
@@ -8,8 +8,8 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
-    "@cdl/compiler": "file:../compiler",
-    "@cdl/renderer-echarts": "file:../renderer",
+    "@naeemo/cdl-compiler": "file:../compiler",
+    "@naeemo/cdl-renderer-echarts": "file:../renderer",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "puppeteer": "^21.0.0"
