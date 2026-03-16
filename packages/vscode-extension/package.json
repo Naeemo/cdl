@@ -139,7 +139,7 @@
     "typescript": "^4.9.4"
   },
   "dependencies": {
-    "@naeemo/cdl-compiler": "workspace:*",
-    "@naeemo/cdl-renderer-echarts": "workspace:*"
+    "@naeemo/cdl-compiler": "^0.1.0",
+    "@naeemo/cdl-renderer-echarts": "^0.1.0"
   }
 }

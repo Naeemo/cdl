@@ -37,10 +37,10 @@
   "author": "Naeemo <naeemo@qq.com>",
   "license": "MIT",
   "peerDependencies": {
-    "@naeemo/cdl-compiler": "workspace:*"
+    "@naeemo/cdl-compiler": "^0.1.0"
   },
   "devDependencies": {
-    "@naeemo/cdl-compiler": "workspace:*",
+    "@naeemo/cdl-compiler": "^0.1.0",
     "@types/node": "^20.11.0",
     "typescript": "^5.3.0"
   }

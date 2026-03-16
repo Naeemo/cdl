@@ -8,7 +8,7 @@
     "test:comprehensive": "node test-comprehensive.js"
   },
   "devDependencies": {
-    "@naeemo/cdl-compiler": "workspace:*",
-    "@naeemo/cdl-renderer-echarts": "workspace:*"
+    "@naeemo/cdl-compiler": "^0.1.0",
+    "@naeemo/cdl-renderer-echarts": "^0.1.0"
   }
 }
