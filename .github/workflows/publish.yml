@@ -34,13 +34,12 @@ jobs:
         # Set up npm auth
         echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
 
-        # Install root dependencies
-        pnpm install --frozen-lockfile=false
+        # Install root dependencies (for build tools only)
+        pnpm install --frozen-lockfile=false --ignore-scripts
 
-        # Build and publish each package
         echo "Publishing CDL packages to NPM..."
 
-        # Compiler
+        # ===== Stage 1: Core packages (no internal deps) =====
         echo "📦 Publishing @naeemo/cdl-compiler..."
         cd packages/compiler
         pnpm install
@@ -48,7 +47,6 @@ jobs:
         pnpm publish --no-verify-access --access public
         cd ../..
 
-        # Renderer ECharts
         echo "📦 Publishing @naeemo/cdl-renderer-echarts..."
         cd packages/renderer
         pnpm install
@@ -56,15 +54,7 @@ jobs:
         pnpm publish --no-verify-access --access public
         cd ../..
 
-        # CLI
-        echo "📦 Publishing @naeemo/cdl-cli..."
-        cd packages/cli
-        pnpm install
-        # CLI doesn't need build, just ensure dependencies are linked
-        pnpm publish --no-verify-access --access public
-        cd ../..
-
-        # AI (Natural Language Generator)
+        # ===== Stage 2: Packages that depend on core =====
         echo "📦 Publishing @naeemo/cdl-ai..."
         cd packages/ai
         pnpm install
@@ -72,11 +62,69 @@ jobs:
         pnpm publish --no-verify-access --access public
         cd ../..
 
-        # SSR (Server-Side Rendering)
         echo "📦 Publishing @naeemo/cdl-ssr..."
         cd packages/ssr
         pnpm install
-        # SSR doesn't need build, server.js is ready
+        pnpm publish --no-verify-access --access public
+        cd ../..
+
+        echo "📦 Publishing @naeemo/cdl-cli..."
+        cd packages/cli
+        pnpm install
+        pnpm publish --no-verify-access --access public
+        cd ../..
+
+        # ===== Stage 3: Remaining packages =====
+        echo "📦 Publishing @naeemo/cdl-react..."
+        cd packages/react
+        pnpm install
+        pnpm run build
+        pnpm publish --no-verify-access --access public
+        cd ../..
+
+        echo "📦 Publishing @naeemo/cdl-vue..."
+        cd packages/vue
+        pnpm install
+        pnpm run build
+        pnpm publish --no-verify-access --access public
+        cd ../..
+
+        echo "📦 Publishing @naeemo/cdl-templates..."
+        cd packages/templates
+        pnpm install
+        pnpm publish --no-verify-access --access public
+        cd ../..
+
+        echo "📦 Publishing @naeemo/cdl-themes..."
+        cd packages/themes
+        pnpm install
+        pnpm run build
+        pnpm publish --no-verify-access --access public
+        cd ../..
+
+        echo "📦 Publishing @naeemo/cdl-renderer-canvas..."
+        cd packages/renderer-canvas
+        pnpm install
+        pnpm publish --no-verify-access --access public
+        cd ../..
+
+        echo "📦 Publishing @naeemo/cdl-renderer-d3..."
+        cd packages/renderer-d3
+        pnpm install
+        pnpm run build
+        pnpm publish --no-verify-access --access public
+        cd ../..
+
+        echo "📦 Publishing @naeemo/cdl-vscode..."
+        cd packages/vscode-extension
+        pnpm install
+        pnpm run build 2>/dev/null || echo "No build script, skipping"
+        pnpm publish --no-verify-access --access public
+        cd ../..
+
+        echo "📦 Publishing @naeemo/cdl-integration-test..."
+        cd packages/integration-test
+        pnpm install
         pnpm publish --no-verify-access --access public
         cd ../..
 
