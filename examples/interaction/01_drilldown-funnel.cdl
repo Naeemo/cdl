@@ -1,0 +1,18 @@
+@lang(data)
+FunnelData {
+    stage,count
+    访问,1000
+    点击,500
+    加入购物车,200
+    结算,100
+    支付,80
+}
+
+Chart 可下钻漏斗 {
+    use FunnelData
+    type funnel
+    x stage
+    y count
+    @title "转化漏斗（支持下钻）"
+    @interaction "drill-down:true"
+}

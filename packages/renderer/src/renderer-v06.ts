@@ -543,6 +543,62 @@ function applyInteraction(
       option.brush.link = interaction.brush.connect;
     }
   }
+
+  // v0.2+ 新增交互
+  
+  // Drill-down
+  if (interaction.drillDown) {
+    // 保存下钻配置到 option 自定义字段，前端需自行处理点击事件
+    option.drillDown = {
+      enabled: true,
+      field: interaction.drillDown.field,
+      maxLevels: interaction.drillDown.maxLevels,
+      breadcrumb: interaction.drillDown.breadcrumb !== false,
+    };
+    // 添加点击事件处理器占位（实际需前端实现）
+    option.series = option.series.map((s: any) => ({
+      ...s,
+      cursor: 'pointer',
+    }));
+  }
+
+  // Linked highlighting
+  if (interaction.link) {
+    const linkConfig = Array.isArray(interaction.link) 
+      ? { charts: interaction.link, group: undefined, highlight: 'both' }
+      : interaction.link;
+    
+    option.linkHighlight = {
+      enabled: true,
+      charts: linkConfig.charts || [],
+      group: linkConfig.group,
+      highlight: linkConfig.highlight || 'both',
+    };
+    
+    // ECharts 的 emphasis 配置会处理基础高亮
+    // 多图表联动需要前端额外代码
+  }
+
+  // Live update (dynamic data)
+  if (interaction.live) {
+    option.live = {
+      enabled: true,
+      interval: interaction.live === true ? 5000 : (interaction.live === 'stream' ? 0 : interaction.live),
+      stream: interaction.live === 'stream',
+    };
+    // 实际实时更新需要前端轮询或 WebSocket
+  }
+
+  // Animation configuration
+  if (interaction.animation) {
+    option.animation = {
+      ...option.animation,
+      easing: interaction.animation.easing || option.animation?.easing || 'cubicOut',
+      duration: interaction.animation.duration || option.animation?.duration || 1000,
+      delay: interaction.animation.delay || option.animation?.delay || 0,
+      loop: interaction.animation.loop || option.animation?.loop || false,
+    };
+  }
 }
 
 /**

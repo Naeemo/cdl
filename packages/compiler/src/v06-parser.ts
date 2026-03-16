@@ -246,6 +246,89 @@ function parseInteraction(str: string): InteractionConfig {
           }
         }
         break;
+      // v0.2+ 新增交互
+      case 'drillDown':
+        if (val === 'true') cfg.drillDown = true;
+        else if (val.startsWith('{')) {
+          try {
+            const fixed = val.replace(/'/g, '"').replace(/(\w+):/g, '"$1":');
+            const json = JSON.parse(fixed);
+            cfg.drillDown = {
+              field: json.field,
+              maxLevels: json.maxLevels,
+              breadcrumb: json.breadcrumb !== false, // 默认 true
+            };
+          } catch (e) {
+            // 简单解析 field=xxx,levels=n
+            const fieldMatch = val.match(/field=(\w+)/);
+            const levelsMatch = val.match(/levels=(\d+)/);
+            cfg.drillDown = {
+              field: fieldMatch ? fieldMatch[1] : undefined,
+              maxLevels: levelsMatch ? parseInt(levelsMatch[1]) : undefined,
+              breadcrumb: true,
+            };
+          }
+        } else {
+          cfg.drillDown = true;
+        }
+        break;
+      case 'link':
+        if (val === 'true') cfg.link = []; // 空数组表示链接到同页面所有图表
+        else if (val.startsWith('[') || val.includes(',')) {
+          // 数组格式: chart1,chart2
+          const charts = val.replace(/[\[\]'"]/g, '').split(',').map(s => s.trim()).filter(Boolean);
+          cfg.link = charts.length ? charts : [];
+        } else if (val.startsWith('{')) {
+          try {
+            const fixed = val.replace(/'/g, '"').replace(/(\w+):/g, '"$1":');
+            const json = JSON.parse(fixed);
+            cfg.link = {
+              charts: json.charts || [],
+              group: json.group,
+              highlight: json.highlight || 'both',
+            };
+          } catch (e) {
+            cfg.link = { charts: [val] };
+          }
+        } else {
+          cfg.link = [val];
+        }
+        break;
+      case 'live':
+        if (val === 'true' || val === 'stream') cfg.live = val;
+        else if (/^\d+$/.test(val)) {
+          cfg.live = parseInt(val, 10);
+        } else {
+          cfg.live = true;
+        }
+        break;
+      case 'animation':
+        if (val === 'true') cfg.animation = {};
+        else if (val.startsWith('{')) {
+          try {
+            const fixed = val.replace(/'/g, '"').replace(/(\w+):/g, '"$1":');
+            const json = JSON.parse(fixed);
+            cfg.animation = {
+              easing: json.easing,
+              duration: json.duration,
+              delay: json.delay,
+              loop: json.loop,
+            };
+          } catch (e) {
+            // 简单解析 key=value
+            const easingMatch = val.match(/easing=(\w+)/);
+            const durationMatch = val.match(/duration=(\d+)/);
+            const delayMatch = val.match(/delay=(\d+)/);
+            const loopMatch = val.match(/loop=(true|false)/);
+            cfg.animation = {
+              easing: easingMatch ? easingMatch[1] : undefined,
+              duration: durationMatch ? parseInt(durationMatch[1]) : undefined,
+              delay: delayMatch ? parseInt(delayMatch[1]) : undefined,
+              loop: loopMatch ? loopMatch[1] === 'true' : undefined,
+            };
+          }
+        }
+        break;
     }
   }
   return cfg;

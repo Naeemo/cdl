@@ -1,0 +1,28 @@
+@lang(data)
+CategorySales {
+    category,subcategory,sales
+    电子产品,手机,50000
+    电子产品,电脑,30000
+    服装,男装,20000
+    服装,女装,25000
+    家居,家具,35000
+}
+
+Chart 柱状图 {
+    use CategorySales
+    type bar
+    x subcategory
+    y sales
+    group category
+    @title "联动高亮示例"
+    @interaction "link:chart2,chart3"
+}
+
+Chart 饼图 {
+    use CategorySales
+    type pie
+    x subcategory
+    y sales
+    group category
+    @title "联动高亮目标"
+}

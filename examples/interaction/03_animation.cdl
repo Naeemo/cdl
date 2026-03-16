@@ -1,0 +1,20 @@
+@lang(data)
+SalesData {
+    month,sales
+    1月,100
+    2月,150
+    3月,200
+    4月,180
+    5月,220
+    6月,250
+}
+
+Chart 自定义动画折线图 {
+    use SalesData
+    type line
+    x month
+    y sales
+    @title "月度销售趋势（弹性动画）"
+    @color "#4fc3f7"
+    @interaction "animation:{easing:elasticOut,duration:1500,loop:false}"
+}

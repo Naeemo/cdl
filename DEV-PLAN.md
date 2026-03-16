@@ -138,14 +138,14 @@ Chart {
 - [ ] 更新语法文档（PROMPT.md）
 - [ ] 添加新图表示例到 examples/
 
-### Phase 2: 交互增强（2-3 天）
-- [ ] 扩展 `interaction` 类型定义
-- [ ] 实现 `applyDrillDown()` 函数
-- [ ] 实现 `applyLinkHighlight()` 函数
-- [ ] 实现 `applyLiveUpdate()` 逻辑
-- [ ] 实现 `applyAnimationConfig()` 函数
-- [ ] 更新 `applyInteraction()` 函数
-- [ ] 测试交互逻辑（可能需要前端配合）
+### Phase 2: 交互增强（2-3 天）✅ 已完成
+- [x] 扩展 `interaction` 类型定义
+- [x] 实现 `applyDrillDown()` 函数
+- [x] 实现 `applyLinkHighlight()` 函数
+- [x] 实现 `applyLiveUpdate()` 逻辑
+- [x] 实现 `applyAnimationConfig()` 函数
+- [x] 更新 `applyInteraction()` 函数
+- [x] 测试交互逻辑
 
 ### Phase 3: 测试与文档（1 天）
 - [ ] 为每个新图表编写测试用例

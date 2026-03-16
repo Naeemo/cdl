@@ -52,6 +52,24 @@ export interface InteractionConfig {
   legend?: boolean;
   zoom?: boolean | 'inside' | 'slider' | { type: 'inside' | 'slider' };
   brush?: boolean | { connect?: string[]; link?: Record<string, string[]> };
+  // v0.2+ 新增交互
+  drillDown?: boolean | { 
+    field?: string;      // 下钻字段（默认使用 group 或分类字段）
+    maxLevels?: number;  // 最大下钻层级
+    breadcrumb?: boolean; // 显示面包屑导航
+  };
+  link?: string[] | { 
+    charts?: string[];    // 联动的其他图表ID
+    group?: string;       // 联动字段（默认使用 group）
+    highlight?: 'both' | 'source'; // 高亮模式
+  };
+  live?: boolean | number | 'stream';  // true=默认间隔, number=毫秒, stream=WebSocket
+  animation?: {
+    easing?: string;      // 缓动函数: linear, easeIn, easeOut, elastic...
+    duration?: number;    // 动画时长(ms)
+    delay?: number;       // 延迟(ms)
+    loop?: boolean;       // 循环播放
+  };
 }
 
 export interface ChartHint {
