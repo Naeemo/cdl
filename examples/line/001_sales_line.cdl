@@ -1,0 +1,22 @@
+@lang(data)
+SalesData {
+    month,region,product_category,revenue,units,profit
+    month_1,华北,电子产品,5871,units_1,7495
+    month_2,华南,服装,5603,units_2,5588
+    month_3,华东,食品,4035,units_3,8142
+    month_4,华中,家居,9180,units_4,1475
+    month_5,西南,书籍,9168,units_5,7317
+    month_6,西北,运动装备,4581,units_6,3838
+}
+
+Chart {
+    use SalesData
+    type line
+    x region
+    y revenue
+    group region
+    @title "销售数据分析 - LINE"
+    @style "平滑曲线，带数据点标记"
+    @color "#5470c6"
+    @interaction "tooltip:shared zoom:inside"
+}

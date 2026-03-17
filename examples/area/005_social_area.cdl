@@ -1,0 +1,22 @@
+@lang(data)
+SocialMedia {
+    date,platform,followers,engagement,posts
+    2026-03-11,Twitter,9418,0.348,posts_1
+    2026-03-12,Facebook,1312,0.499,posts_2
+    2026-03-13,Instagram,6160,0.497,posts_3
+    2026-03-14,LinkedIn,1181,0.405,posts_4
+    2026-03-15,TikTok,8856,0.490,posts_5
+    2026-03-16,YouTube,3835,0.433,posts_6
+}
+
+Chart {
+    use SocialMedia
+    type area
+    x date
+    y followers
+    group platform
+    @title "社交媒体表现 - AREA"
+    @style "面积填充，透明度渐变"
+    @color "#73c0de"
+    @interaction "tooltip:shared zoom:inside"
+}

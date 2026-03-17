@@ -1,0 +1,19 @@
+@lang(data)
+HealthData {
+    date,metric,value,target,status
+    2026-03-12,metric_1,value_1,target_1,active
+    2026-03-13,metric_2,value_2,target_2,active
+    2026-03-14,metric_3,value_3,target_3,inactive
+    2026-03-15,metric_4,value_4,target_4,active
+    2026-03-16,metric_5,value_5,target_5,inactive
+}
+
+Chart {
+    use HealthData
+    type scatter
+    x date
+    y value
+    @title "健康指标监控 - SCATTER"
+    @style "气泡散点，大小映射"
+    @color "#fac858"
+}
