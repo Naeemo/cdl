@@ -1,12 +1,12 @@
 @lang(data)
 SalesData {
     month,region,product_category,revenue,units,profit
-    month_1,华北,电子产品,10336,units_1,6467
-    month_2,华南,服装,1194,units_2,8331
-    month_3,华东,食品,10952,units_3,7366
-    month_4,华中,家居,7601,units_4,4274
-    month_5,西南,书籍,10263,units_5,10973
-    month_6,西北,运动装备,6846,units_6,1785
+    month_1,华北,电子产品,3491,units_1,8901
+    month_2,华南,服装,9967,units_2,9773
+    month_3,华东,食品,7209,units_3,8807
+    month_4,华中,家居,2356,units_4,10264
+    month_5,西南,书籍,5374,units_5,2521
+    month_6,西北,运动装备,8175,units_6,9893
 }
 
 Chart {

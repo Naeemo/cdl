@@ -1,0 +1,20 @@
+@lang(data)
+StudentScores {
+    student,subject,score,class_rank,attendance
+    student_1,subject_1,89,class_rank_1,attendance_1
+    student_2,subject_2,65,class_rank_2,attendance_2
+    student_3,subject_3,96,class_rank_3,attendance_3
+    student_4,subject_4,65,class_rank_4,attendance_4
+    student_5,subject_5,61,class_rank_5,attendance_5
+    student_6,subject_6,71,class_rank_6,attendance_6
+}
+
+Chart {
+    use StudentScores
+    type map
+    x student
+    y score
+    @title "成绩分布 - MAP"
+    @style "地图，区域着色"
+    @color "#fc8452"
+}

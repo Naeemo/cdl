@@ -1,0 +1,21 @@
+@lang(data)
+WebTraffic {
+    date,page,visitors,bounce_rate,avg_session
+    2026-03-11,page_1,visitors_1,0.379,avg_session_1
+    2026-03-12,page_2,visitors_2,0.313,avg_session_2
+    2026-03-13,page_3,visitors_3,0.405,avg_session_3
+    2026-03-14,page_4,visitors_4,0.477,avg_session_4
+    2026-03-15,page_5,visitors_5,0.349,avg_session_5
+    2026-03-16,page_6,visitors_6,0.431,avg_session_6
+}
+
+Chart {
+    use WebTraffic
+    type sankey
+    x page
+    y page
+    @title "流量趋势 - SANKEY"
+    @style "桑基流图，节点大小"
+    @color "#91cc75"
+    @interaction "drill-down:true"
+}

@@ -1,12 +1,12 @@
 @lang(data)
 SocialMedia {
     date,platform,followers,engagement,posts
-    2026-03-11,Twitter,9418,0.348,posts_1
-    2026-03-12,Facebook,1312,0.499,posts_2
-    2026-03-13,Instagram,6160,0.497,posts_3
-    2026-03-14,LinkedIn,1181,0.405,posts_4
-    2026-03-15,TikTok,8856,0.490,posts_5
-    2026-03-16,YouTube,3835,0.433,posts_6
+    2026-03-11,Twitter,7067,0.425,posts_1
+    2026-03-12,Facebook,5528,0.480,posts_2
+    2026-03-13,Instagram,7470,0.335,posts_3
+    2026-03-14,LinkedIn,4795,0.348,posts_4
+    2026-03-15,TikTok,8232,0.369,posts_5
+    2026-03-16,YouTube,8775,0.439,posts_6
 }
 
 Chart {

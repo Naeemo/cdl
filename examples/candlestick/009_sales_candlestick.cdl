@@ -1,0 +1,19 @@
+@lang(data)
+SalesData {
+    month,region,product_category,revenue,units,profit
+    month_1,华北,电子产品,6186,units_1,5823
+    month_2,华南,服装,6043,units_2,9242
+    month_3,华东,食品,7704,units_3,2025
+    month_4,华中,家居,6149,units_4,5910
+    month_5,西南,书籍,6414,units_5,9817
+    month_6,西北,运动装备,5918,units_6,10807
+}
+
+Chart {
+    use SalesData
+    type candlestick
+    x month
+    @title "销售数据分析 - CANDLESTICK"
+    @style "K线图，涨跌颜色"
+    @color "#5470c6"
+}

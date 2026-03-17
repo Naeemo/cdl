@@ -1,0 +1,19 @@
+@lang(data)
+SensorData {
+    timestamp,sensor_id,temperature,humidity,status
+    2026-03-12,sensor_id_1,84,humidity_1,active
+    2026-03-13,sensor_id_2,90,humidity_2,active
+    2026-03-14,sensor_id_3,69,humidity_3,active
+    2026-03-15,sensor_id_4,78,humidity_4,inactive
+    2026-03-16,sensor_id_5,81,humidity_5,inactive
+}
+
+Chart {
+    use SensorData
+    type liquid
+    x timestamp
+    y temperature
+    @title "传感器数据监控 - LIQUID"
+    @style "水波图，动态填充"
+    @color "#3ba272"
+}

@@ -1,0 +1,19 @@
+@lang(data)
+Inventory {
+    product,warehouse,stock,reorder_level,lead_time
+    电子产品,warehouse_1,stock_1,reorder_level_1,lead_time_1
+    服装,warehouse_2,stock_2,reorder_level_2,lead_time_2
+    食品,warehouse_3,stock_3,reorder_level_3,lead_time_3
+    家居,warehouse_4,stock_4,reorder_level_4,lead_time_4
+    书籍,warehouse_5,stock_5,reorder_level_5,lead_time_5
+}
+
+Chart {
+    use Inventory
+    type gauge
+    x product
+    y warehouse
+    @title "库存水平 - GAUGE"
+    @style "仪表盘，指针显示"
+    @color "#9a60b4"
+}

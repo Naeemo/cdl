@@ -1,0 +1,20 @@
+@lang(data)
+StudentScores {
+    student,subject,score,class_rank,attendance
+    student_1,subject_1,65,class_rank_1,attendance_1
+    student_2,subject_2,87,class_rank_2,attendance_2
+    student_3,subject_3,60,class_rank_3,attendance_3
+    student_4,subject_4,79,class_rank_4,attendance_4
+    student_5,subject_5,95,class_rank_5,attendance_5
+    student_6,subject_6,76,class_rank_6,attendance_6
+}
+
+Chart {
+    use StudentScores
+    type heatmap
+    x student
+    y score
+    @title "成绩分布 - HEATMAP"
+    @style "热力矩阵，颜色梯度"
+    @color "#fc8452"
+}

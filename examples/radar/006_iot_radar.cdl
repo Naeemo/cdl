@@ -1,0 +1,19 @@
+@lang(data)
+SensorData {
+    timestamp,sensor_id,temperature,humidity,status
+    2026-03-12,sensor_id_1,94,humidity_1,active
+    2026-03-13,sensor_id_2,89,humidity_2,inactive
+    2026-03-14,sensor_id_3,79,humidity_3,active
+    2026-03-15,sensor_id_4,62,humidity_4,active
+    2026-03-16,sensor_id_5,83,humidity_5,active
+}
+
+Chart {
+    use SensorData
+    type radar
+    x timestamp
+    y temperature
+    @title "传感器数据监控 - RADAR"
+    @style "面积雷达，半透明"
+    @color "#3ba272"
+}
