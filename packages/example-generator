@@ -1,0 +1,288 @@
+#!/usr/bin/env node
+
+/**
+ * CDL Example Generator - Creates new high-quality examples weekly
+ * Automatically expands the example corpus to improve AI training
+ */
+
+const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+
+const CDL_ROOT = '/root/.openclaw/workspace/projects/cdl';
+const EXAMPLES_DIR = path.join(CDL_ROOT, 'examples');
+const TEMPLATES_DIR = path.join(CDL_ROOT, 'packages', 'templates');
+
+// 20 chart types with seed examples
+const CHART_TYPES = [
+  'line', 'bar', 'pie', 'scatter', 'area', 'radar', 'heatmap',
+  'gauge', 'candlestick', 'boxplot', 'sankey', 'treemap',
+  'wordcloud', 'liquid', 'map', 'funnel', 'sunburst', 'graph',
+  'parallel', 'themeRiver'
+];
+
+// Real-world dataset templates
+const DATASET_TEMPLATES = {
+  sales: {
+    name: 'SalesData',
+    fields: ['month', 'region', 'product', 'amount', 'quantity', 'profit'],
+    sampleData: [
+      ['2024-01', '华北', '电子产品', 15000, 120, 3000],
+      ['2024-01', '华南', '服装', 8000, 200, 1500],
+      ['2024-02', '华北', '电子产品', 18000, 145, 3800],
+      ['2024-02', '华东', '家居', 12000, 80, 2200],
+    ]
+  },
+  finance: {
+    name: 'FinancialData',
+    fields: ['date', 'ticker', 'open', 'high', 'low', 'close', 'volume'],
+    sampleData: [
+      ['2024-01-02', 'AAPL', 185.5, 187.2, 184.8, 186.8, 12000000],
+      ['2024-01-03', 'AAPL', 186.8, 188.5, 186.0, 188.2, 11500000],
+      ['2024-01-02', 'GOOGL', 140.2, 141.5, 139.8, 140.9, 8500000],
+    ]
+  },
+  web: {
+    name: 'WebAnalytics',
+    fields: ['date', 'page', 'visitors', 'bounce_rate', 'avg_time'],
+    sampleData: [
+      ['2024-01', '/home', 5000, 0.45, 120],
+      ['2024-01', '/products', 3200, 0.52, 95],
+      ['2024-02', '/home', 5200, 0.42, 125],
+    ]
+  },
+  health: {
+    name: 'HealthMetrics',
+    fields: ['patient_id', 'date', 'heart_rate', 'blood_pressure', 'steps'],
+    sampleData: [
+      ['P001', '2024-01-15', 72, '120/80', 8500],
+      ['P001', '2024-01-16', 68, '118/78', 9200],
+      ['P002', '2024-01-15', 75, '122/82', 7800],
+    ]
+  },
+  social: {
+    name: 'SocialStats',
+    fields: ['date', 'platform', 'followers', 'engagement', 'posts'],
+    sampleData: [
+      ['2024-01', 'Twitter', 50000, 0.035, 150],
+      ['2024-01', 'Instagram', 80000, 0.042, 89],
+      ['2024-02', 'Twitter', 52000, 0.038, 165],
+    ]
+  }
+};
+
+function generateDataBlock(datasetKey, customData = null) {
+  const template = DATASET_TEMPLATES[datasetKey] || DATASET_TEMPLATES.sales;
+  const data = customData || template.sampleData;
+
+  const lines = [
+    `@lang(data)`,
+    `${template.name} {`,
+    `    ${template.fields.join(',')}`
+  ];
+
+  for (const row of data) {
+    lines.push(`    ${row.join(',')}`);
+  }
+
+  lines.push('}');
+  return lines.join('\n');
+}
+
+function generateChartBlock(chartType, dataName, fields, options = {}) {
+  const { title, style, color, interaction } = options;
+  const fieldMap = fields.reduce((acc, field, idx) => {
+    acc[idx] = field;
+    return acc;
+  }, {});
+
+  // Determine x, y, group based on chart type and field types
+  let x = fieldMap[0];
+  let y = fieldMap[1];
+  let group = fieldMap[2];
+
+  // Adjust for specific chart needs
+  if (chartType === 'pie') {
+    x = fieldMap[0]; // category
+    y = fieldMap[1]; // value
+  } else if (chartType === 'candlestick' || chartType === 'boxplot') {
+    // Use multiple value fields
+    x = fieldMap[0]; // date/category
+    // y not used directly
+  } else if (chartType === 'heatmap') {
+    x = fieldMap[0];
+    y = fieldMap[1];
+    group = fieldMap[2]; // value
+  }
+
+  const lines = [
+    'Chart {',
+    `    use ${dataName}`,
+    `    type ${chartType}`,
+    `    x ${x}`,
+    `    y ${y}`
+  ];
+
+  if (group && ['sankey', 'treemap', 'sunburst', 'graph', 'parallel'].includes(chartType)) {
+    lines.push(`    group ${group}`);
+  }
+
+  if (chartType === 'combo' && fields.length >= 3) {
+    lines.push(`    group ${fieldMap[2] || ''}`);
+  }
+
+  if (title) lines.push(`    @title "${title}"`);
+  if (style) lines.push(`    @style "${style}"`);
+  if (color) lines.push(`    @color "${color}"`);
+  if (interaction) lines.push(`    @interaction "${interaction}"`);
+
+  lines.push('}');
+  return lines.join('\n');
+}
+
+function generateExample(chartType, datasetKey, customOptions = {}) {
+  const template = DATASET_TEMPLATES[datasetKey] || DATASET_TEMPLATES.sales;
+  const dataBlock = generateDataBlock(datasetKey);
+  const chartBlock = generateChartBlock(chartType, template.name, template.fields, customOptions);
+
+  return `${dataBlock}\n\n${chartBlock}`;
+}
+
+function getCategoryForChart(chartType) {
+  const mapping = {
+    line: 'line',
+    bar: 'bar',
+    pie: 'pie',
+    scatter: 'scatter',
+    area: 'area',
+    radar: 'radar',
+    heatmap: 'heatmap',
+    gauge: 'gauge',
+    candlestick: 'candlestick',
+    boxplot: 'boxplot',
+    sankey: 'sankey',
+    treemap: 'treemap',
+    wordcloud: 'wordcloud',
+    liquid: 'liquid',
+    map: 'map',
+    funnel: 'funnel',
+    sunburst: 'sunburst',
+    graph: 'graph',
+    parallel: 'parallel',
+    themeRiver: 'theriver'
+  };
+  return mapping[chartType] || 'other';
+}
+
+function generateWeeklyExamples(count = 20) {
+  const generated = [];
+  const chartTypes = CHART_TYPES.slice(0, 18); // Use first 18 types
+
+  for (let i = 0; i < count; i++) {
+    const chartType = chartTypes[i % chartTypes.length];
+    const datasetKeys = Object.keys(DATASET_TEMPLATES);
+    const dataset = datasetKeys[i % datasetKeys.length];
+
+    const titleMap = {
+      sales: ['月度销售趋势', '区域销售对比', '产品销售额分布', '利润分析', '销量统计'],
+      finance: ['股价走势', 'K线图', '成交量分析', '股票对比', '金融指标'],
+      web: ['访问趋势', '页面流量', '用户行为', '跳出率分析', '网站性能'],
+      health: ['健康指标趋势', '患者数据对比', '心率监测', '运动统计'],
+      social: ['粉丝增长', '平台对比', '互动分析', '内容发布趋势']
+    };
+
+    const titles = titleMap[dataset] || ['数据图表', '趋势分析', '对比图表'];
+    const title = titles[i % titles.length];
+
+    const styleMap = {
+      line: ['平滑曲线', '渐变填充', '阶梯线', '虚线标记'],
+      bar: ['横向柱状', '堆叠柱状', '分组柱状', '渐变色彩'],
+      pie: ['环形图', '饼图', '玫瑰图', '南丁格尔'],
+      heatmap: ['热力矩阵', '日历热力图'],
+      radar: ['雷达图', '面积雷达'],
+      sankey: ['桑基图', '流向分析'],
+      treemap: ['矩形树图', '层次结构']
+    };
+    const styles = styleMap[chartType] || ['简洁风格', '现代设计'];
+
+    const example = generateExample(chartType, dataset, {
+      title: `${title} (${chartType})`,
+      style: styles[i % styles.length],
+      color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de'][i % 5],
+      interaction: chartType === 'sankey' ? 'drill-down:true' : 'tooltip:shared'
+    });
+
+    const category = getCategoryForChart(chartType);
+    const filename = `${String(i + 1).padStart(2, '0')}_${dataset}_${chartType}.cdl`;
+    const dir = path.join(EXAMPLES_DIR, category);
+
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
+    const filepath = path.join(dir, filename);
+    fs.writeFileSync(filepath, example, 'utf8');
+    generated.push({ chartType, dataset, category, filename });
+  }
+
+  return generated;
+}
+
+function updateExampleIndex(examples) {
+  const indexPath = path.join(EXAMPLES_DIR, 'README.md');
+  const categories = {};
+
+  for (const ex of examples) {
+    if (!categories[ex.category]) {
+      categories[ex.category] = [];
+    }
+    categories[ex.category].push(ex);
+  }
+
+  let content = '# CDL 示例库\n\n自动生成的示例，覆盖多种图表类型和业务场景。\n\n';
+  content += `共 ${examples.length} 个示例，${Object.keys(categories).length} 个类别：\n\n`;
+
+  for (const [cat, exs] of Object.entries(categories).sort()) {
+    content += `## ${cat}\n\n`;
+    for (const ex of exs) {
+      content += `- [${ex.filename}](${cat}/${ex.filename})\n`;
+    }
+    content += '\n';
+  }
+
+  fs.writeFileSync(indexPath, content, 'utf8');
+}
+
+function main() {
+  console.log('🎯 CDL Example Generator Starting...\n');
+
+  // Ensure examples directory exists
+  if (!fs.existsSync(EXAMPLES_DIR)) {
+    fs.mkdirSync(EXAMPLES_DIR, { recursive: true });
+  }
+
+  // Generate 20 new examples
+  const newExamples = generateWeeklyExamples(20);
+  console.log(`✅ Generated ${newExamples.length} new examples`);
+
+  // Update index
+  updateExampleIndex(newExamples);
+  console.log('✅ Updated example index');
+
+  // Commit changes
+  try {
+    execSync('git add -A', { cwd: CDL_ROOT, stdio: 'ignore' });
+    execSync(`git commit -m "chore: add ${newExamples.length} new examples [skip ci]"`, { cwd: CDL_ROOT, stdio: 'ignore' });
+    console.log('✅ Changes committed');
+  } catch {
+    console.log('ℹ️ No changes to commit');
+  }
+
+  console.log('\n🎉 Example generation complete!');
+}
+
+if (require.main === module) {
+  main();
+}
+
+module.exports = { generateWeeklyExamples, generateExample };

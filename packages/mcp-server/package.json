@@ -1,0 +1,45 @@
+{
+  "name": "@naeemo/cdl-mcp-server",
+  "version": "0.1.0",
+  "description": "MCP Server for CDL (Chart Definition Language)",
+  "main": "dist/server.js",
+  "types": "dist/server.d.ts",
+  "bin": {
+    "cdl-mcp": "dist/server.js"
+  },
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "node dist/server.js",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1"
+  },
+  "peerDependencies": {
+    "@naeemo/cdl-compiler": ">=0.1.0",
+    "@naeemo/cdl-renderer-echarts": ">=0.1.0",
+    "@naeemo/cdl-ai": ">=0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.37",
+    "typescript": "^5.9.3"
+  },
+  "keywords": [
+    "cdl",
+    "mcp",
+    "model-context-protocol",
+    "charts",
+    "ai",
+    "claude"
+  ],
+  "author": "Naeemo <naeemo@qq.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Naeemo/cdl.git",
+    "directory": "packages/mcp-server"
+  }
+}

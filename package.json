@@ -18,8 +18,11 @@
   "author": "Naeemo <naeemo@qq.com>",
   "license": "MIT",
   "devDependencies": {
-    "vitepress": "^1.0.0",
     "echarts": "^5.4.3",
+    "vitepress": "^1.0.0",
     "vue": "^3.4.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1"
   }
 }
