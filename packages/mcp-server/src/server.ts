@@ -113,9 +113,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   try {
+    const a = args || {};
     switch (name) {
       case 'compile_cdl': {
-        const code = args.code as string;
+        const code = a.code as string;
+        if (!code) {
+          return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: 'Missing code parameter' }, null, 2) }] };
+        }
         const result = compile(code);
         return {
           content: [
@@ -132,7 +136,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case 'validate_cdl': {
-        const code = args.code as string;
+        const code = a.code as string;
+        if (!code) {
+          return { content: [{ type: 'text', text: JSON.stringify({ valid: false, errors: [{ message: 'Missing code parameter' }] }, null, 2) }] };
+        }
         const result = validate(code);
         return {
           content: [
@@ -148,7 +155,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case 'render_cdl': {
-        const code = args.code as string;
+        const code = a.code as string;
+        if (!code) {
+          return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: 'Missing code parameter' }, null, 2) }] };
+        }
         const compileResult = compile(code);
         if (compileResult.errors.length > 0) {
           return {
@@ -179,9 +189,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case 'generate_cdl': {
-        const description = args.description as string;
-        const chartType = args.chartType as string || 'auto';
-        const data = args.data as any[] || undefined;
+        const description = a.description as string;
+        if (!description) {
+          return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: 'Missing description parameter' }, null, 2) }] };
+        }
+        const chartType = a.chartType as string || 'auto';
+        const data = a.data as any[] || undefined;
 
         // Get API key from environment
         const apiKey = process.env.STEPFUN_API_KEY || process.env.KIMI_API_KEY;
@@ -195,25 +208,26 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                   error: 'Missing API key. Set STEPFUN_API_KEY or KIMI_API_KEY environment variable.'
                 }, null, 2)
               }
-            ];
-          }
-
-          // Call NL-to-CDL
-          const result: NLToCDLResult = await nlToCDL(description, {
-            apiKey,
-            baseURL: process.env.STEPFUN_API_BASE || 'https://chatapi.stepfun.com/chatapi/v1',
-            model: 'step-3.5-flash'
-          });
-
-          return {
-            content: [
-              {
-                type: 'text',
-                text: JSON.stringify(result, null, 2)
-              }
             ]
           };
         }
+
+        // Call NL-to-CDL
+        const result: NLToCDLResult = await nlToCDL(description, {
+          apiKey,
+          baseURL: process.env.STEPFUN_API_BASE || 'https://chatapi.stepfun.com/chatapi/v1',
+          model: 'step-3.5-flash'
+        });
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(result, null, 2)
+            }
+          ]
+        };
+      }
 
       default:
         return {

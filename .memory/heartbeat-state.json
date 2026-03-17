@@ -1,10 +1,23 @@
 {
-  "lastChecks": {},
-  "alerts": [
-    {
-      "issue": "Low example coverage",
-      "time": 1773747287926
-    }
-  ],
-  "lastCheck": "2026-03-17T11:34:47.928Z"
+  "lastChecks": {
+    "buildHealth": {
+      "compiler": true,
+      "renderer": true,
+      "ai": true,
+      "all": true
+    },
+    "examples": {
+      "categories": 21,
+      "files": 76
+    },
+    "promptTemplate": {
+      "exists": true,
+      "size": 5593,
+      "hasNLGuide": true
+    },
+    "quickTest": true,
+    "timestamp": "2026-03-17T20:21:00.000Z"
+  },
+  "alerts": [],
+  "lastCheck": "2026-03-17T13:30:02.020Z"
 }
