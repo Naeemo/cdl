@@ -295,7 +295,8 @@ function parseInteraction(str: string): InteractionConfig {
         }
         break;
       case 'live':
-        if (val === 'true' || val === 'stream') cfg.live = val;
+        if (val === 'stream') cfg.live = 'stream' as const;
+        else if (val === 'true') cfg.live = true;
         else if (/^\d+$/.test(val)) {
           cfg.live = parseInt(val, 10);
         } else {
@@ -558,7 +559,17 @@ export function parseV05(source: string): { file: CDLFile; errors: CompileError[
       continue;
     }
     
-    // 快速图表
+    // Chart 定义块 (完整语法)
+    if (line.toLowerCase().startsWith('chart')) {
+      const result = parseChartBlock(lines, i, errors);
+      if (result) {
+        file.charts.push(result.chart);
+      }
+      i = result ? result.nextLine : i + 1;
+      continue;
+    }
+    
+    // 快速图表 (Markdown 表格语法)
     if (line.startsWith('#')) {
       const result = parseQuickChart(lines, i, errors);
       if (result) {
@@ -573,6 +584,164 @@ export function parseV05(source: string): { file: CDLFile; errors: CompileError[
   }
   
   return { file, errors };
+}
+
+// 解析 Chart { ... } 块
+function parseChartBlock(
+  lines: string[],
+  start: number,
+  errors: CompileError[]
+): { chart: ChartDefinition; nextLine: number } | null {
+  
+  const line = lines[start].trim();
+  const nameMatch = line.match(/^Chart\s*(?:\{|\s+(\w+)\s*\{)/);
+  if (!nameMatch) return null;
+  
+  const chartName = nameMatch[1] || undefined;
+  
+  // 找到对应的 }
+  let braceCount = 0;
+  let foundOpen = false;
+  let endLine = start;
+  
+  for (let k = start; k < lines.length; k++) {
+    const txt = lines[k];
+    for (const c of txt) {
+      if (c === '{') {
+        braceCount++;
+        foundOpen = true;
+      } else if (c === '}') {
+        braceCount--;
+        if (foundOpen && braceCount === 0) {
+          endLine = k;
+          break;
+        }
+      }
+    }
+    if (foundOpen && braceCount === 0) break;
+  }
+  
+  if (braceCount !== 0) {
+    errors.push({ line: start + 1, column: 0, message: 'Unclosed Chart block', severity: 'error' });
+    return null;
+  }
+  
+  // 提取块内容
+  const blockLines: string[] = [];
+  for (let k = start + 1; k < endLine; k++) {
+    blockLines.push(lines[k]);
+  }
+  
+  // 解析块内容
+  const chart = parseChartBody(blockLines, chartName, errors);
+  if (!chart) return null;
+  
+  return { chart, nextLine: endLine + 1 };
+}
+
+// 解析 Chart 块内部
+function parseChartBody(
+  lines: string[],
+  name?: string,
+  errors: CompileError[] = []
+): ChartDefinition | null {
+  
+  const chart: ChartDefinition = {
+    type: 'chart',
+    name,
+    chartType: 'line', // default
+    dataSources: [],
+    series: [],
+    axis: [],
+    hints: {},
+  };
+  
+  let i = 0;
+  
+  while (i < lines.length) {
+    const line = lines[i].trim();
+    
+    if (!line) {
+      i++;
+      continue;
+    }
+    
+    // use DataSource
+    const useMatch = line.match(/^use\s+(\w+)$/);
+    if (useMatch) {
+      chart.dataSources.push(useMatch[1]);
+      i++;
+      continue;
+    }
+    
+    // type: chartType
+    const typeMatch = line.match(/^type\s*:\s*(\w+)$/);
+    if (typeMatch) {
+      chart.chartType = typeMatch[1];
+      i++;
+      continue;
+    }
+    
+    // x, y, group, stack (support both "x: field" and "x field")
+    const assignMatch = line.match(/^(x|y|group|stack)\s*(?::\s*|\s+)(\w+)$/);
+    if (assignMatch) {
+      const [, field, value] = assignMatch;
+      if (field === 'x') chart.x = value;
+      else if (field === 'y') chart.y = value;
+      else if (field === 'group') chart.group = value;
+      else if (field === 'stack') chart.stack = value === 'true' || value === 'group';
+      i++;
+      continue;
+    }
+    
+    // series array (multi-series)
+    if (line.startsWith('series:')) {
+      const seriesVal = line.slice(7).trim();
+      if (seriesVal === 'true') {
+        // Enable auto-series from data
+        chart.series = [];
+      } else if (seriesVal.startsWith('[')) {
+        // Inline array: series: [field1, field2]
+        try {
+          const arr = JSON.parse(seriesVal.replace(/'/g, '"'));
+          chart.series = arr.map((name: string) => ({ field: name }));
+        } catch {
+          errors.push({ line: i + 1, column: 0, message: 'Invalid series array syntax', severity: 'error' });
+        }
+      }
+      i++;
+      continue;
+    }
+    
+    // @hints (style, color, animation, title, subtitle, layout, theme, grid, interaction)
+    const hintMatch = line.match(/^@(\w+)\s+(?:"([^"]*)"|'([^']*)'|(\S+))/);
+    if (hintMatch) {
+      const [, key, q1, q2, unq] = hintMatch;
+      const val = q1 || q2 || unq || '';
+      const allowedKeys = ['style', 'color', 'animation', 'title', 'subtitle', 'layout', 'theme', 'grid', 'interaction'] as const;
+      if (allowedKeys.includes(key as any)) {
+        (chart.hints as any)[key] = val;
+      }
+      i++;
+      continue;
+    }
+    
+    i++;
+  }
+  
+  // Post-process hints into structured interaction
+  if (chart.hints.interaction) {
+    chart.interaction = parseInteraction(chart.hints.interaction);
+    delete chart.hints.interaction;
+  }
+  
+  // Ensure we have at least one data source
+  if (chart.dataSources.length === 0) {
+    errors.push({ line: 0, column: 0, message: 'Chart must have at least one data source (use <name>)', severity: 'error' });
+    return null;
+  }
+  
+  return chart;
 }
 
 export function compile(source: string): { file: CDLFile; errors: CompileError[] } {

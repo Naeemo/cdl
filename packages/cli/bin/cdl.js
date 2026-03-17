@@ -593,7 +593,7 @@ async function exportFile(args) {
   } else {
     // Fallback: Export as HTML with instructions
     const htmlOutputFile = outputFile.replace(/\.(png|svg)$/, '.html');
-    fs.writeFileSync(htmlOutputFile, htmlContent.replace(/<\\/script>/g, '</script>'));
+    fs.writeFileSync(htmlOutputFile, htmlContent.replace(new RegExp('<\\\\/script>', 'g'), '</script>'));
     console.log(`⚠ Puppeteer not available. Exported as HTML instead.`);
     console.log(`  HTML file: ${htmlOutputFile}`);
     console.log(`  Open this file in a browser and use the browser console to get the chart image.`);
@@ -910,9 +910,9 @@ async function benchmarkCommand(args) {
   console.log(`Running ${iterations} iterations...\n`);
 
   const times = {
-    compile: [] as number[],
-    render: [] as number[],
-    total: [] as number[]
+    compile: [],
+    render: [],
+    total: []
   };
 
   for (let i = 0; i < iterations; i++) {
