@@ -264,3 +264,65 @@ Require stack:
 [2026-03-17T11:50:18.844Z] [INFO] 
 📦 Phase 6: Git operations
 [2026-03-17T11:50:18.849Z] [CMD] Running: Stage changes
+[2026-03-17T11:50:18.853Z] [SUCCESS] ✓ Stage changes completed (0.0s)
+[2026-03-17T11:50:18.853Z] [CMD] Running: Commit changes
+[2026-03-17T11:50:18.860Z] [SUCCESS] ✓ Commit changes completed (0.0s)
+[2026-03-17T11:50:18.860Z] [GIT] ✓ Changes committed
+
+
+## 📊 Weekly Development Summary
+
+**Date**: 2026-03-17
+
+### Build Status
+- Core packages: ✅ Built
+- Duration: 2.3s
+
+### Tests
+- Compiler: ✅ Passed
+- Renderer: ✅ Passed
+
+### Content
+- Examples: 0 categories, 0 files
+- NPM ready: 8/14 packages
+
+### Git
+- Status: committed
+
+### ⚠️ Issues
+- Example generation failed
+
+### 🎯 Next Week
+- [ ] Fix Vue package build compatibility
+- [ ] Publish NPM packages (after secrets configured)
+- [ ] Add React/Vue component wrappers
+- [ ] Expand chart type coverage from ECharts 5.x
+- [ ] Improve NL-to-CDL accuracy
+
+*Auto-generated weekly report*
+[2026-03-17T11:50:18.860Z] [DONE] 
+✅ Weekly development completed!
+[2026-03-17T11:50:42.076Z] [INFO] === CDL Weekly Development Started ===
+[2026-03-17T11:50:42.078Z] [INFO] 
+📦 Phase 1: Building core packages
+[2026-03-17T11:50:42.078Z] [CMD] Running: Build core packages
+[2026-03-17T11:50:44.394Z] [SUCCESS] ✓ Build core packages completed (2.3s)
+[2026-03-17T11:50:44.394Z] [INFO] 
+🧪 Phase 2: Testing compiler
+[2026-03-17T11:50:44.397Z] [TEST] ✅ Compiler test passed
+[2026-03-17T11:50:44.397Z] [INFO] 
+🎨 Phase 3: Testing renderer
+[2026-03-17T11:50:44.400Z] [TEST] ✅ Renderer test passed
+[2026-03-17T11:50:44.400Z] [INFO] 
+📝 Phase 4: Generating new examples
+[2026-03-17T11:50:44.401Z] [CMD] Running: Generate examples
+[2026-03-17T11:50:44.418Z] [GEN] ❌ Example generation failed: start is not defined
+[2026-03-17T11:50:44.418Z] [INFO] 
+📚 Phase 5: Expanding PROMPT.md
+[2026-03-17T11:50:44.418Z] [DOCS] ✅ Expanded PROMPT.md (4419 → 5593 bytes)
+[2026-03-17T11:50:44.418Z] [INFO] 
+📦 Phase 5: NPM publish check
+[2026-03-17T11:50:44.419Z] [PUBLISH] ✅ 8/14 packages publish-ready
+[2026-03-17T11:50:44.419Z] [INFO] 
+📦 Phase 6: Git operations
+[2026-03-17T11:50:44.425Z] [CMD] Running: Stage changes

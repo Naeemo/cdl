@@ -6,15 +6,11 @@
 
 ## 统计
 
-- **总示例数**: 5
-- **图表类型**: 5 类
+- **总示例数**: 2
+- **图表类型**: 2 类
 - **更新时间**: 2026-03-17
 
 ## 分类
-
-### area
-
-- [005_social_area.cdl](area/005_social_area.cdl)
 
 ### bar
 
@@ -23,14 +19,6 @@
 ### line
 
 - [001_sales_line.cdl](line/001_sales_line.cdl)
-
-### pie
-
-- [003_web_pie.cdl](pie/003_web_pie.cdl)
-
-### scatter
-
-- [004_health_scatter.cdl](scatter/004_health_scatter.cdl)
 
 
 ## 使用说明
