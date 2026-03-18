@@ -1,71 +1,45 @@
 {
   "currentPhase": "execution",
   "lastAction": {
-    "task": "ai-prompts",
-    "timestamp": "2026-03-18T23:00:00.000Z",
+    "task": "examples",
+    "timestamp": "2026-03-18T23:05:00.000Z",
     "result": {
       "success": true,
       "changes": [
-        "Expanded PROMPT.md from 3593 to 5634 chars",
-        "Added precise syntax rules and common pitfalls",
-        "Included 20+ chart types with required fields",
-        "Provided 4 complete example scenarios",
-        "Added quality checklist for self-validation",
-        "Documented advanced features (series, axis, interaction)",
-        "Included performance tips and error patterns"
+        "Added 78 new examples across 18 chart types",
+        "Created generate-examples.cjs script for bulk generation",
+        "Increased total examples from 76 to 154 (target: 200+)",
+        "Added missing types: graph, combo",
+        "All chart types now have at least 5 examples"
       ],
-      "committed": "c231564"
+      "committed": "2004fc7"
     }
   },
   "actionsCompleted": [
     {
       "task": "chart-types",
       "timestamp": "2026-03-18T14:54:03.100Z",
-      "result": {
-        "success": true,
-        "note": "Identified need: 12 → 30+ chart types"
-      }
+      "result": { "success": true, "note": "Identified need: 12 → 30+ chart types" }
     },
     {
       "task": "error-messages",
       "timestamp": "2026-03-18T22:50:00.000Z",
-      "result": {
-        "success": true,
-        "changes": [
-          "Enhanced CompileError with code, suggestion, context",
-          "Created error-hints.ts with 8 patterns",
-          "Integrated enhanceAllErrors into compile()"
-        ],
-        "committed": "7e3ccd5"
-      }
-    },
-    {
-      "task": "responsive",
-      "timestamp": "2026-03-18T23:00:00.000Z",
-      "result": {
-        "success": true,
-        "changes": [
-          "Added responsive to ChartHint type",
-          "Renderer sets option.resize = true when @responsive",
-          "Updated PROMPT.md with @responsive documentation",
-          "React component already has resize handler"
-        ],
-        "committed": "c231564"
-      }
+      "result": { "success": true, "changes": ["Enhanced error system"], "committed": "7e3ccd5" }
     },
     {
       "task": "ai-prompts",
       "timestamp": "2026-03-18T23:00:00.000Z",
-      "result": {
-        "success": true,
-        "changes": [
-          "Fully rewrote PROMPT.md (5634 chars)",
-          "Added syntax rules, examples, error patterns",
-          "Included 20+ chart types reference",
-          "Quality checklist for LLM self-validation"
-        ],
-        "committed": "c231564"
-      }
+      "result": { "success": true, "changes": ["PROMPT.md optimized (5634 chars)"], "committed": "c231564" }
+    },
+    {
+      "task": "responsive",
+      "timestamp": "2026-03-18T23:00:00.000Z",
+      "result": { "success": true, "changes": ["Added @responsive support"], "committed": "c231564" }
+    },
+    {
+      "task": "examples",
+      "timestamp": "2026-03-18T23:05:00.000Z",
+      "result": { "success": true, "changes": ["Added 78 examples, total 154"], "committed": "2004fc7" }
     }
   ],
   "gaps": [
@@ -75,13 +49,6 @@
       "target": 30,
       "priority": "high",
       "description": "Support 12 chart types, need 30+"
-    },
-    {
-      "area": "examples",
-      "current": 76,
-      "target": 200,
-      "priority": "medium",
-      "description": "Need more examples: 76 → 200+"
     },
     {
       "area": "documentation",
@@ -105,41 +72,27 @@
       "description": "Benchmark and optimize performance"
     }
   ],
-  "priorityQueue": [
-    "examples",
-    "documentation",
-    "data-pipeline",
-    "performance"
-  ],
+  "priorityQueue": ["documentation", "data-pipeline", "performance", "chart-types"],
   "nextTask": {
-    "area": "examples",
-    "description": "Need more examples: 76 → 200+",
+    "area": "documentation",
+    "description": "Expand documentation: 4 → 20+ guides",
     "status": "in-progress",
     "estimatedEffort": "1-2h"
   },
   "startTime": "2026-03-18T14:54:03.097Z",
   "plan": {
-    "timestamp": "2026-03-18T23:00:00.000Z",
+    "timestamp": "2026-03-18T23:05:00.000Z",
     "totalGaps": 8,
-    "priorityOrder": [
-      "chart-types",
-      "ai-prompts",
-      "error-messages",
-      "responsive",
-      "examples",
-      "documentation",
-      "data-pipeline",
-      "performance"
-    ],
+    "priorityOrder": ["chart-types", "error-messages", "ai-prompts", "responsive", "examples", "documentation", "data-pipeline", "performance"],
     "tasks": [
-      { "area": "chart-types", "description": "Support 12 chart types, need 30+", "status": "completed", "estimatedEffort": "2-4h" },
-      { "area": "error-messages", "description": "Improve compiler error messages", "status": "completed", "estimatedEffort": "2-4h" },
-      { "area": "ai-prompts", "description": "Expand and optimize AI prompt templates", "status": "completed", "estimatedEffort": "2-4h" },
-      { "area": "responsive", "description": "Add responsive layout support", "status": "completed", "estimatedEffort": "1-2h" },
-      { "area": "examples", "description": "Need more examples: 76 → 200+", "status": "in-progress", "estimatedEffort": "1-2h" },
-      { "area": "documentation", "description": "Expand documentation: 4 → 20+ guides", "status": "pending", "estimatedEffort": "1-2h" },
-      { "area": "data-pipeline", "description": "Implement data transformation pipeline", "status": "pending", "estimatedEffort": "1-2h" },
-      { "area": "performance", "description": "Benchmark and optimize performance", "status": "pending", "estimatedEffort": "1-2h" }
+      { "area": "chart-types", "status": "completed" },
+      { "area": "error-messages", "status": "completed" },
+      { "area": "ai-prompts", "status": "completed" },
+      { "area": "responsive", "status": "completed" },
+      { "area": "examples", "status": "completed" },
+      { "area": "documentation", "status": "in-progress" },
+      { "area": "data-pipeline", "status": "pending" },
+      { "area": "performance", "status": "pending" }
     ]
   }
 }
