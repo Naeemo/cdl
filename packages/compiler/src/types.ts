@@ -17,6 +17,50 @@ export interface DataDefinition {
   lang: QueryLanguage;
   config: DataSourceConfig;
   query: string;        // 原始查询内容
+  transform?: DataTransform; // 数据转换管道
+}
+
+// 数据转换管道
+export interface DataTransform {
+  filters?: TransformFilter[];    // 过滤操作
+  aggregates?: TransformAggregate[]; // 聚合操作
+  sorts?: TransformSort[];       // 排序操作
+  limits?: TransformLimit;       // 限制操作
+  columns?: TransformColumn[];   // 列操作（重命名、计算）
+}
+
+export interface TransformFilter {
+  field: string;
+  operator: '==' | '!=' | '>' | '<' | '>=' | '<=' | 'in' | 'contains';
+  value: any;
+}
+
+export interface TransformAggregate {
+  groupBy: string[];      // 分组字段
+  aggregations: Array<{   // 聚合函数
+    field: string;
+    as: string;           // 输出字段名
+    fn: 'sum' | 'avg' | 'count' | 'min' | 'max' | 'median';
+  }>;
+}
+
+export interface TransformSort {
+  field: string;
+  direction: 'asc' | 'desc';
+}
+
+export interface TransformLimit {
+  count: number;
+  offset?: number;
+}
+
+export interface TransformColumn {
+  // 重命名: { from: 'old', to: 'new' }
+  // 计算: { as: 'new', expression: 'field1 + field2' }
+  type: 'rename' | 'compute';
+  from?: string;
+  to?: string;
+  expression?: string;
 }
 
 // ===== 图表相关 =====

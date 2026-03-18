@@ -498,13 +498,15 @@ export function parseV05(source: string): { file: CDLFile; errors: CompileError[
       let directives: any = {};
       let j = i;
       while (j < lines.length && lines[j].trim().startsWith('@')) {
-        const m = lines[j].trim().match(/^@(\w+)(?:\(([^)]*)\))?\s*$/);
+        const m = lines[j].trim().match(/^@(\w+)(?:\(([^)]*)\)|\s+"([^"]*)"|'([^']*)'|\s+(\S+))\s*$/);
         if (m) {
-          const [, key, val] = m;
+          const [, key, parenVal, dqVal, sqVal, bareVal] = m;
+          const val = parenVal ?? dqVal ?? sqVal ?? bareVal ?? '';
           if (key === 'lang') directives.lang = val;
           else if (key === 'source') directives.source = val?.replace(/^["']|["']$/g, '').trim();
           else if (key === 'timeout') directives.timeout = Number(val);
           else if (key === 'cache') directives.cache = Number(val);
+          else if (key === 'transform') directives.transform = val; // 暂存原始 transform 字符串
         }
         j++;
       }
@@ -544,7 +546,7 @@ export function parseV05(source: string): { file: CDLFile; errors: CompileError[
         k++;
       }
       
-      file.data.push({
+      const dataDef: DataDefinition = {
         type: 'data',
         name: dataName,
         lang: directives.lang as any,
@@ -554,7 +556,10 @@ export function parseV05(source: string): { file: CDLFile; errors: CompileError[
           cache: directives.cache,
         },
         query: query.trim(),
-      });
+        transform: directives.transform ? parseTransformDirective(directives.transform) : undefined,
+      };
+      
+      file.data.push(dataDef);
       
       i = k;
       continue;
@@ -743,6 +748,80 @@ function parseChartBody(
   }
   
   return chart;
+}
+
+// ===== 数据转换管道解析 =====
+
+/**
+ * 解析 @transform 指令
+ * 语法: @transform "filter(x > 0) | sort(y desc) | limit(10)"
+ */
+function parseTransformDirective(transformStr: string): any {
+  const steps: any[] = [];
+  const tokens = tokenizeTransform(transformStr);
+  
+  for (const token of tokens) {
+    if (token.type === 'filter') {
+      steps.push({ type: 'filter', field: token.field, operator: token.op, value: token.value });
+    } else if (token.type === 'aggregate') {
+      steps.push({ type: 'aggregate', groupBy: token.groupBy, aggregations: token.aggs });
+    } else if (token.type === 'sort') {
+      steps.push({ type: 'sort', field: token.field, direction: token.dir });
+    } else if (token.type === 'limit') {
+      steps.push({ type: 'limit', count: token.count, offset: token.offset });
+    }
+  }
+  
+  return { steps };
+}
+
+function tokenizeTransform(str: string): any[] {
+  const tokens: any[] = [];
+  const parts = str.split('|').map(p => p.trim()).filter(p => p);
+  
+  for (const part of parts) {
+    if (part.startsWith('filter(') && part.endsWith(')')) {
+      const content = part.slice(7, -1);
+      const match = content.match(/(\w+)\s*(==|!=|>|<|>=|<=|in|contains)\s*(.+)/);
+      if (match) {
+        tokens.push({ type: 'filter', field: match[1], op: match[2], value: parseValue(match[3]) });
+      }
+    } else if (part.startsWith('sort(') && part.endsWith(')')) {
+      const content = part.slice(5, -1);
+      const [field, dir = 'asc'] = content.split(' ');
+      tokens.push({ type: 'sort', field, dir });
+    } else if (part.startsWith('limit(') && part.endsWith(')')) {
+      const content = part.slice(6, -1);
+      const parts = content.split(',');
+      tokens.push({ type: 'limit', count: Number(parts[0]), offset: parts[1] ? Number(parts[1]) : undefined });
+    } else if (part.startsWith('aggregate(') && part.endsWith(')')) {
+      // aggregate: group by field1, field2 | sum(field as alias), count(...)
+      const content = part.slice(10, -1);
+      const [groupPart, aggPart] = content.split('|');
+      const groupBy = groupPart.trim().split(',').map(s => s.trim());
+      const aggs = aggPart.split(',').map(agg => {
+        const m = agg.trim().match(/(sum|avg|count|min|max|median)\((\w+)(?:\s+as\s+(\w+))?\)/);
+        if (m) {
+          return { field: m[2], as: m[3] || m[2], fn: m[1] };
+        }
+        return null;
+      }).filter(Boolean);
+      tokens.push({ type: 'aggregate', groupBy, aggs });
+    }
+  }
+  
+  return tokens;
+}
+
+function parseValue(val: string): any {
+  if (val === 'true') return true;
+  if (val === 'false') return false;
+  if (val === 'null') return null;
+  if (/^-?\d+$/.test(val)) return Number(val);
+  if (/^-?\d+\.\d+$/.test(val)) return Number(val);
+  if (val.startsWith('"') || val.startsWith("'")) return val.slice(1, -1);
+  if (val === 'in') return val; // 特殊处理 in 操作符
+  return val;
 }
 
 export function compile(source: string): { file: CDLFile; errors: CompileError[] } {
