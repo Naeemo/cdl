@@ -106,6 +106,13 @@ function convertChart(
     option.color = parseColors(chart.hints.color);
   }
 
+  // 响应式配置
+  if (chart.hints?.responsive === 'true' || chart.hints?.responsive === true) {
+    // ECharts 默认响应式：不设置 width/height，使用容器尺寸
+    // 调用方需要监听 resize 事件并调用 chart.resize()
+    option.resize = true; // 标记需要 resize 支持
+  }
+
   // 根据图表类型转换
   switch (chart.chartType) {
     case 'line':

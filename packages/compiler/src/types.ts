@@ -81,6 +81,7 @@ export interface ChartHint {
   layout?: string;      // @layout "..."
   theme?: 'light' | 'dark' | 'auto';
   grid?: boolean;
+  responsive?: boolean; // @responsive true - 启用自适应容器尺寸
   interaction?: string; // 临时存储，后面会解析为 InteractionConfig
 }
 
