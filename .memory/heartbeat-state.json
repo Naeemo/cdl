@@ -33,8 +33,18 @@
       "cleaned_artifacts_count": 41,
       "uncommitted_changes": true
     },
-    "timestamp": "2026-03-18T22:34:00.000Z"
+    "autonomousIteration": {
+      "enabled": true,
+      "schedule": "every 5 minutes",
+      "cronJob": "cdl-iteration (OpenClaw native)",
+      "status": "running",
+      "gaps_identified": 8,
+      "currentPriority": "ai-prompts",
+      "tasksCompleted": 2,
+      "lastRun": "2026-03-18T22:54:00.000Z"
+    },
+    "timestamp": "2026-03-18T22:54:00.000Z"
   },
   "alerts": [],
-  "lastCheck": "2026-03-18T22:34:00.000Z"
+  "lastCheck": "2026-03-18T22:54:00.000Z"
 }

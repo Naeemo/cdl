@@ -115,6 +115,9 @@ export interface CompileError {
   column: number;
   message: string;
   severity: 'error' | 'warning';
+  code?: string;              // 错误代码，便于查找文档
+  suggestion?: string;        // 可操作的修复建议
+  context?: string;           // 相关代码片段
 }
 
 export interface CompileResult {

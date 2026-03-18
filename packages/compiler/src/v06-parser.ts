@@ -10,6 +10,7 @@ import {
   InteractionConfig,
   CompileError,
 } from './types';
+import { enhanceAllErrors, formatError } from './error-hints';
 
 // ===== 注释剥离 =====
 
@@ -745,7 +746,10 @@ function parseChartBody(
 }
 
 export function compile(source: string): { file: CDLFile; errors: CompileError[] } {
-  return parseV05(stripComments(source));
+  const result = parseV05(stripComments(source));
+  // Enhance error messages with suggestions
+  result.errors = enhanceAllErrors(result.errors, source);
+  return result;
 }
 
 export function validate(source: string): { valid: boolean; errors: CompileError[] } {
