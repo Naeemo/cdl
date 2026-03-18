@@ -8,43 +8,36 @@
     },
     "examples": {
       "categories": 21,
-      "files": 76
+      "files": 154
     },
     "promptTemplate": {
       "exists": true,
-      "size": 5593,
+      "size": 5634,
       "hasNLGuide": true
     },
     "quickTest": true,
     "buildConfig": {
       "status": "fixed",
-      "issue": "Build artifacts in source directories - RESOLVED",
-      "details": "Fixed tsconfig.json outDir settings for all affected packages",
-      "packages_fixed": [
-        "compiler",
-        "ai",
-        "renderer",
-        "renderer-d3",
-        "react",
-        "themes",
-        "vscode-extension",
-        "mcp-server"
-      ],
-      "cleaned_artifacts_count": 41,
-      "uncommitted_changes": true
+      "issue": "Build artifacts in source directories - RESOLVED"
     },
     "autonomousIteration": {
       "enabled": true,
       "schedule": "every 5 minutes",
-      "cronJob": "cdl-iteration (OpenClaw native)",
+      "cronJob": "cdl-iteration",
       "status": "running",
-      "gaps_identified": 8,
-      "currentPriority": "ai-prompts",
-      "tasksCompleted": 2,
-      "lastRun": "2026-03-18T22:54:00.000Z"
+      "tasksCompleted": 8,
+      "currentTask": "chart-types",
+      "chartTypesNow": 20,
+      "chartTypesTarget": 30,
+      "lastRun": "2026-03-18T23:45:00.000Z"
     },
-    "timestamp": "2026-03-18T22:54:00.000Z"
+    "performance": {
+      "target": "<100ms",
+      "measured": "<1ms",
+      "status": "excellent"
+    },
+    "timestamp": "2026-03-18T23:54:00.000Z"
   },
   "alerts": [],
-  "lastCheck": "2026-03-18T15:00:01.031Z"
+  "lastCheck": "2026-03-18T15:30:01.071Z"
 }
