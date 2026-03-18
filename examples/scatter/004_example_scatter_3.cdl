@@ -1,0 +1,18 @@
+@lang(data)
+Data_4 {
+    x,y,group
+    14,24,A
+    19,39,B
+    24,29,A
+    29,49,B
+    34,34,A
+}
+
+Chart 示例4 {
+    use Data_4
+    type scatter
+    x dimension
+y measure
+    @title "SCATTER 示例 4"
+    @color "#ee6666"
+}

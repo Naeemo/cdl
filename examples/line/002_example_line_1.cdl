@@ -1,0 +1,19 @@
+@lang(data)
+Data_2 {
+    month,value,category
+    Jan,120,A
+    Feb,140,B
+    Mar,110,A
+    Apr,170,B
+    May,150,A
+    Jun,180,B
+}
+
+Chart 示例2 {
+    use Data_2
+    type line
+    x month
+y value
+    @title "LINE 示例 2"
+    @color "#91cc75"
+}

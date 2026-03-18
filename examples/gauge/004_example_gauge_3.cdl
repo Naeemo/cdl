@@ -1,0 +1,16 @@
+@lang(data)
+Data_4 {
+    target,current
+    销售额,170
+    客户数,97
+    满意度,96
+}
+
+Chart 示例4 {
+    use Data_4
+    type gauge
+    x name
+y value
+    @title "GAUGE 示例 4"
+    @color "#ee6666"
+}

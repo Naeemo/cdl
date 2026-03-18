@@ -1,0 +1,18 @@
+@lang(data)
+Data_3 {
+    category,value
+    产品A,95
+    产品B,135
+    产品C,110
+    产品D,125
+    产品E,100
+}
+
+Chart 示例3 {
+    use Data_3
+    type bar
+    x month
+y value
+    @title "BAR 示例 3"
+    @color "#fac858"
+}

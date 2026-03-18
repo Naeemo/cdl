@@ -1,0 +1,16 @@
+@lang(data)
+Data_4 {
+    category,min,q1,median,q3,max
+    组A,14,24,34,44,54
+    组B,19,29,39,49,59
+    组C,24,34,44,54,64
+}
+
+Chart 示例4 {
+    use Data_4
+    type boxplot
+    x dimension
+y measure
+    @title "BOXPLOT 示例 4"
+    @color "#ee6666"
+}

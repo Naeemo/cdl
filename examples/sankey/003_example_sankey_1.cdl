@@ -1,0 +1,19 @@
+@lang(data)
+Data_3 {
+    source,target,value
+    总流量,访问,1300
+    访问,注册,450
+    访问,离开,850
+    注册,购买,240
+    注册,流失,240
+    购买,复购,140
+}
+
+Chart 示例3 {
+    use Data_3
+    type sankey
+    x source
+y target
+    @title "SANKEY 示例 3"
+    @color "#91cc75"
+}

@@ -1,0 +1,18 @@
+@lang(data)
+Data_5 {
+    stage,value
+    访问,1500
+    注册,900
+    激活,600
+    付费,300
+    续费,180
+}
+
+Chart 示例5 {
+    use Data_5
+    type funnel
+    x name
+y value
+    @title "FUNNEL 示例 5"
+    @color "#73c0de"
+}

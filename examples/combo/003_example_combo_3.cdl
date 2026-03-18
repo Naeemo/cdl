@@ -1,0 +1,19 @@
+@lang(data)
+Data_3 {
+    month,value,category
+    Jan,130,A
+    Feb,150,B
+    Mar,120,A
+    Apr,180,B
+    May,160,A
+    Jun,190,B
+}
+
+Chart 示例3 {
+    use Data_3
+    type combo
+    x field1
+y field2
+    @title "COMBO 示例 3"
+    @color "#ee6666"
+}

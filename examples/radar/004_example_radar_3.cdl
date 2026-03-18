@@ -1,0 +1,19 @@
+@lang(data)
+Data_4 {
+    dimension,score
+    技术,74
+    设计,89
+    市场,64
+    销售,94
+    运营,79
+    客服,84
+}
+
+Chart 示例4 {
+    use Data_4
+    type radar
+    x dimension
+y value
+    @title "RADAR 示例 4"
+    @color "#ee6666"
+}

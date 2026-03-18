@@ -1,0 +1,20 @@
+@lang(data)
+Data_5 {
+    parent,child,value
+    公司,研发部,450
+    公司,市场部,350
+    公司,销售部,300
+    研发部,前端,175
+    研发部,后端,225
+    市场部,线上,205
+    市场部,线下,145
+}
+
+Chart 示例5 {
+    use Data_5
+    type treemap
+    x name
+y count
+    @title "TREEMAP 示例 5"
+    @color "#ee6666"
+}

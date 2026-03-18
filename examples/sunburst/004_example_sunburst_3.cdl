@@ -1,0 +1,20 @@
+@lang(data)
+Data_4 {
+    level0,level1,level2,value
+    电子产品,手机,苹果,340
+    电子产品,手机,华为,290
+    电子产品,电脑,联想,220
+    电子产品,电脑,戴尔,190
+    服装,男装,T恤,160
+    服装,男装,衬衫,140
+    服装,女装,连衣裙,200
+}
+
+Chart 示例4 {
+    use Data_4
+    type sunburst
+    x dimension
+y value
+    @title "SUNBURST 示例 4"
+    @color "#ee6666"
+}

@@ -1,0 +1,16 @@
+@lang(data)
+Data_3 {
+    category,min,q1,median,q3,max
+    组A,13,23,33,43,53
+    组B,18,28,38,48,58
+    组C,23,33,43,53,63
+}
+
+Chart 示例3 {
+    use Data_3
+    type boxplot
+    x dimension
+y measure
+    @title "BOXPLOT 示例 3"
+    @color "#fac858"
+}

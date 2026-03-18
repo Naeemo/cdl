@@ -1,0 +1,18 @@
+@lang(data)
+Data_5 {
+    x,y,group
+    15,25,A
+    20,40,B
+    25,30,A
+    30,50,B
+    35,35,A
+}
+
+Chart 示例5 {
+    use Data_5
+    type scatter
+    x dimension
+y measure
+    @title "SCATTER 示例 5"
+    @color "#73c0de"
+}

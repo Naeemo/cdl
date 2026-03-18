@@ -1,0 +1,17 @@
+@lang(data)
+Data_5 {
+    date,open,close,low,high
+    2024-01-01,105,110,103,115
+    2024-01-02,110,107,105,113
+    2024-01-03,107,113,106,117
+    2024-01-04,113,115,112,120
+}
+
+Chart 示例5 {
+    use Data_5
+    type candlestick
+    x dimension
+y measure
+    @title "CANDLESTICK 示例 5"
+    @color "#73c0de"
+}

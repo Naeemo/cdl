@@ -1,0 +1,16 @@
+@lang(data)
+Data_5 {
+    category,min,q1,median,q3,max
+    组A,15,25,35,45,55
+    组B,20,30,40,50,60
+    组C,25,35,45,55,65
+}
+
+Chart 示例5 {
+    use Data_5
+    type boxplot
+    x dimension
+y measure
+    @title "BOXPLOT 示例 5"
+    @color "#73c0de"
+}

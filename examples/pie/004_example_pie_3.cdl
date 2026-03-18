@@ -1,0 +1,17 @@
+@lang(data)
+Data_4 {
+    name,value
+    部门A,38
+    部门B,53
+    部门C,33
+    部门D,43
+}
+
+Chart 示例4 {
+    use Data_4
+    type pie
+    x name
+y value
+    @title "PIE 示例 4"
+    @color "#ee6666"
+}

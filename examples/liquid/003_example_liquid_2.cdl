@@ -1,0 +1,15 @@
+@lang(data)
+Data_3 {
+    target,current
+    销售目标,78
+    预算使用率,91
+    客户满意度,95
+}
+
+Chart 示例3 {
+    use Data_3
+    type liquid
+    y current
+    @title "LIQUID 示例 3"
+    @color "#fac858"
+}

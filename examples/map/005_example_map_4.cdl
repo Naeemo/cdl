@@ -1,0 +1,19 @@
+@lang(data)
+Data_5 {
+    region,value
+    北京,100
+    上海,93
+    广州,81
+    深圳,87
+    杭州,70
+    成都,63
+}
+
+Chart 示例5 {
+    use Data_5
+    type map
+    x region
+y value
+    @title "MAP 示例 5"
+    @color "#73c0de"
+}

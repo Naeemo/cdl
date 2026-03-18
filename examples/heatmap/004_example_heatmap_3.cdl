@@ -1,0 +1,20 @@
+@lang(data)
+Data_4 {
+    x,y,value
+    周一,9-10,24
+    周一,10-11,39
+    周一,11-12,49
+    周二,9-10,34
+    周二,10-11,44
+    周二,11-12,54
+    周三,9-10,29
+}
+
+Chart 示例4 {
+    use Data_4
+    type heatmap
+    x dimension
+y measure
+    @title "HEATMAP 示例 4"
+    @color "#ee6666"
+}

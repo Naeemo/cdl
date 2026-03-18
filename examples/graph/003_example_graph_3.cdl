@@ -1,0 +1,19 @@
+@lang(data)
+Data_3 {
+    source,target,weight
+    产品A,产品B,0.8300000000000001)
+    产品A,产品C,0.63)
+    产品B,产品D,0.73)
+    产品C,产品D,0.93)
+    产品D,产品E,0.53)
+    产品E,产品A,0.43000000000000005)
+}
+
+Chart 示例3 {
+    use Data_3
+    type graph
+    x source
+y target
+    @title "GRAPH 示例 3"
+    @color "#ee6666"
+}

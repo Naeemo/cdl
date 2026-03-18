@@ -1,0 +1,20 @@
+@lang(data)
+Data_2 {
+    x,y,value
+    周一,9-10,22
+    周一,10-11,37
+    周一,11-12,47
+    周二,9-10,32
+    周二,10-11,42
+    周二,11-12,52
+    周三,9-10,27
+}
+
+Chart 示例2 {
+    use Data_2
+    type heatmap
+    x dimension
+y measure
+    @title "HEATMAP 示例 2"
+    @color "#91cc75"
+}

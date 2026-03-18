@@ -1,0 +1,21 @@
+@lang(data)
+Data_5 {
+    word,count,frequency
+    创新,100,high
+    技术,93,high
+    产品,87,high
+    市场,80,medium
+    用户,75,medium
+    设计,70,medium
+    数据,65,medium
+    服务,60,low
+}
+
+Chart 示例5 {
+    use Data_5
+    type wordcloud
+    x name
+y count
+    @title "WORDCLOUD 示例 5"
+    @color "#73c0de"
+}

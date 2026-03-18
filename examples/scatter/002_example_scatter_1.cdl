@@ -1,0 +1,18 @@
+@lang(data)
+Data_2 {
+    x,y,group
+    12,22,A
+    17,37,B
+    22,27,A
+    27,47,B
+    32,32,A
+}
+
+Chart 示例2 {
+    use Data_2
+    type scatter
+    x dimension
+y measure
+    @title "SCATTER 示例 2"
+    @color "#91cc75"
+}

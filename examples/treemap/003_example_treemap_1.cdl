@@ -1,0 +1,20 @@
+@lang(data)
+Data_3 {
+    parent,child,value
+    公司,研发部,430
+    公司,市场部,330
+    公司,销售部,280
+    研发部,前端,165
+    研发部,后端,215
+    市场部,线上,195
+    市场部,线下,135
+}
+
+Chart 示例3 {
+    use Data_3
+    type treemap
+    x name
+y count
+    @title "TREEMAP 示例 3"
+    @color "#91cc75"
+}

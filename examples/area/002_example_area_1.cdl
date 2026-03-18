@@ -1,0 +1,19 @@
+@lang(data)
+Data_2 {
+    month,value
+    1月,116
+    2月,166
+    3月,136
+    4月,196
+    5月,216
+    6月,186
+}
+
+Chart 示例2 {
+    use Data_2
+    type area
+    x month
+y value
+    @title "AREA 示例 2"
+    @color "#91cc75"
+}
