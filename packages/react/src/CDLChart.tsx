@@ -5,6 +5,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as echarts from 'echarts';
+import { useChartLinkage, LinkageConfig } from './hooks/useChartLinkage';
 
 // DrillDown 路径项
 export interface DrillDownPath {
@@ -45,6 +46,8 @@ interface CDLChartProps {
   className?: string;
   /** Custom style */
   style?: React.CSSProperties;
+  /** Linkage configuration for cross-chart highlighting */
+  linkage?: LinkageConfig;
 }
 
 export const CDLChart: React.FC<CDLChartProps> = ({
@@ -59,6 +62,7 @@ export const CDLChart: React.FC<CDLChartProps> = ({
   onError,
   className,
   style,
+  linkage,
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
@@ -70,6 +74,9 @@ export const CDLChart: React.FC<CDLChartProps> = ({
   const [showDetailPanel, setShowDetailPanel] = useState(false);
   const [detailData, setDetailData] = useState<DetailData[]>([]);
   const [detailLoading, setDetailLoading] = useState(false);
+
+  // Linkage hook
+  const { bindChart } = useChartLinkage(linkage);
 
   // Handle drill down
   const handleDrillDown = useCallback(async (params: any) => {
@@ -137,14 +144,14 @@ export const CDLChart: React.FC<CDLChartProps> = ({
         const { render } = await import('@naeemo/cdl-renderer-echarts');
 
         const compileResult = compile(code);
-        if (!compileResult.success) {
+        if (compileResult.errors.length > 0) {
           const errorMsg = compileResult.errors.map(e => 
             `Line ${e.line}: ${e.message}`
           ).join('\n');
           throw new Error(errorMsg);
         }
 
-        const renderResult = render(compileResult.result, theme);
+        const renderResult = render(compileResult.file, theme);
         if (!renderResult.success) {
           throw new Error(renderResult.error || 'Render failed');
         }
@@ -153,8 +160,13 @@ export const CDLChart: React.FC<CDLChartProps> = ({
         if (!chartInstance.current) {
           chartInstance.current = echarts.init(chartRef.current, theme);
           
+          // 绑定联动
+          bindChart(chartInstance.current);
+          
           // 点击事件处理
-          chartInstance.current.on('click', handleDrillDown);
+          chartInstance.current.on('click', (params: any) => {
+            handleDrillDown(params).catch(console.error);
+          });
         }
 
         chartInstance.current.setOption(renderResult.option, true);
