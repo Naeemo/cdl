@@ -25,8 +25,8 @@
     "vue": ">=3.0.0"
   },
   "dependencies": {
-    "@naeemo/cdl-compiler": "^0.1.0",
-    "@naeemo/cdl-renderer-echarts": "^0.1.0",
+    "@naeemo/cdl-compiler": "workspace:*",
+    "@naeemo/cdl-renderer-echarts": "workspace:*",
     "echarts": "^5.4.3"
   },
   "devDependencies": {

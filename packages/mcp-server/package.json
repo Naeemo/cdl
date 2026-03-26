@@ -19,9 +19,9 @@
     "@modelcontextprotocol/sdk": "^1.27.1"
   },
   "peerDependencies": {
-    "@naeemo/cdl-compiler": ">=0.1.0",
-    "@naeemo/cdl-renderer-echarts": ">=0.1.0",
-    "@naeemo/cdl-ai": ">=0.1.0"
+    "@naeemo/cdl-compiler": "workspace:*",
+    "@naeemo/cdl-renderer-echarts": "workspace:*",
+    "@naeemo/cdl-ai": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.19.37",

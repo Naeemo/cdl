@@ -1,0 +1,23 @@
+{
+  "name": "@naeemo/cdl-dynamic-core",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "CDL dynamic chart core - data streaming, polling, update engine",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  },
+  "keywords": ["cdl", "chart", "dynamic", "streaming", "real-time"],
+  "license": "MIT"
+}

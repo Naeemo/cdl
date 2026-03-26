@@ -1,0 +1,33 @@
+{
+  "name": "@naeemo/cdl-vue-dynamic",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "CDL dynamic chart updates for Vue - streaming, polling, real-time",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@naeemo/cdl-dynamic-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "vue": "^3.4.0",
+    "echarts": "^5.4.0",
+    "@naeemo/cdl-compiler": "workspace:*",
+    "@naeemo/cdl-renderer-echarts": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "vue": "^3.4.0"
+  },
+  "keywords": ["cdl", "chart", "dynamic", "streaming", "real-time", "vue"],
+  "license": "MIT"
+}
