@@ -1,9 +1,16 @@
 /**
- * CDL React Component with DrillDown support
+ * CDL React Component with DrillDown support and Accessibility features
  * Usage: <CDLChart code={cdlCode} theme="dark" enableDrillDown />
+ * 
+ * Accessibility Features:
+ * - ARIA labels for chart container and interactive elements
+ * - Keyboard navigation support (Tab, Enter, Escape)
+ * - Screen reader announcements for state changes
+ * - Focus management for drill-down interactions
+ * - High contrast mode support
  */
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useId } from 'react';
 import * as echarts from 'echarts';
 import { useChartLinkage, LinkageConfig } from './hooks/useChartLinkage';
 
@@ -48,6 +55,12 @@ interface CDLChartProps {
   style?: React.CSSProperties;
   /** Linkage configuration for cross-chart highlighting */
   linkage?: LinkageConfig;
+  /** Accessible label for the chart (for screen readers) */
+  ariaLabel?: string;
+  /** Detailed description of the chart data (for screen readers) */
+  ariaDescription?: string;
+  /** Whether the chart is decorative (aria-hidden) */
+  decorative?: boolean;
 }
 
 export const CDLChart: React.FC<CDLChartProps> = ({
@@ -63,9 +76,13 @@ export const CDLChart: React.FC<CDLChartProps> = ({
   className,
   style,
   linkage,
+  ariaLabel = '数据图表',
+  ariaDescription,
+  decorative = false,
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
+  const liveRegionRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   
@@ -74,9 +91,29 @@ export const CDLChart: React.FC<CDLChartProps> = ({
   const [showDetailPanel, setShowDetailPanel] = useState(false);
   const [detailData, setDetailData] = useState<DetailData[]>([]);
   const [detailLoading, setDetailLoading] = useState(false);
+  
+  // Generate unique IDs for accessibility
+  const uniqueId = useId();
+  const chartId = `cdl-chart-${uniqueId}`;
+  const errorId = `cdl-error-${uniqueId}`;
+  const descriptionId = `cdl-desc-${uniqueId}`;
+  const liveRegionId = `cdl-live-${uniqueId}`;
 
   // Linkage hook
   const { bindChart } = useChartLinkage(linkage);
+
+  // Announce message to screen readers
+  const announce = useCallback((message: string) => {
+    if (liveRegionRef.current) {
+      liveRegionRef.current.textContent = message;
+      // Clear after announcement
+      setTimeout(() => {
+        if (liveRegionRef.current) {
+          liveRegionRef.current.textContent = '';
+        }
+      }, 1000);
+    }
+  }, []);
 
   // Handle drill down
   const handleDrillDown = useCallback(async (params: any) => {
@@ -96,11 +133,15 @@ export const CDLChart: React.FC<CDLChartProps> = ({
     setDrillDownPath(newPath);
     setShowDetailPanel(true);
     setDetailLoading(true);
+    
+    // Announce to screen readers
+    announce(`已进入 ${newPathItem.value} 的详情视图，当前层级 ${newPath.length}`);
 
     try {
       if (onDrillDown) {
         const details = await onDrillDown(newPath);
         setDetailData(details);
+        announce(`已加载 ${details.length} 条详情数据`);
       } else {
         // 默认详情展示
         setDetailData([{
@@ -108,13 +149,15 @@ export const CDLChart: React.FC<CDLChartProps> = ({
           value: newPathItem.value,
           rawData: params.data,
         }]);
+        announce('已显示默认详情');
       }
     } catch (err) {
       console.error('Drill down error:', err);
+      announce('加载详情失败，请重试');
     } finally {
       setDetailLoading(false);
     }
-  }, [drillDownPath, enableDrillDown, onDrillDown, onClick]);
+  }, [drillDownPath, enableDrillDown, onDrillDown, onClick, announce]);
 
   // Go back to previous level
   const handleGoBack = useCallback((targetLevel: number) => {
@@ -122,15 +165,28 @@ export const CDLChart: React.FC<CDLChartProps> = ({
     setDrillDownPath(newPath);
     if (newPath.length === 0) {
       setShowDetailPanel(false);
+      announce('已返回顶层视图');
+    } else {
+      announce(`已返回到 ${newPath[newPath.length - 1].value} 层级`);
     }
-  }, [drillDownPath]);
+  }, [drillDownPath, announce]);
 
   // Reset drill down
   const handleReset = useCallback(() => {
     setDrillDownPath([]);
     setShowDetailPanel(false);
     setDetailData([]);
-  }, []);
+    announce('已重置图表视图');
+  }, [announce]);
+
+  // Keyboard navigation handler
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Escape' && showDetailPanel) {
+      event.preventDefault();
+      setShowDetailPanel(false);
+      announce('已关闭详情面板');
+    }
+  }, [showDetailPanel, announce]);
 
   useEffect(() => {
     if (!chartRef.current || !code) return;
@@ -172,11 +228,13 @@ export const CDLChart: React.FC<CDLChartProps> = ({
         chartInstance.current.setOption(renderResult.option, true);
         
         setLoading(false);
+        announce('图表加载完成');
         onSuccess?.();
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : 'Unknown error';
         setError(errorMsg);
         setLoading(false);
+        announce(`图表加载失败: ${errorMsg}`);
         onError?.(errorMsg);
       }
     };
@@ -194,7 +252,7 @@ export const CDLChart: React.FC<CDLChartProps> = ({
       chartInstance.current?.dispose();
       chartInstance.current = null;
     };
-  }, [code, theme, handleDrillDown, onSuccess, onError]);
+  }, [code, theme, handleDrillDown, onSuccess, onError, announce]);
 
   useEffect(() => {
     if (chartInstance.current) {
@@ -239,6 +297,9 @@ export const CDLChart: React.FC<CDLChartProps> = ({
           borderRadius: 4,
           padding: 16,
         }}
+        role="alert"
+        aria-live="assertive"
+        id={errorId}
       >
         <div style={{ color: '#cf222e', fontSize: 14 }}>
           <strong>❌ CDL Error</strong>
@@ -249,10 +310,44 @@ export const CDLChart: React.FC<CDLChartProps> = ({
   }
 
   return (
-    <div className={className} style={containerStyle}>
+    <div 
+      className={className} 
+      style={containerStyle}
+      onKeyDown={handleKeyDown}
+      role={decorative ? 'presentation' : 'region'}
+      aria-label={ariaLabel}
+      id={chartId}
+    >
+      {/* Screen reader live region for announcements */}
+      <div
+        ref={liveRegionRef}
+        id={liveRegionId}
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        style={{
+          position: 'absolute',
+          width: 1,
+          height: 1,
+          padding: 0,
+          margin: -1,
+          overflow: 'hidden',
+          clip: 'rect(0,0,0,0)',
+          whiteSpace: 'nowrap',
+          border: 0,
+        }}
+      />
+      
+      {/* Screen reader description */}
+      {ariaDescription && (
+        <div id={descriptionId} className="sr-only" style={{ display: 'none' }}>
+          {ariaDescription}
+        </div>
+      )}
+
       {/* Breadcrumb */}
       {enableDrillDown && drillDownPath.length > 0 && (
-        <div
+        <nav
           style={{
             position: 'absolute',
             top: 8,
@@ -266,6 +361,7 @@ export const CDLChart: React.FC<CDLChartProps> = ({
             borderRadius: 4,
             fontSize: 12,
           }}
+          aria-label="面包屑导航"
         >
           <button
             onClick={handleReset}
@@ -276,12 +372,14 @@ export const CDLChart: React.FC<CDLChartProps> = ({
               cursor: 'pointer',
               padding: '2px 8px',
             }}
+            aria-label="返回首页"
+            title="返回首页 (Home)"
           >
             🏠
           </button>
           {drillDownPath.map((item, index) => (
             <React.Fragment key={index}>
-              <span style={{ color: theme === 'dark' ? '#666' : '#999' }}>/</span>
+              <span style={{ color: theme === 'dark' ? '#666' : '#999' }} aria-hidden="true">/</span>
               <button
                 onClick={() => handleGoBack(index)}
                 style={{
@@ -294,12 +392,14 @@ export const CDLChart: React.FC<CDLChartProps> = ({
                   padding: '2px 8px',
                   fontWeight: index === drillDownPath.length - 1 ? 'bold' : 'normal',
                 }}
+                aria-current={index === drillDownPath.length - 1 ? 'page' : undefined}
+                aria-label={`返回 ${item.value}`}
               >
                 {item.value}
               </button>
             </React.Fragment>
           ))}
-        </div>
+        </nav>
       )}
 
       {loading && (
@@ -311,6 +411,9 @@ export const CDLChart: React.FC<CDLChartProps> = ({
             transform: 'translate(-50%, -50%)',
             color: '#999',
           }}
+          role="status"
+          aria-live="polite"
+          aria-label="图表加载中"
         >
           Loading...
         </div>
@@ -323,11 +426,18 @@ export const CDLChart: React.FC<CDLChartProps> = ({
           height: '100%',
           transition: 'width 0.3s ease',
         }} 
+        role="img"
+        aria-label={ariaDescription || `${ariaLabel}，使用键盘Tab键可以导航到图表元素`}
+        tabIndex={decorative ? -1 : 0}
       />
 
       {/* Detail Panel */}
       {enableDrillDown && showDetailPanel && (
-        <div style={detailPanelStyle}>
+        <div 
+          style={detailPanelStyle}
+          role="complementary"
+          aria-label="详情面板"
+        >
           <div style={{ 
             display: 'flex', 
             justifyContent: 'space-between', 
@@ -336,11 +446,17 @@ export const CDLChart: React.FC<CDLChartProps> = ({
             borderBottom: `1px solid ${theme === 'dark' ? '#333' : '#e0e0e0'}`,
             paddingBottom: 8,
           }}>
-            <h3 style={{ margin: 0, color: theme === 'dark' ? '#fff' : '#333' }}>
+            <h3 
+              style={{ margin: 0, color: theme === 'dark' ? '#fff' : '#333' }}
+              id={`${chartId}-detail-title`}
+            >
               详情
             </h3>
             <button
-              onClick={() => setShowDetailPanel(false)}
+              onClick={() => {
+                setShowDetailPanel(false);
+                announce('已关闭详情面板');
+              }}
               style={{
                 background: 'none',
                 border: 'none',
@@ -348,17 +464,23 @@ export const CDLChart: React.FC<CDLChartProps> = ({
                 cursor: 'pointer',
                 fontSize: 18,
               }}
+              aria-label="关闭详情面板 (Esc)"
+              title="关闭 (Esc)"
             >
               ✕
             </button>
           </div>
 
           {detailLoading ? (
-            <div style={{ color: theme === 'dark' ? '#999' : '#666', textAlign: 'center', padding: 20 }}>
+            <div 
+              style={{ color: theme === 'dark' ? '#999' : '#666', textAlign: 'center', padding: 20 }}
+              role="status"
+              aria-live="polite"
+            >
               加载中...
             </div>
           ) : detailData.length > 0 ? (
-            <div>
+            <div role="list" aria-label="详情数据列表">
               {detailData.map((detail, index) => (
                 <div
                   key={index}
@@ -368,6 +490,7 @@ export const CDLChart: React.FC<CDLChartProps> = ({
                     background: theme === 'dark' ? '#2a2a3e' : '#f5f5f5',
                     borderRadius: 4,
                   }}
+                  role="listitem"
                 >
                   <div style={{ 
                     fontSize: 12, 

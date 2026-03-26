@@ -2,9 +2,16 @@
  * CDL Vue 包入口
  */
 
-// 组件
-// 注意：CDLChart.vue 需要在 vite 构建后才能正确导入
-// export { default as CDLChart } from './CDLChart.vue';
+// Accessibility utilities
+export {
+  isAccessibleToScreenReader,
+  getAccessibleName,
+  validateChartAccessibility,
+  analyzeKeyboardNavigation,
+  announceToScreenReader,
+  isHighContrastMode,
+  prefersReducedMotion,
+} from './accessibility';
 
 // 性能优化组合式函数
 export {

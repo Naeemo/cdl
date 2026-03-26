@@ -20,7 +20,8 @@ export default defineConfig({
             { text: '快速开始', link: '/guide/' },
             { text: '语法规范', link: '/guide/syntax' },
             { text: '数据查询', link: '/guide/data' },
-            { text: '图表类型', link: '/guide/charts' }
+            { text: '图表类型', link: '/guide/charts' },
+            { text: '无障碍支持', link: '/guide/accessibility' }
           ]
         }
       ],

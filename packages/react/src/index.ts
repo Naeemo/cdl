@@ -4,6 +4,18 @@ export type {
   DetailData 
 } from './CDLChart';
 
+// Accessibility exports
+export {
+  isAccessibleToScreenReader,
+  getAccessibleName,
+  validateChartAccessibility,
+  analyzeKeyboardNavigation,
+  announceToScreenReader,
+  createFocusTrap,
+  isHighContrastMode,
+  prefersReducedMotion,
+} from './accessibility';
+
 // Linkage exports
 export { 
   ChartLinkageProvider, 

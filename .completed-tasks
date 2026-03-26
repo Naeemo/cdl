@@ -227,3 +227,4 @@ const json = await convertData(csvText, 'csv', 'json');
 cdl:transformer
 cdl:i18n
 cdl:performance
+cdl:a11y

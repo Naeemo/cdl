@@ -37,6 +37,14 @@ onMounted(() => {
   if (saved && ['horizontal', 'vertical'].includes(saved)) {
     layoutMode.value = saved
   }
+  
+  // Focus management - focus the editor on load
+  nextTick(() => {
+    const editor = document.querySelector('.code-editor')
+    if (editor) {
+      editor.focus()
+    }
+  })
 })
 
 onUnmounted(() => {
@@ -46,6 +54,20 @@ onUnmounted(() => {
 const toggleLayout = () => {
   layoutMode.value = layoutMode.value === 'horizontal' ? 'vertical' : 'horizontal'
   localStorage.setItem('cdl-playground-layout', layoutMode.value)
+  announce(`已切换到${layoutMode.value === 'horizontal' ? '水平' : '垂直'}布局`)
+}
+
+// Screen reader announcement
+const liveRegion = ref(null)
+const announce = (message) => {
+  if (liveRegion.value) {
+    liveRegion.value.textContent = message
+    setTimeout(() => {
+      if (liveRegion.value) {
+        liveRegion.value.textContent = ''
+      }
+    }, 1000)
+  }
 }
 
 // 从 URL 参数或本地存储加载代码
@@ -135,15 +157,15 @@ function showToast(message, duration = 2000) {
 }
 
 const examples = [
-  { name: 'line', label: '📈 折线' },
-  { name: 'bar', label: '📊 柱状' },
-  { name: 'pie', label: '🥧 饼图' },
-  { name: 'scatter', label: '⚪ 散点' },
-  { name: 'area', label: '🌊 面积' },
-  { name: 'radar', label: '🕸️ 雷达' },
-  { name: 'combo', label: '🔀 组合图(v0.6)' },
-  { name: 'multi-axis', label: '📏 多轴(v0.6)' },
-  { name: 'interaction', label: '🎮 交互(v0.6)' }
+  { name: 'line', label: '📈 折线', description: '折线图示例 - 展示数据随时间变化的趋势' },
+  { name: 'bar', label: '📊 柱状', description: '柱状图示例 - 比较不同类别的数值大小' },
+  { name: 'pie', label: '🥧 饼图', description: '饼图示例 - 展示各部分占整体的比例' },
+  { name: 'scatter', label: '⚪ 散点', description: '散点图示例 - 展示两个变量之间的关系' },
+  { name: 'area', label: '🌊 面积', description: '面积图示例 - 强调数量随时间的变化程度' },
+  { name: 'radar', label: '🕸️ 雷达', description: '雷达图示例 - 展示多维数据的相对大小' },
+  { name: 'combo', label: '🔀 组合图(v0.6)', description: '组合图示例 - 同时展示柱状图和折线图' },
+  { name: 'multi-axis', label: '📏 多轴(v0.6)', description: '多轴图示例 - 展示不同量纲的数据对比' },
+  { name: 'interaction', label: '🎮 交互(v0.6)', description: '交互图示例 - 包含缩放和刷选功能' }
 ]
 
 const exampleCodes = {
@@ -339,6 +361,8 @@ watch(cdlCode, () => {
 function loadExample() {
   if (selectedExample.value && exampleCodes[selectedExample.value]) {
     cdlCode.value = exampleCodes[selectedExample.value]
+    const example = examples.find(e => e.name === selectedExample.value)
+    announce(`已加载示例: ${example?.label}`)
   }
 }
 
@@ -362,6 +386,7 @@ function handlePaste(event) {
     cdl += `}\n\nChart {\n    use ${dataName}\n    type line\n    x ${headers[0]}\n    y ${headers[1] || headers[0]}\n}`
     
     cdlCode.value = cdl
+    announce('已检测到CSV数据并转换为CDL代码')
     run()
   }
 }
@@ -392,6 +417,7 @@ function handleCSVUpload(event) {
     cdl += `}\n\nChart {\n    use ${dataName}\n    type line\n    x ${headers[0]}\n    y ${headers[1] || headers[0]}\n}`
     
     cdlCode.value = cdl
+    announce(`已上传CSV文件: ${file.name}`)
     run()
   }
   reader.readAsText(file)
@@ -399,6 +425,7 @@ function handleCSVUpload(event) {
 
 function refresh() {
   run()
+  announce('图表已刷新')
 }
 
 // 自动刷新控制
@@ -410,9 +437,11 @@ function toggleAutoRefresh() {
         run()
       }
     }, 5000) // 每5秒刷新
+    announce('已开启自动刷新，每5秒刷新一次')
   } else {
     clearInterval(autoRefreshInterval.value)
     autoRefreshInterval.value = null
+    announce('已停止自动刷新')
   }
 }
 
@@ -613,7 +642,7 @@ function renderChartOption(data, chart) {
       symbolSize: 15
     }]
     option.tooltip = {
-      formatter: (params) => `${chart.xField}: ${params.data[0]}<br/>${chart.yField}: ${params.data[1]}`
+      formatter: (params) => `${chart.xField}: ${params.data[0]}<br/${chart.yField}: ${params.data[1]}`
     }
   }
   
@@ -633,11 +662,13 @@ function generateShareLink() {
   url.searchParams.set('code', encoded)
   shareUrl.value = url.toString()
   showShareModal.value = true
+  announce('分享链接已生成')
 }
 
 function copyShareLink() {
   navigator.clipboard.writeText(shareUrl.value).then(() => {
     showToast('链接已复制到剪贴板！')
+    announce('链接已复制到剪贴板')
   })
 }
 
@@ -654,6 +685,7 @@ function generateEmbedCode() {
   navigator.clipboard.writeText(embedCode).then(() => {
     showExportMenu.value = false
     showToast('嵌入代码已复制到剪贴板！')
+    announce('嵌入代码已复制到剪贴板')
   })
 }
 function exportPNG() {
@@ -666,6 +698,7 @@ function exportPNG() {
   download(url, 'cdl-chart.png')
   showExportMenu.value = false
   showToast('PNG 导出成功！')
+  announce('PNG图片已导出')
 }
 
 function exportSVG() {
@@ -677,6 +710,7 @@ function exportSVG() {
   download(url, 'cdl-chart.svg')
   showExportMenu.value = false
   showToast('SVG 导出成功！')
+  announce('SVG矢量图已导出')
 }
 
 // 导出PDF - 使用浏览器原生打印功能实现高质量PDF导出
@@ -684,6 +718,7 @@ function exportPDF() {
   if (!chartInstance) return
   showExportMenu.value = false
   showToast('正在生成 PDF...', 3000)
+  announce('正在生成PDF文档')
   
   // 获取图表的dataURL（高分辨率PNG）
   const chartUrl = chartInstance.getDataURL({
@@ -873,60 +908,181 @@ onUnmounted(() => {
 })
 
 watch(echartsOption, () => nextTick(renderChart))
+
+// Keyboard shortcuts
+function handleKeyDown(event) {
+  // Ctrl/Cmd + Enter to refresh
+  if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+    event.preventDefault()
+    refresh()
+  }
+  // Escape to close modals/menus
+  if (event.key === 'Escape') {
+    if (showShareModal.value) {
+      showShareModal.value = false
+    } else if (showExportMenu.value) {
+      showExportMenu.value = false
+    }
+  }
+}
 </script>
 
 <template>
-  <div class="playground" :class="layoutMode">
-    <div class="editor-pane">
+  <div 
+    class="playground" 
+    :class="layoutMode"
+    @keydown="handleKeyDown"
+    role="main"
+    aria-label="CDL图表编辑器"
+  >
+    <!-- Screen reader live region -->
+    <div
+      ref="liveRegion"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      class="sr-only"
+    ></div>
+    
+    <!-- Skip to content link for keyboard navigation -->
+    <a 
+      href="#preview-pane" 
+      class="skip-link"
+    >
+      跳转到预览区
+    </a>
+    
+    <div class="editor-pane" role="region" aria-label="代码编辑区">
       <div class="pane-header">
         <div class="header-left">
-          <span class="title">CDL</span>
-          <span v-if="isDirty" class="dot"></span>
-          <button class="btn-layout" @click="toggleLayout" :title="layoutMode === 'horizontal' ? '切换为垂直布局' : '切换为水平布局'">
+          <span class="title" id="editor-title">CDL</span>
+          <span v-if="isDirty" class="dot" aria-label="有未保存的更改"></span>
+          <button 
+            class="btn-layout" 
+            @click="toggleLayout" 
+            :title="layoutMode === 'horizontal' ? '切换为垂直布局' : '切换为水平布局'"
+            :aria-label="layoutMode === 'horizontal' ? '切换为垂直布局' : '切换为水平布局'"
+          >
             {{ layoutMode === 'horizontal' ? '🔀' : '📱' }}
           </button>
         </div>
         <div class="header-actions">
-          <input type="file" accept=".csv" @change="handleCSVUpload" class="file-input" title="上传 CSV" />
+          <div class="file-input-wrapper">
+            <input 
+              type="file" 
+              accept=".csv" 
+              @change="handleCSVUpload" 
+              class="file-input" 
+              id="csv-upload"
+              aria-label="上传CSV文件"
+            />
+            <label for="csv-upload" class="file-input-label" title="上传CSV">
+              📁 CSV
+            </label>
+          </div>
           <button 
             class="btn-auto-refresh" 
             :class="{ active: autoRefresh }"
             @click="toggleAutoRefresh" 
+            :aria-pressed="autoRefresh"
+            :aria-label="autoRefresh ? '停止自动刷新' : '开启自动刷新(5秒间隔)'"
             :title="autoRefresh ? '停止自动刷新' : '开启自动刷新(5s)'"
           >
             {{ autoRefresh ? '⏸' : '▶' }}
           </button>
-          <button class="btn-share" @click="generateShareLink" title="分享链接">🔗</button>
-          <select v-model="selectedExample" @change="loadExample" class="example-select">
-            <option v-for="ex in examples" :key="ex.name" :value="ex.name">{{ ex.label }}</option>
+          <button 
+            class="btn-share" 
+            @click="generateShareLink" 
+            aria-label="生成分享链接"
+            title="分享链接"
+          >
+            🔗
+          </button>
+          <select 
+            v-model="selectedExample" 
+            @change="loadExample" 
+            class="example-select"
+            aria-label="选择示例图表"
+          >
+            <option value="" disabled>选择示例...</option>
+            <option v-for="ex in examples" :key="ex.name" :value="ex.name">
+              {{ ex.label }}
+            </option>
           </select>
-          <button class="btn-refresh" @click="refresh" title="重新渲染"><span class="icon">↻</span></button>
+          <button 
+            class="btn-refresh" 
+            @click="refresh" 
+            aria-label="刷新图表 (Ctrl+Enter)"
+            title="重新渲染 (Ctrl+Enter)"
+          >
+            <span class="icon">↻</span>
+          </button>
         </div>
       </div>
-      <textarea v-model="cdlCode" class="code-editor" placeholder="输入 CDL 代码...或粘贴 CSV" spellcheck="false" @paste="handlePaste" />
+      <textarea 
+        v-model="cdlCode" 
+        class="code-editor" 
+        placeholder="输入 CDL 代码...或粘贴 CSV" 
+        spellcheck="false" 
+        @paste="handlePaste"
+        role="textbox"
+        aria-multiline="true"
+        aria-labelledby="editor-title"
+        aria-describedby="editor-help"
+      />
+      <div id="editor-help" class="sr-only">
+        输入CDL代码定义数据和图表。支持粘贴CSV数据自动转换。使用Ctrl+Enter快速刷新预览。
+      </div>
     </div>
 
-    <div class="preview-pane">
+    <div 
+      class="preview-pane" 
+      id="preview-pane"
+      role="region" 
+      aria-label="图表预览区"
+    >
       <div class="pane-header">
-        <span class="title">预览</span>
+        <span class="title" id="preview-title">预览</span>
         <div class="header-actions">
           <div class="export-menu-wrapper">
-            <button class="btn-export btn-export-primary" @click="showExportMenu = !showExportMenu" title="导出选项">
+            <button 
+              class="btn-export btn-export-primary" 
+              @click="showExportMenu = !showExportMenu"
+              aria-haspopup="true"
+              :aria-expanded="showExportMenu"
+              aria-label="导出选项"
+            >
               📥 导出
             </button>
-            <div v-if="showExportMenu" class="export-dropdown" v-click-outside="() => showExportMenu = false">
+            <div 
+              v-if="showExportMenu" 
+              class="export-dropdown" 
+              v-click-outside="() => showExportMenu = false"
+              role="menu"
+              aria-label="导出格式选项"
+            >
               <div class="export-group">
-                <div class="export-label">图片格式</div>
-                <div class="export-options">
-                  <button class="export-option" @click="exportPNG" title="高分辨率 PNG 图片">
-                    <span class="export-icon">🖼️</span>
+                <div class="export-label" role="separator">图片格式</div>
+                <div class="export-options" role="group" aria-label="图片导出选项">
+                  <button 
+                    class="export-option" 
+                    @click="exportPNG" 
+                    role="menuitem"
+                    aria-label="导出为PNG图片格式"
+                  >
+                    <span class="export-icon" aria-hidden="true">🖼️</span>
                     <span class="export-text">
                       <strong>PNG</strong>
                       <small>高分辨率图片</small>
                     </span>
                   </button>
-                  <button class="export-option" @click="exportSVG" title="矢量图形，可无损缩放">
-                    <span class="export-icon">✨</span>
+                  <button 
+                    class="export-option" 
+                    @click="exportSVG" 
+                    role="menuitem"
+                    aria-label="导出为SVG矢量图形格式"
+                  >
+                    <span class="export-icon" aria-hidden="true">✨</span>
                     <span class="export-text">
                       <strong>SVG</strong>
                       <small>矢量图形</small>
@@ -934,22 +1090,32 @@ watch(echartsOption, () => nextTick(renderChart))
                   </button>
                 </div>
               </div>
-              <div class="export-divider"></div>
+              <div class="export-divider" role="separator"></div>
               <div class="export-group">
-                <div class="export-label">文档格式</div>
-                <button class="export-option" @click="exportPDF" title="A4 PDF 文档，含源代码">
-                  <span class="export-icon">📄</span>
+                <div class="export-label" role="separator">文档格式</div>
+                <button 
+                  class="export-option" 
+                  @click="exportPDF" 
+                  role="menuitem"
+                  aria-label="导出为PDF文档格式"
+                >
+                  <span class="export-icon" aria-hidden="true">📄</span>
                   <span class="export-text">
                     <strong>PDF</strong>
                     <small>A4文档含源代码</small>
                   </span>
                 </button>
               </div>
-              <div class="export-divider"></div>
+              <div class="export-divider" role="separator"></div>
               <div class="export-group">
-                <div class="export-label">其他</div>
-                <button class="export-option" @click="generateEmbedCode" title="复制 iframe 嵌入代码">
-                  <span class="export-icon">🔗</span>
+                <div class="export-label" role="separator">其他</div>
+                <button 
+                  class="export-option" 
+                  @click="generateEmbedCode" 
+                  role="menuitem"
+                  aria-label="复制iframe嵌入代码"
+                >
+                  <span class="export-icon" aria-hidden="true">🔗</span>
                   <span class="export-text">
                     <strong>嵌入代码</strong>
                     <small>iframe 嵌入</small>
@@ -958,37 +1124,96 @@ watch(echartsOption, () => nextTick(renderChart))
               </div>
             </div>
           </div>
-          <div v-if="loading" class="loading-dot"></div>
+          <div 
+            v-if="loading" 
+            class="loading-dot" 
+            aria-label="正在加载"
+            role="status"
+          ></div>
         </div>
       </div>
       <div class="preview-content">
-        <div v-if="error" class="error-message">{{ error }}</div>
-        <div v-else-if="echartsOption" ref="chartRef" class="chart-container"></div>
-        <div v-else class="placeholder">输入 CDL 代码查看图表</div>
+        <div 
+          v-if="error" 
+          class="error-message"
+          role="alert"
+          aria-live="assertive"
+        >
+          {{ error }}
+        </div>
+        <div 
+          v-else-if="echartsOption" 
+          ref="chartRef" 
+          class="chart-container"
+          role="img"
+          :aria-label="`图表预览: ${echartsOption?.title?.text || '数据图表'}`"
+          tabindex="0"
+        ></div>
+        <div 
+          v-else 
+          class="placeholder"
+          role="status"
+          aria-live="polite"
+        >
+          输入 CDL 代码查看图表
+        </div>
       </div>
     </div>
   </div>
 
   <!-- 分享模态框 -->
-  <div v-if="showShareModal" class="modal-overlay" @click="closeShareModal">
+  <div 
+    v-if="showShareModal" 
+    class="modal-overlay" 
+    @click="closeShareModal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="share-modal-title"
+  >
     <div class="modal" @click.stop>
-      <h3>🔗 分享链接</h3>
-      <input type="text" :value="shareUrl" readonly class="share-input" />
+      <h3 id="share-modal-title">🔗 分享链接</h3>
+      <input 
+        type="text" 
+        :value="shareUrl" 
+        readonly 
+        class="share-input"
+        aria-label="分享链接"
+        aria-readonly="true"
+      />
       <div class="modal-actions">
         <button class="btn-primary" @click="copyShareLink">复制链接</button>
         <button class="btn-secondary" @click="closeShareModal">关闭</button>
       </div>
     </div>
   </div>
+  
   <!-- Toast 提示 -->
-  <div v-if="toast.show" class="toast" :class="{ show: toast.show }">{{ toast.message }}</div>
+  <div 
+    v-if="toast.show" 
+    class="toast" 
+    :class="{ show: toast.show }"
+    role="status"
+    aria-live="polite"
+  >
+    {{ toast.message }}
+  </div>
 </template>
 
 <style scoped>
 * { box-sizing: border-box; }
-.playground { display: flex; width: 100%; height: 600px; background: #0d1117; border-radius: 8px; overflow: hidden; border: 1px solid #30363d; }
+
+.playground { 
+  display: flex; 
+  width: 100%; 
+  height: 600px; 
+  background: #0d1117; 
+  border-radius: 8px; 
+  overflow: hidden; 
+  border: 1px solid #30363d; 
+}
 .playground.horizontal { flex-direction: row; }
 .playground.vertical { flex-direction: column; height: 800px; }
+
 .editor-pane { 
   width: 50%; 
   min-width: 0; 
@@ -1003,31 +1228,179 @@ watch(echartsOption, () => nextTick(renderChart))
   border-right: none;
   border-bottom: 1px solid #30363d;
 }
-.pane-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #161b22; border-bottom: 1px solid #30363d; height: 40px; flex-shrink: 0; }
+
+.pane-header { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  padding: 8px 12px; 
+  background: #161b22; 
+  border-bottom: 1px solid #30363d; 
+  height: 40px; 
+  flex-shrink: 0; 
+}
+
 .header-left { display: flex; align-items: center; gap: 8px; }
-.title { font-weight: 600; font-size: 12px; color: #c9d1d9; text-transform: uppercase; letter-spacing: 0.5px; }
-.dot { width: 6px; height: 6px; background: #58a6ff; border-radius: 50%; animation: pulse 2s infinite; }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+.title { 
+  font-weight: 600; 
+  font-size: 12px; 
+  color: #c9d1d9; 
+  text-transform: uppercase; 
+  letter-spacing: 0.5px; 
+}
+
+.dot { 
+  width: 6px; 
+  height: 6px; 
+  background: #58a6ff; 
+  border-radius: 50%; 
+  animation: pulse 2s infinite; 
+}
+
+@keyframes pulse { 
+  0%, 100% { opacity: 1; } 
+  50% { opacity: 0.5; } 
+}
+
 .header-actions { display: flex; align-items: center; gap: 6px; }
-.btn-layout { padding: 4px 8px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; cursor: pointer; font-size: 12px; color: #c9d1d9; transition: all 0.2s; }
-.btn-layout:hover { background: #30363d; border-color: #58a6ff; }
-.file-input { padding: 4px 8px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; font-size: 11px; color: #c9d1d9; cursor: pointer; max-width: 90px; }
-.file-input:hover { border-color: #58a6ff; }
-.example-select { padding: 4px 8px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; font-size: 12px; color: #c9d1d9; cursor: pointer; outline: none; }
+
+.btn-layout { 
+  padding: 4px 8px; 
+  background: #21262d; 
+  border: 1px solid #30363d; 
+  border-radius: 4px; 
+  cursor: pointer; 
+  font-size: 12px; 
+  color: #c9d1d9; 
+  transition: all 0.2s; 
+}
+.btn-layout:hover { 
+  background: #30363d; 
+  border-color: #58a6ff; 
+}
+
+.file-input-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.file-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.file-input-label {
+  display: inline-block;
+  padding: 4px 8px;
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #c9d1d9;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.file-input-label:hover {
+  background: #30363d;
+  border-color: #58a6ff;
+}
+
+.example-select { 
+  padding: 4px 8px; 
+  background: #21262d; 
+  border: 1px solid #30363d; 
+  border-radius: 4px; 
+  font-size: 12px; 
+  color: #c9d1d9; 
+  cursor: pointer; 
+  outline: none; 
+}
 .example-select:hover { border-color: #58a6ff; }
-.btn-auto-refresh { padding: 4px 8px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; cursor: pointer; font-size: 12px; color: #c9d1d9; transition: all 0.2s; }
-.btn-auto-refresh:hover { background: #30363d; border-color: #58a6ff; }
-.btn-auto-refresh.active { background: #238636; border-color: #238636; }
-.btn-refresh { padding: 4px 8px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; cursor: pointer; font-size: 13px; color: #c9d1d9; transition: all 0.2s; }
-.btn-refresh:hover { background: #30363d; border-color: #58a6ff; }
+
+.btn-auto-refresh { 
+  padding: 4px 8px; 
+  background: #21262d; 
+  border: 1px solid #30363d; 
+  border-radius: 4px; 
+  cursor: pointer; 
+  font-size: 12px; 
+  color: #c9d1d9; 
+  transition: all 0.2s; 
+}
+.btn-auto-refresh:hover { 
+  background: #30363d; 
+  border-color: #58a6ff; 
+}
+.btn-auto-refresh.active { 
+  background: #238636; 
+  border-color: #238636; 
+}
+
+.btn-refresh { 
+  padding: 4px 8px; 
+  background: #21262d; 
+  border: 1px solid #30363d; 
+  border-radius: 4px; 
+  cursor: pointer; 
+  font-size: 13px; 
+  color: #c9d1d9; 
+  transition: all 0.2s; 
+}
+.btn-refresh:hover { 
+  background: #30363d; 
+  border-color: #58a6ff; 
+}
 .btn-refresh .icon { display: inline-block; transition: transform 0.3s; }
 .btn-refresh:hover .icon { transform: rotate(180deg); }
-.btn-export { padding: 4px 10px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; cursor: pointer; font-size: 11px; color: #c9d1d9; transition: all 0.2s; }
-.btn-export:hover { background: #30363d; border-color: #58a6ff; }
-.preview-pane .btn-export { background: #f6f8fa; border-color: #d0d7de; color: #24292f; }
-.preview-pane .btn-export:hover { background: #fff; border-color: #0969da; }
-.code-editor { flex: 1; padding: 12px; border: none; outline: none; font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', monospace; font-size: 13px; line-height: 1.5; resize: none; background: #0d1117; color: #c9d1d9; tab-size: 4; min-height: 0; }
+
+.btn-export { 
+  padding: 4px 10px; 
+  background: #21262d; 
+  border: 1px solid #30363d; 
+  border-radius: 4px; 
+  cursor: pointer; 
+  font-size: 11px; 
+  color: #c9d1d9; 
+  transition: all 0.2s; 
+}
+.btn-export:hover { 
+  background: #30363d; 
+  border-color: #58a6ff; 
+}
+
+.preview-pane .btn-export { 
+  background: #f6f8fa; 
+  border-color: #d0d7de; 
+  color: #24292f; 
+}
+.preview-pane .btn-export:hover { 
+  background: #fff; 
+  border-color: #0969da; 
+}
+
+.code-editor { 
+  flex: 1; 
+  padding: 12px; 
+  border: none; 
+  outline: none; 
+  font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', monospace; 
+  font-size: 13px; 
+  line-height: 1.5; 
+  resize: none; 
+  background: #0d1117; 
+  color: #c9d1d9; 
+  tab-size: 4; 
+  min-height: 0; 
+}
 .code-editor::placeholder { color: #484f58; }
+.code-editor:focus {
+  outline: 2px solid #58a6ff;
+  outline-offset: -2px;
+}
+
 .preview-pane { 
   width: 50%; 
   min-width: 0; 
@@ -1039,14 +1412,62 @@ watch(echartsOption, () => nextTick(renderChart))
   width: 100%;
   height: 50%;
 }
-.preview-pane .pane-header { background: #f6f8fa; border-bottom: 1px solid #d0d7de; }
+.preview-pane .pane-header { 
+  background: #f6f8fa; 
+  border-bottom: 1px solid #d0d7de; 
+}
 .preview-pane .title { color: #24292f; }
-.loading-dot { width: 6px; height: 6px; background: #0969da; border-radius: 50%; animation: blink 1s infinite; }
-@keyframes blink { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
-.preview-content { flex: 1; padding: 16px; overflow: auto; display: flex; flex-direction: column; min-height: 0; }
-.chart-container { flex: 1; min-height: 200px; width: 100%; }
-.placeholder { flex: 1; display: flex; align-items: center; justify-content: center; color: #8c959f; font-size: 13px; }
-.error-message { padding: 12px; background: #fff2f0; border: 1px solid #ffccc7; border-radius: 6px; color: #cf222e; font-size: 12px; margin-bottom: 12px; }
+
+.loading-dot { 
+  width: 6px; 
+  height: 6px; 
+  background: #0969da; 
+  border-radius: 50%; 
+  animation: blink 1s infinite; 
+}
+@keyframes blink { 
+  0%, 100% { opacity: 0.3; } 
+  50% { opacity: 1; } 
+}
+
+.preview-content { 
+  flex: 1; 
+  padding: 16px; 
+  overflow: auto; 
+  display: flex; 
+  flex-direction: column; 
+  min-height: 0; 
+}
+
+.chart-container { 
+  flex: 1; 
+  min-height: 200px; 
+  width: 100%; 
+}
+.chart-container:focus {
+  outline: 2px solid #0969da;
+  outline-offset: 2px;
+}
+
+.placeholder { 
+  flex: 1; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  color: #8c959f; 
+  font-size: 13px; 
+}
+
+.error-message { 
+  padding: 12px; 
+  background: #fff2f0; 
+  border: 1px solid #ffccc7; 
+  border-radius: 6px; 
+  color: #cf222e; 
+  font-size: 12px; 
+  margin-bottom: 12px; 
+}
+
 @media (max-width: 768px) { 
   .playground.vertical { 
     flex-direction: column; 
@@ -1063,21 +1484,127 @@ watch(echartsOption, () => nextTick(renderChart))
   }
 }
 
+/* Skip link for keyboard navigation */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #0969da;
+  color: #fff;
+  padding: 8px;
+  text-decoration: none;
+  z-index: 100;
+  border-radius: 0 0 4px 0;
+}
+.skip-link:focus {
+  top: 0;
+}
+
+/* Screen reader only class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* 分享模态框 */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.modal { background: #fff; padding: 24px; border-radius: 8px; min-width: 400px; }
-.modal h3 { margin: 0 0 16px 0; font-size: 16px; }
-.share-input { width: 100%; padding: 8px 12px; border: 1px solid #d0d7de; border-radius: 4px; font-size: 13px; font-family: monospace; margin-bottom: 16px; }
-.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
-.btn-primary { padding: 6px 16px; background: #0969da; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+.modal-overlay { 
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  height: 100%; 
+  background: rgba(0,0,0,0.5); 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  z-index: 1000; 
+}
+
+.modal { 
+  background: #fff; 
+  padding: 24px; 
+  border-radius: 8px; 
+  min-width: 400px; 
+  max-width: 90vw;
+}
+
+.modal h3 { 
+  margin: 0 0 16px 0; 
+  font-size: 16px; 
+}
+
+.share-input { 
+  width: 100%; 
+  padding: 8px 12px; 
+  border: 1px solid #d0d7de; 
+  border-radius: 4px; 
+  font-size: 13px; 
+  font-family: monospace; 
+  margin-bottom: 16px; 
+}
+.share-input:focus {
+  outline: 2px solid #0969da;
+  border-color: #0969da;
+}
+
+.modal-actions { 
+  display: flex; 
+  gap: 8px; 
+  justify-content: flex-end; 
+}
+
+.btn-primary { 
+  padding: 6px 16px; 
+  background: #0969da; 
+  color: #fff; 
+  border: none; 
+  border-radius: 4px; 
+  cursor: pointer; 
+}
 .btn-primary:hover { background: #0550ae; }
-.btn-secondary { padding: 6px 16px; background: #f6f8fa; color: #24292f; border: 1px solid #d0d7de; border-radius: 4px; cursor: pointer; }
+.btn-primary:focus {
+  outline: 2px solid #0969da;
+  outline-offset: 2px;
+}
+
+.btn-secondary { 
+  padding: 6px 16px; 
+  background: #f6f8fa; 
+  color: #24292f; 
+  border: 1px solid #d0d7de; 
+  border-radius: 4px; 
+  cursor: pointer; 
+}
 .btn-secondary:hover { background: #f3f4f6; }
-.btn-share { padding: 4px 8px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; cursor: pointer; font-size: 12px; color: #c9d1d9; }
-.btn-share:hover { background: #30363d; border-color: #58a6ff; }
+.btn-secondary:focus {
+  outline: 2px solid #0969da;
+  outline-offset: 2px;
+}
+
+.btn-share { 
+  padding: 4px 8px; 
+  background: #21262d; 
+  border: 1px solid #30363d; 
+  border-radius: 4px; 
+  cursor: pointer; 
+  font-size: 12px; 
+  color: #c9d1d9; 
+}
+.btn-share:hover { 
+  background: #30363d; 
+  border-color: #58a6ff; 
+}
 
 /* 导出菜单样式 */
 .export-menu-wrapper { position: relative; }
+
 .btn-export-primary { 
   padding: 4px 12px; 
   background: #0969da; 
@@ -1093,6 +1620,11 @@ watch(echartsOption, () => nextTick(renderChart))
   background: #0550ae; 
   border-color: #0550ae;
 }
+.btn-export-primary:focus {
+  outline: 2px solid #0969da;
+  outline-offset: 2px;
+}
+
 .export-dropdown {
   position: absolute;
   top: calc(100% + 4px);
@@ -1110,6 +1642,7 @@ watch(echartsOption, () => nextTick(renderChart))
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
 .export-group { padding: 8px; }
 .export-label {
   font-size: 11px;
@@ -1121,6 +1654,7 @@ watch(echartsOption, () => nextTick(renderChart))
   margin-bottom: 4px;
 }
 .export-options { display: flex; flex-direction: column; gap: 2px; }
+
 .export-option {
   display: flex;
   align-items: center;
@@ -1134,7 +1668,15 @@ watch(echartsOption, () => nextTick(renderChart))
   transition: background 0.15s;
   width: 100%;
 }
-.export-option:hover { background: #f6f8fa; }
+.export-option:hover { 
+  background: #f6f8fa; 
+}
+.export-option:focus {
+  outline: 2px solid #0969da;
+  outline-offset: -2px;
+  background: #f6f8fa;
+}
+
 .export-icon {
   width: 32px;
   height: 32px;
@@ -1183,5 +1725,54 @@ watch(echartsOption, () => nextTick(renderChart))
 .toast.show {
   transform: translateX(-50%) translateY(0);
   opacity: 1;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .dot,
+  .loading-dot,
+  .toast,
+  .export-dropdown,
+  .btn-refresh .icon {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .playground {
+    border-width: 2px;
+  }
+  .code-editor:focus,
+  .btn-primary:focus,
+  .btn-secondary:focus,
+  .export-option:focus,
+  .share-input:focus {
+    outline-width: 3px;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #0969da;
+  outline-offset: 2px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .export-dropdown {
+    background: #161b22;
+    border-color: #30363d;
+  }
+  .export-text strong {
+    color: #c9d1d9;
+  }
+  .export-text small {
+    color: #8b949e;
+  }
 }
 </style>
