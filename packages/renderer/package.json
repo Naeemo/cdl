@@ -39,7 +39,7 @@
     "@naeemo/cdl-compiler": "^0.1.0"
   },
   "devDependencies": {
-    "@naeemo/cdl-compiler": "^0.1.0",
+    "@naeemo/cdl-compiler": "file:../compiler",
     "@types/node": "^20.11.0",
     "typescript": "^5.3.0"
   }

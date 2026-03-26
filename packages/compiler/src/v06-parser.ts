@@ -191,9 +191,11 @@ function parseAxis(lines: string[], start: number): { axis: AxisConfig; end: num
 function parseInteraction(str: string): InteractionConfig {
   const cfg: InteractionConfig = {};
   for (const part of str.split(/\s+/)) {
-    const kv = part.match(/^(\w+):(.+)$/);
+    const kv = part.match(/^([\w-]+):(.+)$/);
     if (!kv) continue;
-    const [, key, val] = kv;
+    const [, rawKey, val] = kv;
+    // 将连字符转换为驼峰命名
+    const key = rawKey.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
     switch (key) {
       case 'tooltip':
         if (val === 'single' || val === 'shared' || val === 'none') cfg.tooltip = val;
@@ -600,7 +602,7 @@ function parseChartBlock(
 ): { chart: ChartDefinition; nextLine: number } | null {
   
   const line = lines[start].trim();
-  const nameMatch = line.match(/^Chart\s*(?:\{|\s+(\w+)\s*\{)/);
+  const nameMatch = line.match(/^Chart\s*(?:\{|\s+([^\s{]+)\s*\{)/);
   if (!nameMatch) return null;
   
   const chartName = nameMatch[1] || undefined;
@@ -680,8 +682,8 @@ function parseChartBody(
       continue;
     }
     
-    // type: chartType
-    const typeMatch = line.match(/^type\s*:\s*(\w+)$/);
+    // type: chartType (support both "type: bar" and "type bar")
+    const typeMatch = line.match(/^type\s*(?::\s*|\s+)(\w+)$/);
     if (typeMatch) {
       chart.chartType = typeMatch[1];
       i++;
