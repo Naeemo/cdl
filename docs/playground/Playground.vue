@@ -76,7 +76,7 @@ max: 200
 ## axis y2
 min: 0
 max: 50
-labelFormatter: "${value}%"
+labelFormatter: "{value}%"
 
 @title "销售额 vs 利润"
 @color "#4fc3f7"
