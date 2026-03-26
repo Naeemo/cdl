@@ -130,4 +130,4 @@ export default {
   'error.dataFormat': '잘못된 데이터 형식',
   'error.noData': '데이터를 찾을 수 없습니다',
   'error.invalidType': '지원되지 않는 차트 유형입니다',
-} as const;
+};

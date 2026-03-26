@@ -130,4 +130,4 @@ export default {
   'error.dataFormat': 'データ形式が無効です',
   'error.noData': 'データが見つかりません',
   'error.invalidType': 'サポートされていないチャートタイプです',
-} as const;
+};

@@ -16,8 +16,15 @@ import ruRU from './locales/ru-RU';
 import ptBR from './locales/pt-BR';
 import itIT from './locales/it-IT';
 
+// 浏览器全局变量声明
+declare const navigator: {
+  language?: string;
+  userLanguage?: string;
+} | undefined;
+declare const window: unknown;
+
 // 语言包映射
-const localeMap: Record<Locale, typeof zhCN> = {
+const localeMap: Record<Locale, Record<string, string>> = {
   'zh-CN': zhCN,
   'en-US': enUS,
   'ja-JP': jaJP,
@@ -32,11 +39,12 @@ const localeMap: Record<Locale, typeof zhCN> = {
 
 // 自动检测浏览器语言
 export function detectBrowserLocale(): Locale {
-  if (typeof navigator === 'undefined') {
+  // 检查是否在浏览器环境
+  if (typeof navigator === 'undefined' || typeof window === 'undefined') {
     return 'en-US';
   }
   
-  const lang = navigator.language || (navigator as any).userLanguage || 'en-US';
+  const lang = navigator?.language || navigator?.userLanguage || 'en-US';
   
   // 精确匹配
   if (lang in localeMap) {

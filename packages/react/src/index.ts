@@ -18,3 +18,25 @@ export type {
   LinkageEvent,
   LinkageContextState
 } from './hooks/useChartLinkage';
+
+// Performance optimization hooks
+export {
+  useVirtualScroll,
+  useLazyLoad,
+  useProgressiveRender,
+  useChartPerformance,
+  usePerformanceMonitor,
+} from './hooks/usePerformance';
+export type {
+  UseVirtualScrollOptions,
+  VirtualScrollState,
+  UseLazyLoadOptions,
+  LazyLoadState,
+  LazyLoadActions,
+  UseProgressiveRenderOptions,
+  ProgressiveRenderState,
+  ProgressiveRenderActions,
+  UseChartPerformanceOptions,
+  ChartPerformanceState,
+  UsePerformanceMonitorOptions,
+} from './hooks/usePerformance';

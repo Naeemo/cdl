@@ -130,4 +130,4 @@ export default {
   'error.dataFormat': 'Format de données invalide',
   'error.noData': 'Aucune donnée trouvée',
   'error.invalidType': 'Type de graphique non pris en charge',
-} as const;
+};

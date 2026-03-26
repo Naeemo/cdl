@@ -130,4 +130,4 @@ export default {
   'error.dataFormat': '数据格式错误',
   'error.noData': '未找到数据',
   'error.invalidType': '不支持的图表类型',
-} as const;
+};

@@ -124,6 +124,7 @@ export interface ChartHint {
   subtitle?: string;    // @subtitle "..."
   layout?: string;      // @layout "..."
   theme?: 'light' | 'dark' | 'auto';
+  locale?: string;      // @locale "..." - i18n语言设置
   grid?: boolean;
   responsive?: boolean; // @responsive true - 启用自适应容器尺寸
   interaction?: string; // 临时存储，后面会解析为 InteractionConfig

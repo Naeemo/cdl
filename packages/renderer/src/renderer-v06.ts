@@ -1,8 +1,34 @@
 // ECharts Renderer for CDL v0.6
-// 支持：series 表格、axis 块、interaction
+// 支持：series 表格、axis 块、interaction、国际化(i18n)、性能优化
 
 // 临时使用 any 绕过类型检查（后续可完善）
 type AnyType = any;
+
+import { 
+  t, setLocale, getLocale, formatNumber, Locale, BuiltInKeys 
+} from './i18n/index';
+import { 
+  translateAxisName, 
+  translateSeriesName, 
+  translateLegendNames,
+  translateTitle,
+  createTooltipFormatter,
+  createPieTooltipFormatter,
+  applyI18nToOption 
+} from './i18n/chart-i18n';
+import {
+  parsePerformanceHints,
+  applyPerformanceOptimization,
+  optimizeChartOption,
+  getOptimizationSuggestions,
+  ChartPerformanceHints,
+} from './performance';
+
+export interface RenderOptions {
+  theme?: string;
+  locale?: Locale;
+  i18n?: boolean;  // 是否启用国际化（默认 true）
+}
 
 export interface RenderResult {
   success: boolean;
@@ -25,19 +51,62 @@ const THEMES: Record<string, { primary: string[]; background?: string; text?: st
 };
 
 /**
+ * 设置渲染器的语言
+ */
+export function setRenderLocale(locale: Locale): void {
+  setLocale(locale);
+}
+
+/**
+ * 获取当前渲染器的语言
+ */
+export function getRenderLocale(): Locale {
+  return getLocale();
+}
+
+/**
  * 主渲染函数
  */
-export function render(cdlFile: any, themeName?: string): RenderResult {
+export function render(cdlFile: any, options?: RenderOptions | string): RenderResult {
   if (cdlFile.charts.length === 0) {
     return { success: false, error: 'No chart definition found' };
   }
 
   const chart = cdlFile.charts[0];
   const dataMap = buildDataMap(cdlFile.data);
-  const effectiveTheme = themeName || 'light';
+  
+  // 处理向后兼容：options 可以是字符串（themeName）或对象
+  let themeName = 'light';
+  let locale: Locale | undefined;
+  let enableI18n = true;
+  
+  if (typeof options === 'string') {
+    themeName = options;
+  } else if (options) {
+    themeName = options.theme || 'light';
+    locale = options.locale;
+    enableI18n = options.i18n !== false;
+  }
+  
+  // 设置语言
+  if (locale) {
+    setLocale(locale);
+  }
 
   try {
-    const option = convertChart(chart, dataMap, effectiveTheme);
+    let option = convertChart(chart, dataMap, themeName);
+    
+    // 从 hints 中获取 locale 设置
+    const chartLocale = chart.hints?.locale;
+    if (chartLocale) {
+      setLocale(chartLocale as Locale);
+    }
+    
+    // 应用国际化
+    if (enableI18n) {
+      option = applyI18nToOption(option);
+    }
+    
     return { success: true, option };
   } catch (e) {
     return {
@@ -75,20 +144,47 @@ function convertChart(
 
   // 获取数据
   const dataDef = chart.dataSources.length > 0 ? dataMap.get(chart.dataSources[0]) : undefined;
-  const { headers, rows } = dataDef ? parseData(dataDef.query) : { headers: [], rows: [] };
+  let { headers, rows } = dataDef ? parseData(dataDef.query) : { headers: [], rows: [] };
 
-  // 标题
+  // 解析性能优化配置
+  const performanceHints = parsePerformanceHints(chart.hints);
+  
+  // 应用性能优化
+  if (performanceHints.enabled !== false && rows.length > 0) {
+    const xField = chart.x || headers[0] || 'x';
+    const yField = chart.y || headers[1] || headers[0] || 'y';
+    
+    const optimizationResult = applyPerformanceOptimization(
+      rows,
+      performanceHints,
+      xField,
+      yField,
+      chart.group
+    );
+
+    if (optimizationResult.isOptimized) {
+      rows = optimizationResult.data;
+      
+      // 添加优化信息到 console（开发模式）
+      if (typeof console !== 'undefined' && console.log) {
+        console.log('[CDL Performance]', optimizationResult.optimizationInfo);
+      }
+    }
+  }
+
+  // 标题 - 支持国际化
   if (chart.hints?.title || chart.name) {
     option.title = {
-      text: chart.hints?.title || chart.name,
+      text: translateTitle(chart.hints?.title || chart.name),
       left: 'center',
       top: 10,
     };
   }
 
-  // Tooltip 默认
+  // Tooltip 默认 - 使用国际化格式化器
   option.tooltip = {
     trigger: isPieChart(chart) ? 'item' : 'axis',
+    formatter: isPieChart(chart) ? createPieTooltipFormatter() : createTooltipFormatter(),
   };
 
   // Grid（非饼图/雷达图）
@@ -221,7 +317,19 @@ function convertChart(
   // 应用样式提示
   applyStyleHints(chart, option);
 
-  return option;
+  // 应用最终性能优化配置
+  const finalOptimizedOption = optimizeChartOption(
+    option,
+    performanceHints,
+    {
+      dataLength: rows.length,
+      xField: chart.x || headers[0] || 'x',
+      yField: chart.y || headers[1] || headers[0] || 'y',
+      groupBy: chart.group,
+    }
+  );
+
+  return finalOptimizedOption;
 }
 
 function isPieChart(chart: any): boolean {

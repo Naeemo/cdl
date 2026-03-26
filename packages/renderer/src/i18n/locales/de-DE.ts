@@ -130,4 +130,4 @@ export default {
   'error.dataFormat': 'Ungültiges Datenformat',
   'error.noData': 'Keine Daten gefunden',
   'error.invalidType': 'Nicht unterstützter Diagrammtyp',
-} as const;
+};
