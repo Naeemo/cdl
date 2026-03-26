@@ -2,17 +2,11 @@ import React from 'react';
 import { useDynamicChart, UseDynamicChartOptions } from './index';
 
 export interface DynamicCDLChartProps extends Omit<UseDynamicChartOptions, 'onCompileError' | 'onDataUpdate' | 'onConnectionChange' | 'onError'> {
-  /** 容器类名 */
   className?: string;
-  /** 容器样式 */
   style?: React.CSSProperties;
-  /** 加载中提示 */
   loadingComponent?: React.ReactNode;
-  /** 错误提示组件 */
   errorComponent?: React.FC<{ error: string }>;
-  /** 显示连接状态 */
   showConnectionStatus?: boolean;
-  /** 显示统计信息 */
   showStats?: boolean;
   onCompileError?: (error: string) => void;
   onDataUpdate?: (state: { data: any[]; lastUpdate: number | null; updateCount: number }) => void;
@@ -33,9 +27,9 @@ const DefaultErrorComponent: React.FC<{ error: string }> = ({ error }) => (
       height: '100%',
     }}
   >
-    <div style={{ color: '#cf222e', fontSize: 14 }>}
-      <strong>❌ 图表错误</strong>
-      <pre style={{ marginTop: 8, whiteSpace: 'pre-wrap' }>}>{error}</pre>
+    <div style={{ color: '#cf222e', fontSize: 14 }}>
+      <strong>Error</strong>
+      <pre style={{ marginTop: 8, whiteSpace: 'pre-wrap' }}>{error}</pre>
     </div>
   </div>
 );
@@ -104,22 +98,18 @@ export const DynamicCDLChart: React.FC<DynamicCDLChartProps> = ({
 
   return (
     <div className={className} style={containerStyle}>
-      {/* 连接状态 */}
       {showConnectionStatus && chartOptions.enableStreaming && (
         <div style={statusStyle}>
           <span style={dotStyle(isConnected)} />
-          <span style={{ color: chartOptions.theme === 'dark' ? '#fff' : '#333' }>}
-            {isConnected ? '已连接' : '未连接'}
+          <span style={{ color: chartOptions.theme === 'dark' ? '#fff' : '#333' }}>
+            {isConnected ? 'Connected' : 'Disconnected'}
           </span>
           {isStreaming && (
-            <span style={{ color: '#52c41a', marginLeft: 8 }>}
-              ● 接收中
-            </span>
+            <span style={{ color: '#52c41a', marginLeft: 8 }}>Receiving...</span>
           )}
         </div>
       )}
 
-      {/* 统计信息 */}
       {showStats && streamStats && (
         <div
           style={{
@@ -134,27 +124,20 @@ export const DynamicCDLChart: React.FC<DynamicCDLChartProps> = ({
             zIndex: 10,
           }}
         >
-          <div>批次: {streamStats.receivedBatches}</div>
-          <div>记录: {streamStats.receivedRecords}</div>
+          <div>Batches: {streamStats.receivedBatches}</div>
+          <div>Records: {streamStats.receivedRecords}</div>
           {streamStats.lastReceivedAt && (
-            <div>
-              最后更新: {new Date(streamStats.lastReceivedAt).toLocaleTimeString()}
-            </div>
+            <div>Last: {new Date(streamStats.lastReceivedAt).toLocaleTimeString()}</div>
           )}
         </div>
       )}
 
-      {/* 错误状态 */}
       {error && <ErrorComponent error={error} />}
 
-      {/* 加载状态 */}
       {isLoading && loadingComponent}
 
-      {/* 图表容器 */}
-      {!error && <div ref={chartRef} style={{ width: '100%', height: '100%' }}
-003e}
+      {!error && <div ref={chartRef} style={{ width: '100%', height: '100%' }} />}
 
-      {/* 控制按钮 */}
       {chartOptions.enableStreaming && (
         <div
           style={{
@@ -177,7 +160,7 @@ export const DynamicCDLChart: React.FC<DynamicCDLChartProps> = ({
               color: chartOptions.theme === 'dark' ? '#fff' : '#333',
             }}
           >
-            刷新
+            Refresh
           </button>
           {isStreaming ? (
             <button
@@ -191,7 +174,7 @@ export const DynamicCDLChart: React.FC<DynamicCDLChartProps> = ({
                 color: '#fff',
               }}
             >
-              暂停
+              Stop
             </button>
           ) : (
             <button
@@ -205,7 +188,7 @@ export const DynamicCDLChart: React.FC<DynamicCDLChartProps> = ({
                 color: '#fff',
               }}
             >
-              开始
+              Start
             </button>
           )}
           <button
@@ -219,7 +202,7 @@ export const DynamicCDLChart: React.FC<DynamicCDLChartProps> = ({
               color: chartOptions.theme === 'dark' ? '#fff' : '#333',
             }}
           >
-            清空
+            Clear
           </button>
         </div>
       )}

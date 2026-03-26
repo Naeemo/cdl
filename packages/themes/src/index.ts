@@ -343,6 +343,62 @@ export const vibrantTheme: Theme = {
   },
 };
 
+// Colorful Theme - Bright, playful, high-contrast colors on light background
+export const colorfulTheme: Theme = {
+  name: 'colorful',
+  colors: {
+    primary: [
+      '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', 
+      '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F'
+    ],
+    background: '#FEFEFE',
+    foreground: '#2D3436',
+    grid: '#F0F2F5',
+    text: '#2D3436',
+    title: '#2D3436',
+    axis: '#636E72',
+    tooltip: {
+      background: 'rgba(255, 255, 255, 0.98)',
+      text: '#2D3436',
+      border: '#E8E8E8',
+    },
+  },
+  typography: {
+    fontFamily: '"Nunito", "Quicksand", -apple-system, BlinkMacSystemFont, sans-serif',
+    fontSize: {
+      small: 12,
+      medium: 14,
+      large: 16,
+      title: 20,
+    },
+    fontWeight: {
+      normal: 400,
+      bold: 700,
+    },
+  },
+  layout: {
+    margin: {
+      top: 40,
+      right: 40,
+      bottom: 60,
+      left: 60,
+    },
+    padding: {
+      xs: 4,
+      sm: 8,
+      md: 16,
+      lg: 24,
+      xl: 32,
+    },
+    borderRadius: 12,
+  },
+  animation: {
+    duration: 800,
+    easing: 'ease-out',
+    delay: 0,
+  },
+};
+
 // Theme registry
 const themes: Record<string, Theme> = {
   light: lightTheme,
@@ -350,6 +406,7 @@ const themes: Record<string, Theme> = {
   corporate: corporateTheme,
   minimal: minimalTheme,
   vibrant: vibrantTheme,
+  colorful: colorfulTheme,
 };
 
 // Get theme by name
@@ -395,12 +452,20 @@ export function applyTheme(config: Record<string, unknown>, themeName: string): 
 
 // Export all themes
 export { themes };
+
+// Export theme switching utilities
+export * from './theme-switcher';
+
+// Note: React hooks are available at '@naeemo/cdl-themes/react'
+// import { useTheme } from '@naeemo/cdl-themes/react';
+
 export default {
   light: lightTheme,
   dark: darkTheme,
   corporate: corporateTheme,
   minimal: minimalTheme,
   vibrant: vibrantTheme,
+  colorful: colorfulTheme,
   getTheme,
   registerTheme,
   listThemes,

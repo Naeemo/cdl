@@ -4,6 +4,7 @@ import {
   corporateTheme, 
   minimalTheme, 
   vibrantTheme,
+  colorfulTheme,
   getTheme, 
   listThemes, 
   applyTheme,
@@ -87,7 +88,7 @@ console.log('✅ Updated themes list:', listThemes().join(', '));
 
 // Test 7: All theme variations
 console.log('\nTest 7: All theme variations');
-[lightTheme, darkTheme, corporateTheme, minimalTheme, vibrantTheme].forEach(theme => {
+[lightTheme, darkTheme, corporateTheme, minimalTheme, vibrantTheme, colorfulTheme].forEach(theme => {
   console.log(`✅ ${theme.name}: ${theme.colors.primary.length} colors, ${theme.typography.fontSize.title}px title`);
 });
 

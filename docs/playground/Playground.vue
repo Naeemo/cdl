@@ -2,6 +2,21 @@
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import * as echarts from 'echarts'
 
+// 自定义指令：点击外部关闭
+const vClickOutside = {
+  mounted(el, binding) {
+    el._clickOutside = (event) => {
+      if (!(el === event.target || el.contains(event.target))) {
+        binding.value()
+      }
+    }
+    document.addEventListener('click', el._clickOutside, true)
+  },
+  unmounted(el) {
+    document.removeEventListener('click', el._clickOutside, true)
+  }
+}
+
 // 响应式布局状态
 const layoutMode = ref('horizontal')
 const isMobile = ref(false)
@@ -97,6 +112,27 @@ let chartInstance = null
 
 const shareUrl = ref('')
 const showShareModal = ref(false)
+
+// 导出配置
+const showExportMenu = ref(false)
+const exportConfig = ref({
+  pngPixelRatio: 2,
+  pngBackground: '#ffffff',
+  pdfPageSize: 'a4',
+  pdfOrientation: 'portrait',
+  pdfIncludeSource: true
+})
+
+// Toast 提示
+const toast = ref({ show: false, message: '', timer: null })
+function showToast(message, duration = 2000) {
+  if (toast.value.timer) clearTimeout(toast.value.timer)
+  toast.value.message = message
+  toast.value.show = true
+  toast.value.timer = setTimeout(() => {
+    toast.value.show = false
+  }, duration)
+}
 
 const examples = [
   { name: 'line', label: '📈 折线' },
@@ -601,7 +637,7 @@ function generateShareLink() {
 
 function copyShareLink() {
   navigator.clipboard.writeText(shareUrl.value).then(() => {
-    alert('链接已复制到剪贴板！')
+    showToast('链接已复制到剪贴板！')
   })
 }
 
@@ -616,17 +652,20 @@ function generateEmbedCode() {
   url.searchParams.set('code', encoded)
   const embedCode = `<iframe src="${url.toString()}" width="100%" height="600" frameborder="0"></iframe>`
   navigator.clipboard.writeText(embedCode).then(() => {
-    alert('iframe 嵌入代码已复制！')
+    showExportMenu.value = false
+    showToast('嵌入代码已复制到剪贴板！')
   })
 }
 function exportPNG() {
   if (!chartInstance) return
   const url = chartInstance.getDataURL({
     type: 'png',
-    pixelRatio: 2,
-    backgroundColor: '#fff'
+    pixelRatio: exportConfig.value.pngPixelRatio,
+    backgroundColor: exportConfig.value.pngBackground
   })
-  download(url, 'chart.png')
+  download(url, 'cdl-chart.png')
+  showExportMenu.value = false
+  showToast('PNG 导出成功！')
 }
 
 function exportSVG() {
@@ -635,7 +674,177 @@ function exportSVG() {
     type: 'svg',
     pixelRatio: 2
   })
-  download(url, 'chart.svg')
+  download(url, 'cdl-chart.svg')
+  showExportMenu.value = false
+  showToast('SVG 导出成功！')
+}
+
+// 导出PDF - 使用浏览器原生打印功能实现高质量PDF导出
+function exportPDF() {
+  if (!chartInstance) return
+  showExportMenu.value = false
+  showToast('正在生成 PDF...', 3000)
+  
+  // 获取图表的dataURL（高分辨率PNG）
+  const chartUrl = chartInstance.getDataURL({
+    type: 'png',
+    pixelRatio: 3, // 更高分辨率
+    backgroundColor: '#fff'
+  })
+  
+  // 获取CDL代码标题或默认标题
+  const titleMatch = cdlCode.value.match(/@title\s+"([^"]+)"/)
+  const chartTitle = titleMatch ? titleMatch[1] : 'CDL Chart'
+  
+  // 创建PDF打印窗口
+  const printWindow = window.open('', '_blank')
+  if (!printWindow) {
+    alert('请允许弹出窗口以导出PDF')
+    return
+  }
+  
+  // 获取图表尺寸
+  const chartWidth = chartInstance.getWidth()
+  const chartHeight = chartInstance.getHeight()
+  const aspectRatio = chartWidth / chartHeight
+  
+  // 计算适合A4页面的尺寸（保持宽高比）
+  // A4: 210mm x 297mm，保留边距
+  const a4Width = 190 // mm
+  const a4Height = 277 // mm
+  
+  let imgWidth = a4Width
+  let imgHeight = imgWidth / aspectRatio
+  
+  // 如果高度超出页面，以高度为基准
+  if (imgHeight > a4Height - 40) { // 预留标题空间
+    imgHeight = a4Height - 40
+    imgWidth = imgHeight * aspectRatio
+  }
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>${chartTitle}</title>
+      <style>
+        @page {
+          size: A4;
+          margin: 10mm;
+        }
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          background: #fff;
+          padding: 10mm;
+        }
+        .container {
+          width: 100%;
+          max-width: 190mm;
+          margin: 0 auto;
+        }
+        .header {
+          text-align: center;
+          margin-bottom: 20px;
+          padding-bottom: 10px;
+          border-bottom: 2px solid #0969da;
+        }
+        .title {
+          font-size: 18px;
+          font-weight: 600;
+          color: #1f2328;
+          margin-bottom: 8px;
+        }
+        .meta {
+          font-size: 10px;
+          color: #656d76;
+        }
+        .chart-wrapper {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 200mm;
+        }
+        .chart-img {
+          max-width: 100%;
+          height: auto;
+          display: block;
+        }
+        .footer {
+          margin-top: 20px;
+          text-align: center;
+          font-size: 9px;
+          color: #8c959f;
+          padding-top: 10px;
+          border-top: 1px solid #d0d7de;
+        }
+        .cdl-code {
+          margin-top: 20px;
+          padding: 12px;
+          background: #f6f8fa;
+          border: 1px solid #d0d7de;
+          border-radius: 6px;
+          font-family: 'SF Mono', Monaco, monospace;
+          font-size: 8px;
+          line-height: 1.5;
+          color: #24292f;
+          white-space: pre-wrap;
+          word-break: break-all;
+          max-height: 60mm;
+          overflow: hidden;
+        }
+        .cdl-label {
+          font-size: 10px;
+          font-weight: 600;
+          color: #656d76;
+          margin-bottom: 8px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        @media print {
+          body { padding: 0; }
+          .no-print { display: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="title">${chartTitle}</div>
+          <div class="meta">CDL Chart Export • ${new Date().toLocaleString('zh-CN')}</div>
+        </div>
+        <div class="chart-wrapper">
+          <img class="chart-img" src="${chartUrl}" style="width: ${imgWidth}mm; height: auto;" alt="Chart" />
+        </div>
+        <div class="cdl-label">CDL Source Code</div>
+        <pre class="cdl-code">${cdlCode.value.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+        <div class="footer">
+          Generated by CDL Playground • github.com/naeemo/cdl
+        </div>
+      </div>
+      <div class="no-print" style="position: fixed; top: 10px; right: 10px; z-index: 1000;">
+        <button onclick="window.print()" style="padding: 8px 16px; background: #0969da; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+          🖨️ 打印 / 保存为PDF
+        </button>
+        <button onclick="window.close()" style="padding: 8px 16px; background: #f6f8fa; color: #24292f; border: 1px solid #d0d7de; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 8px;">
+          关闭
+        </button>
+      </div>
+      <${'script'}>
+        // 自动触发打印对话框（可选，用户可以选择取消）
+        // setTimeout(() => window.print(), 500);
+      </${'script'}>
+    </body>
+    </html>
+  `
+  
+  printWindow.document.write(html)
+  printWindow.document.close()
 }
 
 function download(url, filename) {
@@ -660,6 +869,7 @@ onUnmounted(() => {
     chartInstance.dispose()
     chartInstance = null
   }
+  showExportMenu.value = false
 })
 
 watch(echartsOption, () => nextTick(renderChart))
@@ -700,9 +910,54 @@ watch(echartsOption, () => nextTick(renderChart))
       <div class="pane-header">
         <span class="title">预览</span>
         <div class="header-actions">
-          <button class="btn-export" @click="exportPNG" title="导出 PNG">PNG</button>
-          <button class="btn-export" @click="exportSVG" title="导出 SVG">SVG</button>
-          <button class="btn-export" @click="generateEmbedCode" title="嵌入代码">Embed</button>
+          <div class="export-menu-wrapper">
+            <button class="btn-export btn-export-primary" @click="showExportMenu = !showExportMenu" title="导出选项">
+              📥 导出
+            </button>
+            <div v-if="showExportMenu" class="export-dropdown" v-click-outside="() => showExportMenu = false">
+              <div class="export-group">
+                <div class="export-label">图片格式</div>
+                <div class="export-options">
+                  <button class="export-option" @click="exportPNG" title="高分辨率 PNG 图片">
+                    <span class="export-icon">🖼️</span>
+                    <span class="export-text">
+                      <strong>PNG</strong>
+                      <small>高分辨率图片</small>
+                    </span>
+                  </button>
+                  <button class="export-option" @click="exportSVG" title="矢量图形，可无损缩放">
+                    <span class="export-icon">✨</span>
+                    <span class="export-text">
+                      <strong>SVG</strong>
+                      <small>矢量图形</small>
+                    </span>
+                  </button>
+                </div>
+              </div>
+              <div class="export-divider"></div>
+              <div class="export-group">
+                <div class="export-label">文档格式</div>
+                <button class="export-option" @click="exportPDF" title="A4 PDF 文档，含源代码">
+                  <span class="export-icon">📄</span>
+                  <span class="export-text">
+                    <strong>PDF</strong>
+                    <small>A4文档含源代码</small>
+                  </span>
+                </button>
+              </div>
+              <div class="export-divider"></div>
+              <div class="export-group">
+                <div class="export-label">其他</div>
+                <button class="export-option" @click="generateEmbedCode" title="复制 iframe 嵌入代码">
+                  <span class="export-icon">🔗</span>
+                  <span class="export-text">
+                    <strong>嵌入代码</strong>
+                    <small>iframe 嵌入</small>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
           <div v-if="loading" class="loading-dot"></div>
         </div>
       </div>
@@ -725,6 +980,8 @@ watch(echartsOption, () => nextTick(renderChart))
       </div>
     </div>
   </div>
+  <!-- Toast 提示 -->
+  <div v-if="toast.show" class="toast" :class="{ show: toast.show }">{{ toast.message }}</div>
 </template>
 
 <style scoped>
@@ -818,4 +1075,113 @@ watch(echartsOption, () => nextTick(renderChart))
 .btn-secondary:hover { background: #f3f4f6; }
 .btn-share { padding: 4px 8px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; cursor: pointer; font-size: 12px; color: #c9d1d9; }
 .btn-share:hover { background: #30363d; border-color: #58a6ff; }
+
+/* 导出菜单样式 */
+.export-menu-wrapper { position: relative; }
+.btn-export-primary { 
+  padding: 4px 12px; 
+  background: #0969da; 
+  border: 1px solid #0969da; 
+  border-radius: 4px; 
+  cursor: pointer; 
+  font-size: 12px; 
+  color: #fff; 
+  transition: all 0.2s;
+  font-weight: 500;
+}
+.btn-export-primary:hover { 
+  background: #0550ae; 
+  border-color: #0550ae;
+}
+.export-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(31, 35, 40, 0.12);
+  min-width: 200px;
+  z-index: 100;
+  overflow: hidden;
+  animation: dropdownSlide 0.15s ease-out;
+}
+@keyframes dropdownSlide {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.export-group { padding: 8px; }
+.export-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #656d76;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  margin-bottom: 4px;
+}
+.export-options { display: flex; flex-direction: column; gap: 2px; }
+.export-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 6px;
+  text-align: left;
+  transition: background 0.15s;
+  width: 100%;
+}
+.export-option:hover { background: #f6f8fa; }
+.export-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  background: #f6f8fa;
+  border-radius: 6px;
+}
+.export-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.export-text strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2328;
+}
+.export-text small {
+  font-size: 11px;
+  color: #656d76;
+}
+.export-divider {
+  height: 1px;
+  background: #d0d7de;
+  margin: 0;
+}
+
+/* Toast 提示 */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: #24292f;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 13px;
+  z-index: 2000;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
 </style>

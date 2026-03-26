@@ -14,7 +14,11 @@
     "test": "ts-node compiler.ts line.chart",
     "test:example": "ts-node compiler.ts examples/sql/line/01_monthly_sales.cdl",
     "test:v06": "ts-node compiler.ts test-combo.cdl",
+    "test:transformer": "ts-node transformer.test.ts",
     "prepublishOnly": "npm run build"
+  },
+  "optionalDependencies": {
+    "xlsx": "^0.18.5"
   },
   "repository": {
     "type": "git",

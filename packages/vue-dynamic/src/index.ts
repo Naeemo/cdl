@@ -145,18 +145,18 @@ export function useDynamicChart(options: UseDynamicChartOptions): UseDynamicChar
       isLoading.value = true;
       error.value = null;
 
-      const { compile } = await import('@cdl/compiler');
-      const { render } = await import('@cdl/renderer-echarts');
+      const { compile } = await import('@naeemo/cdl-compiler');
+      const { render } = await import('@naeemo/cdl-renderer-echarts');
 
       const compileResult = compile(getCode());
-      if (!compileResult.success) {
+      if (compileResult.errors.length > 0) {
         const errorMsg = compileResult.errors
           .map((e) => `Line ${e.line}: ${e.message}`)
           .join('\n');
         throw new Error(errorMsg);
       }
 
-      const renderResult = render(compileResult.result, getTheme());
+      const renderResult = render(compileResult.file, getTheme());
       if (!renderResult.success) {
         throw new Error(renderResult.error || 'Render failed');
       }

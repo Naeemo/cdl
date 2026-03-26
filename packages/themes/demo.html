@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CDL Theme System - Flicker-free Demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--cdl-font-family, -apple-system, BlinkMacSystemFont, sans-serif);
+      background-color: var(--cdl-bg, #ffffff);
+      color: var(--cdl-text, #333333);
+      transition: background-color 0.3s ease, color 0.3s ease;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      color: var(--cdl-title, #1a1a2e);
+      font-size: 32px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--cdl-axis, #666666);
+      margin-bottom: 40px;
+    }
+
+    .theme-switcher {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    .theme-btn {
+      padding: 10px 20px;
+      border: 2px solid var(--cdl-grid, #e8e8e8);
+      background: var(--cdl-bg, #ffffff);
+      color: var(--cdl-text, #333333);
+      border-radius: var(--cdl-border-radius, 4px);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .theme-btn:hover {
+      border-color: var(--cdl-primary-1, #4e79a7);
+      transform: translateY(-2px);
+    }
+
+    .theme-btn.active {
+      background: var(--cdl-primary-1, #4e79a7);
+      color: white;
+      border-color: var(--cdl-primary-1, #4e79a7);
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    .chart-card {
+      background: var(--cdl-bg, #ffffff);
+      border: 1px solid var(--cdl-grid, #e8e8e8);
+      border-radius: var(--cdl-border-radius, 4px);
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: all 0.3s ease;
+    }
+
+    .chart-card h3 {
+      color: var(--cdl-title, #1a1a2e);
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+
+    .chart-container {
+      width: 100%;
+      height: 300px;
+    }
+
+    .info-section {
+      background: var(--cdl-tooltip-bg, rgba(255,255,255,0.95));
+      border: 1px solid var(--cdl-tooltip-border, #e8e8e8);
+      border-radius: var(--cdl-border-radius, 4px);
+      padding: 30px;
+      margin-top: 40px;
+    }
+
+    .info-section h2 {
+      color: var(--cdl-title, #1a1a2e);
+      margin-bottom: 20px;
+    }
+
+    .color-palette {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+
+    .color-swatch {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: 2px solid var(--cdl-grid, #e8e8e8);
+    }
+
+    .feature-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .feature-list li {
+      padding: 8px 0;
+      padding-left: 24px;
+      position: relative;
+    }
+
+    .feature-list li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--cdl-primary-2, #4ECDC4);
+      font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CDL Theme System</h1>
+    <p class="subtitle">Flicker-free theme switching with 6 preset themes</p>
+
+    <div class="theme-switcher">
+      <button class="theme-btn active" data-theme="light">☀️ Light</button>
+      <button class="theme-btn" data-theme="dark">🌙 Dark</button>
+      <button class="theme-btn" data-theme="colorful">🎨 Colorful</button>
+      <button class="theme-btn" data-theme="vibrant">✨ Vibrant</button>
+      <button class="theme-btn" data-theme="corporate">💼 Corporate</button>
+      <button class="theme-btn" data-theme="minimal">⚪ Minimal</button>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>Line Chart</h3>
+        <div id="chart1" class="chart-container"></div>
+      </div>
+      <div class="chart-card">
+        <h3>Bar Chart</h3>
+        <div id="chart2" class="chart-container"></div>
+      </div>
+      <div class="chart-card">
+        <h3>Pie Chart</h3>
+        <div id="chart3" class="chart-container"></div>
+      </div>
+      <div class="chart-card">
+        <h3>Area Chart</h3>
+        <div id="chart4" class="chart-container"></div>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h2>Current Theme: <span id="current-theme-name">light</span></h2>
+      
+      <h3>Color Palette</h3>
+      <div class="color-palette" id="color-palette">
+        <!-- Colors will be inserted here -->
+      </div>
+
+      <h3>Features</h3>
+      <ul class="feature-list">
+        <li>CSS Custom Properties for instant theme application</li>
+        <li>Preloaded ECharts themes for flicker-free chart switching</li>
+        <li>Smooth 0.3s transition animations</li>
+        <li>6 preset themes: light, dark, colorful, vibrant, corporate, minimal</li>
+        <li>Custom theme registration support</li>
+        <li>React hook: useTheme()</li>
+        <li>TypeScript support</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // Theme definitions (mirroring the TypeScript source)
+    const themes = {
+      light: {
+        colors: {
+          primary: ['#4e79a7', '#f28e2c', '#e15759', '#76b7b2', '#59a14f', '#edc949', '#af7aa1', '#ff9da7'],
+          background: '#ffffff',
+          foreground: '#1a1a2e',
+          grid: '#e8e8e8',
+          text: '#333333',
+          title: '#1a1a2e',
+          axis: '#666666',
+        }
+      },
+      dark: {
+        colors: {
+          primary: ['#4fc3f7', '#29b6f6', '#66bb6a', '#ffa726', '#ef5350', '#ab47bc', '#ffee58', '#26c6da'],
+          background: '#1a1a2e',
+          foreground: '#ffffff',
+          grid: '#2d2d44',
+          text: '#b0b0c0',
+          title: '#ffffff',
+          axis: '#808090',
+        }
+      },
+      colorful: {
+        colors: {
+          primary: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F'],
+          background: '#FEFEFE',
+          foreground: '#2D3436',
+          grid: '#F0F2F5',
+          text: '#2D3436',
+          title: '#2D3436',
+          axis: '#636E72',
+        }
+      },
+      vibrant: {
+        colors: {
+          primary: ['#ff006e', '#fb5607', '#ffbe0b', '#8338ec', '#3a86ff', '#06ffa5', '#ff4365', '#00d9ff'],
+          background: '#0a0a0f',
+          foreground: '#ffffff',
+          grid: '#1a1a2e',
+          text: '#c0c0d0',
+          title: '#ffffff',
+          axis: '#808090',
+        }
+      },
+      corporate: {
+        colors: {
+          primary: ['#003f5c', '#2f4b7c', '#665191', '#a05195', '#d45087', '#f95d6a', '#ff7c43', '#ffa600'],
+          background: '#ffffff',
+          foreground: '#1a1a2e',
+          grid: '#f0f0f5',
+          text: '#333344',
+          title: '#1a1a2e',
+          axis: '#666677',
+        }
+      },
+      minimal: {
+        colors: {
+          primary: ['#000000', '#333333', '#666666', '#999999', '#cccccc', '#dddddd', '#eeeeee', '#f5f5f5'],
+          background: '#ffffff',
+          foreground: '#000000',
+          grid: '#f5f5f5',
+          text: '#333333',
+          title: '#000000',
+          axis: '#999999',
+        }
+      }
+    };
+
+    // Generate CSS variables from theme
+    function generateCSSVariables(themeName) {
+      const theme = themes[themeName];
+      const vars = {};
+      
+      vars['--cdl-bg'] = theme.colors.background;
+      vars['--cdl-fg'] = theme.colors.foreground;
+      vars['--cdl-text'] = theme.colors.text;
+      vars['--cdl-title'] = theme.colors.title;
+      vars['--cdl-axis'] = theme.colors.axis;
+      vars['--cdl-grid'] = theme.colors.grid;
+      
+      theme.colors.primary.forEach((color, i) => {
+        vars[`--cdl-primary-${i + 1}`] = color;
+      });
+      
+      return vars;
+    }
+
+    // Apply CSS variables
+    function applyTheme(themeName) {
+      const vars = generateCSSVariables(themeName);
+      const root = document.documentElement;
+      
+      // Enable transition
+      root.classList.add('cdl-theme-transition');
+      
+      // Apply variables
+      Object.entries(vars).forEach(([key, value]) => {
+        root.style.setProperty(key, value);
+      });
+      
+      // Remove transition class after animation
+      setTimeout(() => {
+        root.classList.remove('cdl-theme-transition');
+      }, 350);
+      
+      // Update ECharts instances
+      updateCharts(themeName);
+      
+      // Update UI
+      document.getElementById('current-theme-name').textContent = themeName;
+      updateColorPalette(themeName);
+      
+      // Update active button
+      document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.theme === themeName);
+      });
+    }
+
+    // Update color palette display
+    function updateColorPalette(themeName) {
+      const theme = themes[themeName];
+      const container = document.getElementById('color-palette');
+      container.innerHTML = theme.colors.primary.map(color => 
+        `<div class="color-swatch" style="background-color: ${color}"></div>`
+      ).join('');
+    }
+
+    // ECharts instances
+    let charts = {};
+
+    // Create ECharts theme object
+    function createEChartsTheme(themeName) {
+      const theme = themes[themeName];
+      return {
+        color: theme.colors.primary,
+        backgroundColor: 'transparent',
+        textStyle: { color: theme.colors.text },
+        title: { textStyle: { color: theme.colors.title } },
+        legend: { textStyle: { color: theme.colors.text } },
+        xAxis: {
+          axisLine: { lineStyle: { color: theme.colors.axis } },
+          axisLabel: { color: theme.colors.text },
+          splitLine: { lineStyle: { color: theme.colors.grid } }
+        },
+        yAxis: {
+          axisLine: { lineStyle: { color: theme.colors.axis } },
+          axisLabel: { color: theme.colors.text },
+          splitLine: { lineStyle: { color: theme.colors.grid } }
+        }
+      };
+    }
+
+    // Initialize charts
+    function initCharts() {
+      // Register all themes
+      Object.keys(themes).forEach(themeName => {
+        echarts.registerTheme(themeName, createEChartsTheme(themeName));
+      });
+
+      // Chart 1: Line
+      charts.chart1 = echarts.init(document.getElementById('chart1'), 'light');
+      charts.chart1.setOption({
+        tooltip: { trigger: 'axis' },
+        xAxis: { type: 'category', data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'] },
+        yAxis: { type: 'value' },
+        series: [{
+          data: [820, 932, 901, 934, 1290, 1330],
+          type: 'line',
+          smooth: true,
+          areaStyle: { opacity: 0.3 }
+        }]
+      });
+
+      // Chart 2: Bar
+      charts.chart2 = echarts.init(document.getElementById('chart2'), 'light');
+      charts.chart2.setOption({
+        tooltip: { trigger: 'axis' },
+        xAxis: { type: 'category', data: ['A', 'B', 'C', 'D', 'E'] },
+        yAxis: { type: 'value' },
+        series: [{
+          data: [120, 200, 150, 80, 70],
+          type: 'bar',
+          barWidth: '60%'
+        }]
+      });
+
+      // Chart 3: Pie
+      charts.chart3 = echarts.init(document.getElementById('chart3'), 'light');
+      charts.chart3.setOption({
+        tooltip: { trigger: 'item' },
+        series: [{
+          type: 'pie',
+          radius: ['40%', '70%'],
+          data: [
+            { value: 1048, name: 'A' },
+            { value: 735, name: 'B' },
+            { value: 580, name: 'C' },
+            { value: 484, name: 'D' },
+            { value: 300, name: 'E' }
+          ]
+        }]
+      });
+
+      // Chart 4: Multi-line Area
+      charts.chart4 = echarts.init(document.getElementById('chart4'), 'light');
+      charts.chart4.setOption({
+        tooltip: { trigger: 'axis' },
+        legend: { data: ['Series A', 'Series B'] },
+        xAxis: { type: 'category', data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] },
+        yAxis: { type: 'value' },
+        series: [
+          {
+            name: 'Series A',
+            type: 'line',
+            stack: 'total',
+            areaStyle: {},
+            data: [120, 132, 101, 134, 90, 230, 210]
+          },
+          {
+            name: 'Series B',
+            type: 'line',
+            stack: 'total',
+            areaStyle: {},
+            data: [220, 182, 191, 234, 290, 330, 310]
+          }
+        ]
+      });
+    }
+
+    // Update all charts with new theme
+    function updateCharts(themeName) {
+      Object.values(charts).forEach(chart => {
+        const dom = chart.getDom();
+        const option = chart.getOption();
+        chart.dispose();
+        charts[dom.id] = echarts.init(dom, themeName);
+        charts[dom.id].setOption(option);
+      });
+    }
+
+    // Event listeners
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        applyTheme(btn.dataset.theme);
+      });
+    });
+
+    window.addEventListener('resize', () => {
+      Object.values(charts).forEach(chart => chart.resize());
+    });
+
+    // Initialize
+    initCharts();
+    updateColorPalette('light');
+  </script>
+</body>
+</html>

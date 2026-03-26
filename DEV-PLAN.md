@@ -155,6 +155,52 @@ Chart {
 
 ---
 
+## ✅ 已完成的任务
+
+### CDL 数据转换器 (2025-03-26)
+- [x] **CSV 支持** - 完整 CSV 解析与序列化，支持引号、自动类型解析、BOM
+- [x] **JSON 支持** - 对象数组格式和 DataTable 格式
+- [x] **Excel 支持** - .xlsx 格式导入导出（基于 xlsx 库）
+- [x] **文件 I/O** - 完整的文件导入导出功能
+- [x] **内存转换** - 任意格式互转
+- [x] **CDL 集成** - @import/@export 指令解析、数据管道
+- [x] **类型定义** - 完整的 TypeScript 类型支持
+- [x] **测试覆盖** - 25 个测试用例全部通过
+
+**文件位置**:
+- 主模块: `packages/compiler/transformer.ts`
+- 集成模块: `packages/compiler/transformer-integration.ts`
+- 测试文件: `packages/compiler/transformer.test.ts`
+- 文档: `packages/compiler/TRANSFORMER.md`
+- 示例: `packages/compiler/transformer-examples.ts`
+
+**API 导出**:
+```typescript
+export {
+  importFromFile, exportToFile, convertData,
+  parseCSV, parseJSON, parseExcel,
+  serializeCSV, serializeJSON, serializeExcel,
+  createEmptyTable, addRow, mergeTables, validateTable,
+  parseImportDirective, parseExportDirective,
+  csvToJson, jsonToCsv, importFromUrl,
+} from '@naeemo/cdl-compiler';
+```
+
+### Playground 导出功能增强 (2025-03-26)
+- [x] **PNG 导出** - 高分辨率图片导出（可配置像素比、背景色）
+- [x] **SVG 导出** - 矢量图形导出，支持无损缩放
+- [x] **PDF 导出** - A4 格式 PDF，包含图表和源代码
+- [x] **导出菜单** - 统一的下拉导出菜单，支持一键导出
+- [x] **Toast 提示** - 导出成功/失败的用户反馈
+- [x] **点击外部关闭** - 导出菜单点击外部自动关闭
+
+**技术实现**:
+- PNG/SVG: 使用 ECharts `getDataURL()` API
+- PDF: 使用浏览器原生打印功能，生成包含图表和源代码的 A4 页面
+- 文件命名: `cdl-chart.png`, `cdl-chart.svg`
+
+---
+
 ## 🧪 测试策略
 
 - 单元测试：每个 `convert*` 函数的输入输出
