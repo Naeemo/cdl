@@ -224,6 +224,6 @@ configure({
 
 ## 更多资源
 
-- [示例](./examples.md) - 查看完整示例代码
+- [示例](./quickstart.md) - 查看完整示例代码
 - [故障排除](./troubleshooting.md) - 常见问题解决
 - [开发者指南](./developer.md) - 如何贡献代码
