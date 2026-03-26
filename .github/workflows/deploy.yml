@@ -26,16 +26,21 @@ jobs:
         with:
           node-version: 22
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Build packages
         run: |
-          cd packages/compiler && npm install && npm run build
-          cd ../renderer && npm install && npm run build
+          pnpm --filter @naeemo/cdl-compiler build
+          pnpm --filter @naeemo/cdl-renderer-echarts build
 
       - name: Build docs
-        run: npm run docs:build
+        run: pnpm docs:build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
