@@ -1259,14 +1259,24 @@ const warningCount = computed(() => errors.value.filter(e => e.severity === 'war
   --error: #ef4444;
   --warning: #f59e0b;
   --border: #334155;
-  
+
   display: flex;
   flex-direction: column;
+  width: 100vw;
   height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
+  margin: 0;
+  padding: 0;
   background: var(--bg-primary);
   color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow: hidden;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 0;
 }
 
 /* ============ 工具栏 ============ */
