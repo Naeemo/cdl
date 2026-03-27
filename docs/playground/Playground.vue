@@ -1262,11 +1262,11 @@ const warningCount = computed(() => errors.value.filter(e => e.severity === 'war
 
   display: flex;
   flex-direction: column;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  max-height: 100vh;
-  max-height: 100dvh;
+  width: 100%;
+  height: calc(100vh - var(--vp-nav-height, 64px));
+  height: calc(100dvh - var(--vp-nav-height, 64px));
+  max-height: calc(100vh - var(--vp-nav-height, 64px));
+  max-height: calc(100dvh - var(--vp-nav-height, 64px));
   margin: 0;
   padding: 0;
   background: var(--bg-primary);
@@ -1274,9 +1274,6 @@ const warningCount = computed(() => errors.value.filter(e => e.severity === 'war
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow: hidden;
   box-sizing: border-box;
-  position: fixed;
-  top: 0;
-  left: 0;
 }
 
 /* ============ 工具栏 ============ */
