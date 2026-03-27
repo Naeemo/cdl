@@ -25,72 +25,116 @@ jobs:
         node-version: '22'
         registry-url: 'https://registry.npmjs.org'
 
-    - name: Debug npm config
+    - name: Configure npm authentication
       run: |
-        echo "NPM config:"
-        npm config list
-        echo ""
-        echo "Trying npm whoami..."
-        npm whoami || echo "whoami failed"
+        echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+        npm whoami
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
     - name: Build and publish packages
+      run: |
+        set -e
+        echo "Publishing CDL packages to NPM..."
+        
+        # 检查包是否已存在（带超时）
+        check_package() {
+          local pkg=$1
+          local ver=$2
+          timeout 15 npm info "$pkg@$ver" version 2>/dev/null || echo "NOT_FOUND"
+        }
+        
+        # 发布 core
+        CORE_VER=$(node -p "require('./packages/core/package.json').version")
+        echo "📦 @naeemo/cdl-core@$CORE_VER"
+        if [ "$(check_package '@naeemo/cdl-core' $CORE_VER)" != "$CORE_VER" ]; then
+          cd packages/core
+          npm ci 2>/dev/null || npm install
+          npm run build
+          npm publish --access public
+          cd ../..
+          echo "  ✅ Published"
+        else
+          echo "  ⚠️ Already exists, skipping"
+        fi
+        
+        # 发布 react
+        REACT_VER=$(node -p "require('./packages/react/package.json').version")
+        echo "📦 @naeemo/cdl-react@$REACT_VER"
+        if [ "$(check_package '@naeemo/cdl-react' $REACT_VER)" != "$REACT_VER" ]; then
+          cd packages/react
+          npm ci 2>/dev/null || npm install
+          npm run build
+          npm publish --access public
+          cd ../..
+          echo "  ✅ Published"
+        else
+          echo "  ⚠️ Already exists, skipping"
+        fi
+        
+        # 发布 vue
+        VUE_VER=$(node -p "require('./packages/vue/package.json').version")
+        echo "📦 @naeemo/cdl-vue@$VUE_VER"
+        if [ "$(check_package '@naeemo/cdl-vue' $VUE_VER)" != "$VUE_VER" ]; then
+          cd packages/vue
+          npm ci 2>/dev/null || npm install
+          npm run build
+          npm publish --access public
+          cd ../..
+          echo "  ✅ Published"
+        else
+          echo "  ⚠️ Already exists, skipping"
+        fi
+        
+        # 发布 ai
+        AI_VER=$(node -p "require('./packages/ai/package.json').version")
+        echo "📦 @naeemo/cdl-ai@$AI_VER"
+        if [ "$(check_package '@naeemo/cdl-ai' $AI_VER)" != "$AI_VER" ]; then
+          cd packages/ai
+          npm ci 2>/dev/null || npm install
+          npm run build
+          npm publish --access public
+          cd ../..
+          echo "  ✅ Published"
+        else
+          echo "  ⚠️ Already exists, skipping"
+        fi
+        
+        # 发布 cli
+        CLI_VER=$(node -p "require('./packages/cli/package.json').version")
+        echo "📦 @naeemo/cdl-cli@$CLI_VER"
+        if [ "$(check_package '@naeemo/cdl-cli' $CLI_VER)" != "$CLI_VER" ]; then
+          cd packages/cli
+          npm ci 2>/dev/null || npm install
+          npm publish --access public
+          cd ../..
+          echo "  ✅ Published"
+        else
+          echo "  ⚠️ Already exists, skipping"
+        fi
+        
+        # 发布 ssr
+        SSR_VER=$(node -p "require('./packages/ssr/package.json').version")
+        echo "📦 @naeemo/cdl-ssr@$SSR_VER"
+        if [ "$(check_package '@naeemo/cdl-ssr' $SSR_VER)" != "$SSR_VER" ]; then
+          cd packages/ssr
+          npm ci 2>/dev/null || npm install
+          npm publish --access public
+          cd ../..
+          echo "  ✅ Published"
+        else
+          echo "  ⚠️ Already exists, skipping"
+        fi
+        
+        echo "✅ All packages processed!"
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+    - name: Verify published packages
       run: |
-        echo "Publishing CDL packages to NPM..."
-
-        publish_package() {
-          local pkg_dir=$1
-          local pkg_name=$2
-          cd $pkg_dir
-          local version=$(node -p "require('./package.json').version")
-          local full_name="@naeemo/cdl-${pkg_name}"
-          echo "📦 Checking $full_name@$version..."
-          if npm view "$full_name@$version" version &>/dev/null; then
-            echo "  ⚠️  $full_name@$version already exists, skipping"
-          else
-            echo "  🚀 Publishing $full_name@$version..."
-            npm install
-            npm run build 2>/dev/null || echo "  (no build script)"
-            npm publish --access public
-            echo "  ✅ Published $full_name@$version"
-          fi
-          cd ../..
-        }
-
-        # Stage 1: Core package (must publish first)
-        publish_package "packages/core" "core"
-
-        # Stage 2: Framework bindings
-        publish_package "packages/react" "react"
-        publish_package "packages/vue" "vue"
-
-        # Stage 3: Additional packages
-        publish_package "packages/ai" "ai"
-        publish_package "packages/cli" "cli"
-        publish_package "packages/ssr" "ssr"
-
-        echo "✅ All packages processed!"
-
-    - name: Create GitHub Release Comment
-      if: github.event_name == 'release'
-      run: |
-        echo "🎉 CDL v${{ github.event.release.tag_name }} packages published to NPM!"
-        echo ""
-        echo "📦 Published packages:"
-        echo "  - @naeemo/cdl-core"
-        echo "  - @naeemo/cdl-react"
-        echo "  - @naeemo/cdl-vue"
-        echo "  - @naeemo/cdl-ai"
-        echo "  - @naeemo/cdl-cli"
-        echo "  - @naeemo/cdl-ssr"
-        echo ""
-        echo "🚀 Installation:"
-        echo "  npm install @naeemo/cdl-core @naeemo/cdl-react"
-        echo ""
-        echo "📦 Package structure (v0.7):"
-        echo "  - @naeemo/cdl-core: compiler + renderer + themes"
-        echo "  - @naeemo/cdl-react: React components + dynamic charts"
-        echo "  - @naeemo/cdl-vue: Vue components + dynamic charts"
+        echo "Verifying published packages on NPM..."
+        sleep 5
+        for pkg in core react vue ai cli ssr; do
+          VER=$(npm view "@naeemo/cdl-$pkg" version 2>/dev/null || echo "NOT_FOUND")
+          echo "@naeemo/cdl-$pkg: $VER"
+        done
