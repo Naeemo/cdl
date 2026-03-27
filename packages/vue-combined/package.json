@@ -1,0 +1,29 @@
+{
+  "name": "@cdl/vue",
+  "version": "0.7.0",
+  "description": "CDL Vue components",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --declaration",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "vue": ">=3.0.0"
+  },
+  "dependencies": {
+    "echarts": "^5.4.3"
+  },
+  "devDependencies": {
+    "vue": "^3.3.0",
+    "typescript": "^5.3.0"
+  },
+  "keywords": ["cdl", "chart", "vue", "component"],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}
