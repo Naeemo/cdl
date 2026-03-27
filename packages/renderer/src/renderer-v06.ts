@@ -143,7 +143,7 @@ function convertChart(
   };
 
   // 获取数据
-  const dataDef = chart.dataSources.length > 0 ? dataMap.get(chart.dataSources[0]) : undefined;
+  const dataDef = chart.data.length > 0 ? dataMap.get(chart.data[0]) : undefined;
   let { headers, rows } = dataDef ? parseData(dataDef.query) : { headers: [], rows: [] };
 
   // 解析性能优化配置
