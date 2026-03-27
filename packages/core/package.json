@@ -1,0 +1,25 @@
+{
+  "name": "@cdl/core",
+  "version": "0.7.0",
+  "description": "CDL core - compiler and ECharts renderer",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --declaration",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "echarts": "^5.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  },
+  "keywords": ["cdl", "chart", "compiler", "echarts"],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}

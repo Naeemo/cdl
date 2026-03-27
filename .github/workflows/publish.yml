@@ -67,7 +67,7 @@ jobs:
         npm publish --access public
         cd ../..
 
-        # Stage 3: Remaining packages
+        # Stage 3: Framework bindings
         echo "📦 Publishing @naeemo/cdl-react..."
         cd packages/react
         npm install
@@ -82,19 +82,29 @@ jobs:
         npm publish --access public
         cd ../..
 
-        echo "📦 Publishing @naeemo/cdl-templates..."
-        cd packages/templates
-        npm install
-        npm publish --access public
-        cd ../..
-
-        echo "📦 Publishing @naeemo/cdl-themes..."
-        cd packages/themes
+        # Stage 4: Dynamic/realtime packages
+        echo "📦 Publishing @naeemo/cdl-dynamic-core..."
+        cd packages/dynamic-core
         npm install
         npm run build
         npm publish --access public
         cd ../..
 
+        echo "📦 Publishing @naeemo/cdl-react-dynamic..."
+        cd packages/react-dynamic
+        npm install
+        npm run build
+        npm publish --access public
+        cd ../..
+
+        echo "📦 Publishing @naeemo/cdl-vue-dynamic..."
+        cd packages/vue-dynamic
+        npm install
+        npm run build
+        npm publish --access public
+        cd ../..
+
+        # Stage 5: Additional renderers and tools
         echo "📦 Publishing @naeemo/cdl-renderer-canvas..."
         cd packages/renderer-canvas
         npm install
@@ -108,18 +118,15 @@ jobs:
         npm publish --access public
         cd ../..
 
-        echo "📦 Publishing @naeemo/cdl-vscode..."
-        cd packages/vscode-extension
+        echo "📦 Publishing @naeemo/cdl-mcp-server..."
+        cd packages/mcp-server
         npm install
-        npm run build 2>/dev/null || echo "No build script, skipping"
+        npm run build
         npm publish --access public
         cd ../..
 
-        echo "📦 Publishing @naeemo/cdl-integration-test..."
-        cd packages/integration-test
-        npm install
-        npm publish --access public
-        cd ../..
+        # Note: @naeemo/cdl-vscode is published separately to VS Code Marketplace
+        # Note: @naeemo/cdl-integration-test is not published (internal test package)
 
         echo "✅ All packages published successfully!"
 
@@ -131,17 +138,17 @@ jobs:
         echo "📦 Published packages:"
         echo "  - @naeemo/cdl-compiler"
         echo "  - @naeemo/cdl-renderer-echarts"
+        echo "  - @naeemo/cdl-renderer-canvas"
+        echo "  - @naeemo/cdl-renderer-d3"
         echo "  - @naeemo/cdl-cli"
         echo "  - @naeemo/cdl-ai"
         echo "  - @naeemo/cdl-ssr"
+        echo "  - @naeemo/cdl-mcp-server"
         echo "  - @naeemo/cdl-react"
         echo "  - @naeemo/cdl-vue"
-        echo "  - @naeemo/cdl-templates"
-        echo "  - @naeemo/cdl-themes"
-        echo "  - @naeemo/cdl-renderer-canvas"
-        echo "  - @naeemo/cdl-renderer-d3"
-        echo "  - @naeemo/cdl-vscode"
-        echo "  - @naeemo/cdl-integration-test"
+        echo "  - @naeemo/cdl-dynamic-core"
+        echo "  - @naeemo/cdl-react-dynamic"
+        echo "  - @naeemo/cdl-vue-dynamic"
         echo ""
         echo "🚀 Installation:"
         echo "  npm install @naeemo/cdl-compiler @naeemo/cdl-renderer-echarts @naeemo/cdl-cli"
