@@ -4,24 +4,16 @@
 
 CDL（Chart Definition Language）是一种用于定义数据图表的领域特定语言（DSL）。它的设计目标是：
 
-- **简洁**：用最少的语法表达图表意图
+- **像 Markdown 一样简单**：纯 Markdown 风格语法，3 行上手
 - **安全**：不携带实际数据，只描述"怎么查、怎么画"
 - **AI 友好**：结构化、可验证，易于 LLM 生成和修改
-- **渐进式**：三种语法级别满足不同场景
+- **渐进增强**：简单图表 3 行，复杂图表逐层添加配置
+
+---
 
 ## 基础语法
 
-### 1. 定义数据源
-
-```cdl
-@lang(sql)
-@source('sales_db')
-SalesData {
-    SELECT month, amount FROM sales_2024
-}
-```
-
-### 2. 定义图表（快速语法）
+### 1. 定义图表（最简单）
 
 ```cdl
 # 月度销售趋势
@@ -32,40 +24,57 @@ SalesData {
 | 2月 | 150 |
 | 3月 | 200 |
 
-## 折线图
+## line
 
-@color "#4fc3f7"
-@style "smooth"
+@color #4fc3f7
+@style smooth
 ```
 
-### 3. 使用标准语法
+### 2. 添加配置
 
 ```cdl
-Chart 月度销售 {
-    use SalesData
-    type line
-    x month
-    y amount
-    
-    @style "平滑曲线"
-    @color "#4fc3f7"
-    @title "2024年销售趋势"
-}
+# 月度销售趋势
+
+| 月份 | 销售额 |
+| --- | --- |
+| 1月 | 100 |
+| 2月 | 150 |
+| 3月 | 200 |
+
+## line
+
+## series
+| field | as | color |
+| --- | --- | --- |
+| 销售额 | 销售额(万元) | #4fc3f7 |
+
+## axis y
+min: 0
+max: 250
+labelFormatter: "${value}万"
+
+@title 2024年销售趋势
+@interaction "tooltip:shared"
 ```
 
-## 三种语法对比
+### 3. 使用 SQL 数据源
 
-| 特性 | 快速语法 | 标准语法 | 高级语法 |
-|------|----------|----------|----------|
-| 易用性 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ |
-| 表达力 | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| 适用场景 | 新手、原型 | 生产环境 | 复杂图表 |
-| 代码量 | 最少 | 适中 | 较多 |
+```cdl
+```sql SalesData
+SELECT month, SUM(amount) as total
+FROM sales
+WHERE year = 2024
+GROUP BY month
+```
 
-**推荐**：
-- 新手入门 → 快速语法
-- 日常开发 → 标准语法
-- 复杂图表（combo、多轴） → 高级语法
+# 月度销售
+## line
+use SalesData
+
+@color #4fc3f7
+```
+
+---
 
 ## 支持的图表类型
 
@@ -91,6 +100,8 @@ Chart 月度销售 {
 - **liquid** - 水波图（填充进度）
 - **map** - 地图（地理分布）
 
+---
+
 ## 自动类型推断
 
 如果省略 `## 图表类型`，系统会根据标题关键词自动选择：
@@ -106,44 +117,38 @@ Chart 月度销售 {
 | 热力、矩阵、密度 | heatmap | "活跃热力图" → 热力图 |
 | 组合、混合、双轴 | combo | "销售额与利润" → 组合图 |
 
+---
+
 ## 安装使用
 
 ### 安装
 
 ```bash
-npm install @naeemo/cdl-compiler @naeemo/cdl-renderer-echarts
+npm install @cdl/compiler @cdl/renderer-echarts
 ```
 
 ### 基本使用
 
 ```typescript
-import { compile } from '@naeemo/cdl-compiler'
-import { render } from '@naeemo/cdl-renderer-echarts'
+import { compile } from '@cdl/compiler'
+import { render } from '@cdl/renderer-echarts'
 
 const cdlSource = `
-@lang(data)
-Sales {
-    month, amount
-    1月, 100
-    2月, 150
-    3月, 200
-}
+# 月度销售
 
-Chart 销售 {
-    use Sales
-    type line
-    x month
-    y amount
-}
+| 月份 | 销售额 |
+| --- | --- |
+| 1月 | 100 |
+| 2月 | 150 |
+| 3月 | 200 |
+
+## line
 `
 
-const { result, errors } = compile(cdlSource)
-if (errors.length > 0) {
-    console.error('编译错误:', errors)
-} else {
-    const { option } = render(result)
+const { file, errors } = compile(cdlSource)
+if (errors.length === 0) {
+    const { option } = render(file)
     // option 是标准的 ECharts 配置
-    // 可直接传递给 ECharts 实例
 }
 ```
 
@@ -151,17 +156,16 @@ if (errors.length > 0) {
 
 ```bash
 # 安装全局 CLI
-npm install -g @naeemo/cdl-cli
+npm install -g @cdl/cli
 
 # 验证语法
 cdl validate example.cdl
 
 # 编译输出 AST
 cdl compile example.cdl --output ast.json
-
-# 渲染并导出图片（需要 server）
-cdl export example.cdl --format png --output chart.png
 ```
+
+---
 
 ## 下一步
 
@@ -169,3 +173,7 @@ cdl export example.cdl --format png --output chart.png
 - 浏览 [示例代码](../examples/)
 - 在线体验 [Playground](../playground/)
 - 了解 [数据源配置](./data)
+
+---
+
+*文档版本：v0.7*

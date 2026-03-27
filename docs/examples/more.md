@@ -3,40 +3,63 @@
 ## 散点图
 
 ```cdl
-@lang(data)
-Data { x,y\n1,2\n2,4\n3,6\n4,8 }
+# 身高体重关系
 
-Chart {
-    use Data
-    type scatter
-    x x
-    y y
-}
+| 身高(cm) | 体重(kg) |
+| --- | --- |
+| 170 | 65 |
+| 175 | 72 |
+| 180 | 80 |
+| 165 | 60 |
+| 172 | 68 |
+
+## scatter
+
+@color #4fc3f7
 ```
+
+---
 
 ## 面积图
 
 ```cdl
-@lang(data)
-Data { x,y\n1,10\n2,20\n3,15 }
+# 用户累积增长
 
-Chart {
-    use Data
-    type area
-    x x
-    y y
-    @style "渐变填充"
-}
+| 月份 | 用户数 |
+| --- | --- |
+| 1月 | 1000 |
+| 2月 | 2500 |
+| 3月 | 4500 |
+| 4月 | 6000 |
+
+## area
+
+@color #4fc3f7
+@style smooth
 ```
+
+---
 
 ## 雷达图
 
 ```cdl
-@lang(data)
-Data { dim,value\nA,80\nB,90\nC,70\nD,85 }
+# 能力评估
 
-Chart {
-    use Data
-    type radar
-}
+| 维度 | 分数 |
+| --- | --- |
+| 技术 | 90 |
+| 沟通 | 80 |
+| 管理 | 70 |
+| 创新 | 85 |
+| 执行 | 95 |
+
+## radar
+
+@color #4fc3f7
 ```
+
+---
+
+*更多图表示例请参考 [图表类型详解](../guide/charts)*
+
+*文档版本：v0.7*

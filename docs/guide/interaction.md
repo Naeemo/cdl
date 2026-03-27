@@ -1,131 +1,123 @@
 # 交互配置指南
 
-CDL 支持丰富的交互功能，包括 tooltip、zoom、brush、drill-down、link 等。
+CDL 支持丰富的交互功能，包括 tooltip、zoom、brush 等。
+
+---
 
 ## 配置方式
 
-### 方式 1：@interaction 提示
+### @interaction 指令
 
 ```cdl
-Chart {
-    use Data
-    type line
-    x month
-    y amount
-    @interaction "tooltip:shared zoom:inside"
-}
+# 月度销售
+
+| 月份 | 销售额 |
+| --- | --- |
+| 1月 | 100 |
+| 2月 | 150 |
+| 3月 | 200 |
+
+## line
+
+@interaction "tooltip:shared zoom:inside"
 ```
 
-### 方式 2：## interaction 块
-
-```cdl
-Chart {
-    use Data
-    type line
-    x month
-    y amount
-    
-    ## interaction
-    tooltip: shared
-    zoom: inside
-    brush: true
-}
-```
+---
 
 ## 交互选项
 
 | 选项 | 类型 | 说明 |
 |------|------|------|
 | `tooltip` | `single` \| `shared` \| `none` | 提示框触发方式 |
-| `legend` | `boolean` | 显示图例 |
-| `zoom` | `boolean` \| `inside` \| `slider` \| `{type, ...}` | 缩放 |
-| `brush` | `boolean` \| `{connect, link}` | 刷选 |
-| `drillDown` | `boolean` \| `{field, maxLevels}` | 下钻 |
-| `link` | `string[]` \| `{charts, group, highlight}` | 联动 |
-| `live` | `boolean` \| `number` \| `stream` | 实时更新 |
-| `animation` | `{easing, duration, delay, loop}` | 动画 |
+| `zoom` | `inside` \| `slider` \| `false` | 缩放方式 |
+| `brush` | `true` \| `false` | 刷选功能 |
 
-## 详细说明
+---
 
-### Tooltip
+## 提示框（Tooltip）
 
-- `single`: 单个系列触发（默认）
-- `shared`: 所有系列显示相同提示
-- `none`: 禁用
-
-### Zoom
-
-- `true` 或 `inside`: 鼠标滚轮缩放
-- `slider`: 显示底部滑动条
-- `{type: 'inside', start: 0, end: 100}`: 自定义参数
-
-### Brush
-
-- `true`: 启用刷选
-- `{connect: ['chart1', 'chart2']}`: 跨图表联动
-- `{link: {charts: ['other'], group: 'category'}}`: 联动配置
-
-### Drill-down
-
-- `true`: 使用默认字段（group 或分类字段）
-- `{field: 'region'}`: 指定下钻字段
-- `{maxLevels: 3}`: 限制最大层级
-- `{breadcrumb: true}`: 显示面包屑导航
-
-### Live Updates
-
-- `true`: 自动刷新（默认 5s）
-- `number`: 刷新间隔（毫秒）
-- `'stream'`: WebSocket 实时流
-
-### Animation
+### 共享提示（推荐用于多系列）
 
 ```cdl
-@interaction "animation:easeOut duration:800"
+@interaction "tooltip:shared"
 ```
 
-或
+鼠标悬停时显示同一 X 轴点的所有系列值。
+
+### 单系列提示
 
 ```cdl
-## interaction
-animation:
-  easing: easeOut
-  duration: 800
-  delay: 100
-  loop: false
+@interaction "tooltip:single"
 ```
 
-## 示例：全功能交互
+仅显示当前悬停的数据项。
+
+### 禁用提示
 
 ```cdl
-Chart 交互示例 {
-    use SalesData
-    type line
-    x month
-    y amount
-    group product
-    
-    ## interaction
-    tooltip: shared
-    zoom: inside
-    brush: true
-    drillDown:
-      field: region
-      maxLevels: 3
-      breadcrumb: true
-    link:
-      charts: [其他图表ID]
-      group: product
-      highlight: both
-    animation:
-      easing: easeOut
-      duration: 1000
-}
+@interaction "tooltip:none"
 ```
 
-## 注意事项
+---
 
-- 交互功能依赖渲染器支持，ECharts 渲染器已完全支持
-- `link` 和 `brush` 需要多个图表联动，需确保图表有唯一 ID
-- `drillDown` 需要数据支持层级结构
-- 实时更新 `live` 需要后端提供数据推送接口
+## 数据缩放（Zoom）
+
+### 鼠标滚轮缩放
+
+```cdl
+@interaction "zoom:inside"
+```
+
+在图表区域滚动鼠标滚轮可放大/缩小。
+
+### 底部滑块
+
+```cdl
+@interaction "zoom:slider"
+```
+
+图表底部出现缩放滑块。
+
+### 同时启用
+
+```cdl
+@interaction "zoom:inside zoom:slider"
+```
+
+---
+
+## 刷选（Brush）
+
+```cdl
+@interaction "brush:true"
+```
+
+图表右上角出现刷选工具（矩形、多边形、清除）。
+
+---
+
+## 组合配置
+
+```cdl
+# 销售分析
+
+| 月份 | 销售额 | 利润 |
+| --- | --- | --- |
+| 1月 | 120 | 15 |
+| 2月 | 150 | 20 |
+| 3月 | 180 | 25 |
+
+## combo
+
+## series
+| field | as | type | axis |
+| --- | --- | --- | --- |
+| 销售额 | 销售额 | bar | left |
+| 利润 | 利润 | line | right |
+
+@interaction "tooltip:shared zoom:inside brush:true"
+```
+
+---
+
+*文档版本：v0.7*

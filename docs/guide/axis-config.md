@@ -2,27 +2,32 @@
 
 axis 块允许精细控制图表坐标轴的各项属性。
 
+---
+
 ## 基础用法
 
 ```cdl
-Chart {
-    use Data
-    type line
-    x month
-    y amount
-    
-    ## axis x
-    type: category
-    name: 月份
-    labelRotate: 45
-    
-    ## axis y
-    type: value
-    name: 销售额(万元)
-    min: 0
-    max: 200
-}
+# 月度销售
+
+| 月份 | 销售额 |
+| --- | --- |
+| 1月 | 100 |
+| 2月 | 150 |
+| 3月 | 200 |
+
+## line
+
+## axis x
+name: 月份
+labelRotate: 45
+
+## axis y
+name: 销售额(万元)
+min: 0
+max: 250
 ```
+
+---
 
 ## 坐标轴标识
 
@@ -33,6 +38,8 @@ Chart {
 | `x2` | 副 X 轴（顶部） | 辅助分类 |
 | `y2` | 副 Y 轴（右侧） | 第二数值（双轴图表） |
 
+---
+
 ## 通用配置项
 
 ### type
@@ -41,173 +48,106 @@ Chart {
 - `time` - 时间轴
 - `log` - 对数轴
 
-### name
-坐标轴名称，显示在轴末端。
+### 范围控制
+- `min` - 最小值
+- `max` - 最大值
 
-### nameLocation
-- `start` - 起点
-- `center` - 中间
-- `end` - 末端（默认）
+### 标签配置
+- `name` - 轴名称
+- `labelRotate` - 标签旋转角度（0-90）
+- `labelFormatter` - 标签格式化（如 `"${value}万"`）
 
-### min / max
-轴的范围。可以留空自动计算。
+### 刻度与网格
+- `tickCount` - 刻度数量
+- `splitLine` - 是否显示网格线（true/false）
 
-### scale
-`true` 表示从 0 开始计算（默认），`false` 仅使用数据最小最大值。
+---
 
-### splitNumber
-分割段数，默认 5。
-
-### interval
-强制指定分割间隔。
-
-### axisLabel
-标签样式配置：
+## 双 Y 轴示例
 
 ```cdl
-## axis y
-axisLabel:
-  formatter: ${value}万元  // 模板
-  color: #333
-  fontSize: 12
-  rotate: 0
+# 销售额与利润率
+
+| 月份 | 销售额 | 利润率 |
+| --- | --- | --- |
+| 1月 | 120 | 12% |
+| 2月 | 150 | 13% |
+| 3月 | 180 | 14% |
+
+## combo
+
+## series
+| field | as | type | axis |
+| --- | --- | --- | --- |
+| 销售额 | 销售额 | bar | left |
+| 利润率 | 利润率 | line | right |
+
+## axis y left
+min: 0
+max: 200
+labelFormatter: "${value}万"
+splitLine: true
+
+## axis y right
+min: 0
+max: 20
+labelFormatter: "${value}%"
 ```
 
-### axisLine
-轴线样式：
+---
+
+## X 轴标签旋转
+
+当类别较多时，旋转标签避免重叠：
 
 ```cdl
-axisLine:
-  show: true
-  lineStyle:
-    color: #999
-    width: 1
-    type: solid
+# 月度数据（12个月）
+
+| 月份 | 销售额 |
+| --- | --- |
+| 1月 | 100 |
+| 2月 | 120 |
+| ... | ... |
+| 12月 | 200 |
+
+## line
+
+## axis x
+labelRotate: 45
 ```
 
-### axisTick
-刻度线：
+---
+
+## 时间轴配置
 
 ```cdl
-axisTick:
-  show: true
-  length: 5
-  lineStyle:
-    color: #999
-```
+# 销售趋势
 
-## 坐标轴配置示例
+| 日期 | 销售额 |
+| --- | --- |
+| 2024-01-01 | 100 |
+| 2024-02-01 | 150 |
+| 2024-03-01 | 200 |
 
-### 时间轴
+## line
 
-```cdl
 ## axis x
 type: time
-name: 日期
-min: 2024-01-01
-max: 2024-12-31
+labelFormatter: "MM-dd"
 ```
 
-### 数值轴（百分比）
+---
 
-```cdl
-## axis y
-type: value
-name: 完成率
-min: 0
-max: 100
-axisLabel:
-  formatter: ${value}%
-```
+## 对数坐标轴
 
-### 对数轴
+适用于数值跨度大的数据：
 
 ```cdl
 ## axis y
 type: log
 base: 10
-name: 数值（对数）
 ```
 
-### 隐藏轴线
+---
 
-```cdl
-## axis x
-axisLine: { show: false }
-axisTick: { show: false }
-```
-
-### 网格线控制
-
-```cdl
-splitLine:
-  show: true
-  lineStyle:
-    color: #eee
-    type: dashed
-```
-
-## 多轴完整示例
-
-```cdl
-@lang(data)
-MixedData {
-    month,sales,profit,rate
-    1月,100,15,12.5
-    2月,120,18,15.0
-    3月,140,22,15.7
-}
-
-Chart {
-    use MixedData
-    type combo
-    
-    ## series
-    | field | as | type | axis |
-    | --- | --- | --- | --- |
-    | sales | 销售额 | bar | left |
-    | profit | 利润 | line | left |
-    | rate | 增长率 | line | right |
-    
-    ## axis x
-    type: category
-    
-    ## axis y
-    name: 金额(万元)
-    min: 0
-    
-    ## axis y2
-    name: 百分比(%)
-    min: 0
-    max: 100
-    axisLabel:
-      formatter: ${value}%
-}
-```
-
-## 与主题配合
-
-坐标轴颜色会自动适配主题。如需覆盖：
-
-```cdl
-## axis y
-axisLabel:
-  color: theme.text  // 自动跟随主题文字色
-```
-
-## 常见问题
-
-**Q: 如何让 Y 轴从 0 开始？**  
-A: 设置 `min: 0`，或让 `scale: true`（默认）。
-
-**Q: X 轴标签重叠怎么办？**  
-A: 使用 `labelRotate: 45` 旋转，或 `interval: 1` 隔点显示。
-
-**Q: 如何隐藏坐标轴？**  
-A: `axisLine: { show: false }` 和 `axisLabel: { show: false }`。
-
-## 参考
-
-- [ECharts 坐标轴文档](https://echarts.apache.org/zh/option.html#xAxis)
-- [图表类型参考](./charts-reference.md)
-- [系列配置](./series-config.md)
+*文档版本：v0.7*
