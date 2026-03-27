@@ -3,7 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'CDL',
   description: 'Chart Definition Language - 图表定义语言',
-  
+
   themeConfig: {
     nav: [
       { text: '首页', link: '/' },
@@ -11,7 +11,7 @@ export default defineConfig({
       { text: 'Playground', link: '/playground/' },
       { text: '示例', link: '/examples/' }
     ],
-    
+
     sidebar: {
       '/guide/': [
         {
@@ -37,21 +37,29 @@ export default defineConfig({
         }
       ]
     },
-    
+
     socialLinks: [
       { icon: 'github', link: 'https://github.com/Naeemo/cdl' }
     ]
   },
-  
+
   base: '/cdl/',
-  
+
   head: [
-    ['link', { rel: 'icon', href: '/favicon.ico' }]
+    ['link', { rel: 'icon', href: '/favicon.ico' }],
+    ['script', { src: 'https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js' }]
   ],
-  
+
   vite: {
-    optimizeDeps: {
-      include: ['echarts']
+    build: {
+      rollupOptions: {
+        external: ['echarts'],
+        output: {
+          globals: {
+            echarts: 'echarts'
+          }
+        }
+      }
     }
   }
 })

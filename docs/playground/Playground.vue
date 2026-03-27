@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
-import * as echarts from 'echarts'
+
+// ECharts is loaded from CDN
+const echarts = typeof window !== 'undefined' ? window.echarts : null
 
 // ============ 内嵌 CDL Compiler (简化版) ============
 
@@ -558,7 +560,7 @@ function handleResize() {
 }
 
 function initChart() {
-  if (!chartRef.value) return
+  if (!chartRef.value || !echarts) return
   chartInstance = echarts.init(chartRef.value, 'dark')
 }
 
@@ -808,10 +810,12 @@ function setupLineChart(option, chart, headers, rows) {
     itemStyle: { borderWidth: 2, borderColor: '#fff' },
     areaStyle: isArea ? {
       opacity: 0.3,
-      color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-        { offset: 0, color: 'rgba(99, 102, 241, 0.6)' },
-        { offset: 1, color: 'rgba(99, 102, 241, 0.05)' }
-      ])
+      color: echarts?.graphic?.LinearGradient 
+        ? new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: 'rgba(99, 102, 241, 0.6)' },
+            { offset: 1, color: 'rgba(99, 102, 241, 0.05)' }
+          ])
+        : 'rgba(99, 102, 241, 0.3)'
     } : undefined
   }]
 }
