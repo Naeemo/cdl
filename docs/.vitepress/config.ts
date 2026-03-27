@@ -47,5 +47,11 @@ export default defineConfig({
   
   head: [
     ['link', { rel: 'icon', href: '/favicon.ico' }]
-  ]
+  ],
+  
+  vite: {
+    optimizeDeps: {
+      include: ['echarts']
+    }
+  }
 })
