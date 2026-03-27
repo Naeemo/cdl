@@ -1,9 +1,9 @@
 /**
- * CDL Compiler v0.6 - Complete Rewrite
+ * CDL Compiler v0.7 - Unified Markdown Style
  * 将 CDL 源码编译为带类型的 JSON AST
  */
 
-export { compile, validate } from './src/v06-parser';
+export { compile, validate } from './src/unified-parser';
 export type {
   QueryLanguage,
   DataSourceConfig,
