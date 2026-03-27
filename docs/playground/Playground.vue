@@ -1384,6 +1384,7 @@ const warningCount = computed(() => errors.value.filter(e => e.severity === 'war
   display: grid;
   flex: 1;
   overflow: hidden;
+  min-height: 0;
 }
 
 /* ============ 面板通用 ============ */
@@ -1459,6 +1460,12 @@ const warningCount = computed(() => errors.value.filter(e => e.severity === 'war
   color: var(--text-muted);
   overflow: hidden;
   user-select: none;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.line-numbers::-webkit-scrollbar {
+  display: none;
 }
 
 .line-number {
@@ -1479,6 +1486,26 @@ const warningCount = computed(() => errors.value.filter(e => e.severity === 'war
   tab-size: 2;
   white-space: pre;
   overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-tertiary) transparent;
+}
+
+.code-editor::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.code-editor::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.code-editor::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+}
+
+.code-editor::-webkit-scrollbar-thumb:hover {
+  background: var(--bg-hover);
 }
 
 .code-editor::placeholder {
@@ -1571,6 +1598,26 @@ const warningCount = computed(() => errors.value.filter(e => e.severity === 'war
   flex: 1;
   overflow: auto;
   position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-tertiary) transparent;
+}
+
+.panel-content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.panel-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.panel-content::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+}
+
+.panel-content::-webkit-scrollbar-thumb:hover {
+  background: var(--bg-hover);
 }
 
 /* ============ 图表区域 ============ */
