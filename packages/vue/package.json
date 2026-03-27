@@ -1,7 +1,7 @@
 {
-  "name": "@cdl/react",
+  "name": "@naeemo/cdl-vue",
   "version": "0.7.0",
-  "description": "CDL React components",
+  "description": "CDL Vue components",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -12,19 +12,16 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
-    "react": ">=16.8.0",
-    "react-dom": ">=16.8.0",
-    "@cdl/core": "0.7.0"
+    "vue": ">=3.0.0"
   },
   "dependencies": {
     "echarts": "^5.4.3"
   },
   "devDependencies": {
-    "@types/react": "^18.0.0",
-    "@types/react-dom": "^18.0.0",
+    "vue": "^3.3.0",
     "typescript": "^5.3.0"
   },
-  "keywords": ["cdl", "chart", "react", "component"],
+  "keywords": ["cdl", "chart", "vue", "component"],
   "license": "MIT",
   "publishConfig": {
     "access": "public"

@@ -14,9 +14,8 @@
     "test": "node bin/cdl.js --help"
   },
   "dependencies": {
-    "@naeemo/cdl-compiler": "workspace:*",
-    "@naeemo/cdl-renderer-echarts": "workspace:*",
-    "@naeemo/cdl-ai": "workspace:*"
+    "@naeemo/cdl-core": "0.7.0",
+    "@naeemo/cdl-ai": "0.1.0"
   },
   "author": "Naeemo <naeemo@qq.com>",
   "license": "MIT",

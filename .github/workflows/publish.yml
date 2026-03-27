@@ -33,7 +33,7 @@ jobs:
         echo "Publishing CDL packages to NPM..."
 
         # Stage 1: Core package (must publish first)
-        echo "📦 Publishing @cdl/core..."
+        echo "📦 Publishing @naeemo/cdl-core..."
         cd packages/core
         npm install
         npm run build
@@ -41,35 +41,35 @@ jobs:
         cd ../..
 
         # Stage 2: Framework bindings
-        echo "📦 Publishing @cdl/react..."
-        cd packages/react-combined
+        echo "📦 Publishing @naeemo/cdl-react..."
+        cd packages/react
         npm install
         npm run build
         npm publish --access public
         cd ../..
 
-        echo "📦 Publishing @cdl/vue..."
-        cd packages/vue-combined
+        echo "📦 Publishing @naeemo/cdl-vue..."
+        cd packages/vue
         npm install
         npm run build
         npm publish --access public
         cd ../..
 
         # Stage 3: Additional packages
-        echo "📦 Publishing @cdl/ai..."
+        echo "📦 Publishing @naeemo/cdl-ai..."
         cd packages/ai
         npm install
         npm run build
         npm publish --access public
         cd ../..
 
-        echo "📦 Publishing @cdl/cli..."
+        echo "📦 Publishing @naeemo/cdl-cli..."
         cd packages/cli
         npm install
         npm publish --access public
         cd ../..
 
-        echo "📦 Publishing @cdl/ssr..."
+        echo "📦 Publishing @naeemo/cdl-ssr..."
         cd packages/ssr
         npm install
         npm publish --access public
@@ -83,23 +83,17 @@ jobs:
         echo "🎉 CDL v${{ github.event.release.tag_name }} packages published to NPM!"
         echo ""
         echo "📦 Published packages:"
-        echo "  - @cdl/core"
-        echo "  - @cdl/react"
-        echo "  - @cdl/vue"
-        echo "  - @cdl/ai"
-        echo "  - @cdl/cli"
-        echo "  - @cdl/ssr"
+        echo "  - @naeemo/cdl-core"
+        echo "  - @naeemo/cdl-react"
+        echo "  - @naeemo/cdl-vue"
+        echo "  - @naeemo/cdl-ai"
+        echo "  - @naeemo/cdl-cli"
+        echo "  - @naeemo/cdl-ssr"
         echo ""
         echo "🚀 Installation:"
-        echo "  npm install @cdl/core @cdl/react"
+        echo "  npm install @naeemo/cdl-core @naeemo/cdl-react"
         echo ""
-        echo "📦 New package structure (v0.7):"
-        echo "  - @cdl/core: compiler + renderer + themes"
-        echo "  - @cdl/react: React components + dynamic charts"
-        echo "  - @cdl/vue: Vue components + dynamic charts"
-        echo ""
-        echo "⚠️  Migration from v0.6:"
-        echo "  - @naeemo/cdl-compiler → @cdl/core"
-        echo "  - @naeemo/cdl-renderer-echarts → @cdl/core"
-        echo "  - @naeemo/cdl-react → @cdl/react"
-        echo "  - @naeemo/cdl-vue → @cdl/vue"
+        echo "📦 Package structure (v0.7):"
+        echo "  - @naeemo/cdl-core: compiler + renderer + themes"
+        echo "  - @naeemo/cdl-react: React components + dynamic charts"
+        echo "  - @naeemo/cdl-vue: Vue components + dynamic charts"

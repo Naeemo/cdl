@@ -8,8 +8,7 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
-    "@naeemo/cdl-compiler": "workspace:*",
-    "@naeemo/cdl-renderer-echarts": "workspace:*",
+    "@naeemo/cdl-core": "0.7.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "puppeteer": "^21.0.0"

@@ -59,8 +59,8 @@ const renderChart = async () => {
     loading.value = true;
     error.value = null;
 
-    const { compile } = await import('@cdl/compiler');
-    const { render } = await import('@cdl/renderer-echarts');
+    const { compile } = await import('@naeemo/cdl-core');
+    const { render } = await import('@naeemo/cdl-core');
 
     const compileResult = compile(props.code);
     if (!compileResult.success) {

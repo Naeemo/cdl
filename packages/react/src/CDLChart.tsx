@@ -196,7 +196,7 @@ export const CDLChart: React.FC<CDLChartProps> = ({
         setLoading(true);
         setError(null);
 
-        const { compile, render } = await import('@cdl/core');
+        const { compile, render } = await import('@naeemo/cdl-core');
 
         const compileResult = compile(code);
         if (compileResult.errors.length > 0) {

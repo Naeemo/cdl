@@ -145,8 +145,8 @@ export function useDynamicChart(options: UseDynamicChartOptions): UseDynamicChar
         setIsLoading(true);
         setError(null);
 
-        // 使用 @cdl/core 的动态导入
-        const core = await import('@cdl/core');
+        // 使用 @naeemo/cdl-core 的动态导入
+        const core = await import('@naeemo/cdl-core');
         const compileResult = core.compile(code);
         if (compileResult.errors.length > 0) {
           const errorMsg = compileResult.errors.map(e => `Line ${e.line}: ${e.message}`).join('\n');

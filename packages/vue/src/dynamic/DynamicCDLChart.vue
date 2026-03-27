@@ -5,7 +5,7 @@ import { useDynamicChart, UseDynamicChartOptions } from './index';
 interface Props extends Omit<UseDynamicChartOptions, 'code' | 'theme' | 'dataSource' | 'refreshInterval' | 'enableStreaming'> {
   code: string;
   theme?: 'light' | 'dark';
-  dataSource?: import('@cdl/dynamic-core').DataSourceConfig;
+  dataSource?: import('@naeemo/cdl-core').DataSourceConfig;
   refreshInterval?: number;
   enableStreaming?: boolean;
   className?: string;

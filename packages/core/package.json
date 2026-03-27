@@ -1,5 +1,5 @@
 {
-  "name": "@cdl/core",
+  "name": "@naeemo/cdl-core",
   "version": "0.7.0",
   "description": "CDL core - compiler and ECharts renderer",
   "main": "dist/index.js",
