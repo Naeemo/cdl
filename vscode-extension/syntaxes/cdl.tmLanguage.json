@@ -5,93 +5,65 @@
   "fileTypes": [".cdl"],
   "patterns": [
     { "include": "#comments" },
+    { "include": "#title" },
+    { "include": "#charttype" },
+    { "include": "#sections" },
     { "include": "#directives" },
-    { "include": "#keywords" },
+    { "include": "#table" },
     { "include": "#strings" },
-    { "include": "#numbers" },
-    { "include": "#identifiers" },
-    { "include": "#v06-features" }
+    { "include": "#numbers" }
   ],
   "repository": {
     "comments": {
       "patterns": [
-        {
-          "name": "comment.line.double-slash.cdl",
-          "match": "//.*$"
-        },
-        {
-          "name": "comment.block.cdl",
-          "begin": "/\\*",
-          "end": "\\*/"
-        }
+        { "name": "comment.line.double-slash.cdl", "match": "//.*$" },
+        { "name": "comment.block.cdl", "begin": "/\\*", "end": "\\*/" }
       ]
+    },
+    "title": {
+      "match": "^(#)\\s+(.*)$",
+      "captures": {
+        "1": { "name": "markup.heading.cdl" },
+        "2": { "name": "entity.name.function.cdl" }
+      }
+    },
+    "charttype": {
+      "match": "^(##)\\s+(line|bar|pie|scatter|area|radar|heatmap|combo|gauge|candlestick|boxplot|sankey|treemap|wordcloud|liquid|map|funnel|sunburst|graph|parallel)$",
+      "captures": {
+        "1": { "name": "markup.heading.cdl" },
+        "2": { "name": "keyword.other.charttype.cdl" }
+      }
+    },
+    "sections": {
+      "match": "^(##)\\s+(series|axis|map|data)$",
+      "captures": {
+        "1": { "name": "markup.heading.cdl" },
+        "2": { "name": "keyword.control.cdl" }
+      }
     },
     "directives": {
-      "patterns": [
-        {
-          "name": "meta.annotation.cdl",
-          "match": "(@(lang|source|timeout|cache|style|color|animation|interaction|title|subtitle|layout|theme|grid))\\s*(\\([^)]*\\))?",
-          "captures": {
-            "1": { "name": "storage.modifier.cdl" },
-            "3": { "name": "meta.annotation.parameters.cdl" }
-          }
-        }
-      ]
+      "match": "(@(style|color|animation|title|subtitle|layout|theme|grid|interaction|locale|responsive))\\s*(\"[^\"]*\"|'[^']*'|\\S+)?",
+      "captures": {
+        "1": { "name": "storage.modifier.cdl" },
+        "2": { "name": "string.quoted.cdl" }
+      }
     },
-    "keywords": {
+    "table": {
+      "begin": "^\\|",
+      "end": "\\|$",
       "patterns": [
-        {
-          "name": "keyword.declaration.cdl",
-          "match": "\\b(Data|Chart)\\b"
-        },
-        {
-          "name": "keyword.control.cdl",
-          "match": "\\b(use|type|x|y|group|stack|where|as)\\b"
-        },
-        {
-          "name": "keyword.other.charttype.cdl",
-          "match": "\\b(line|bar|pie|scatter|area|radar|heatmap|combo|gauge|candlestick|boxplot|sankey|treemap|wordcloud|liquid|map)\\b"
-        }
-      ]
-    },
-    "v06-features": {
-      "patterns": [
-        {
-          "name": "keyword.control.v06.cdl",
-          "match": "^##\\s+(series|axis)\\b"
-        },
-        {
-          "name": "support.type.axis-position.cdl",
-          "match": "\\b(x|y|y2|x2|left|right|top|bottom)\\b"
-        },
-        {
-          "name": "support.constant.axis-type.cdl",
-          "match": "\\b(category|value|time|log)\\b"
-        },
-        {
-          "name": "support.type.series-style.cdl",
-          "match": "\\b(solid|dashed|smooth|marker)\\b"
-        }
+        { "name": "punctuation.definition.table.cdl", "match": "\\|" },
+        { "name": "string.other.table-cell.cdl", "match": "[^|]+" }
       ]
     },
     "strings": {
       "name": "string.quoted.double.cdl",
       "begin": "\"",
-      "end": "\"",
-      "patterns": [
-        {
-          "name": "constant.character.escape.cdl",
-          "match": "\\\\."
-        }
-      ]
+      "end": "\""
     },
     "numbers": {
       "name": "constant.numeric.cdl",
       "match": "\\b\\d+(\\.\\d+)?\\b"
-    },
-    "identifiers": {
-      "name": "variable.other.cdl",
-      "match": "[a-zA-Z_][a-zA-Z0-9_]*"
     }
   }
 }
