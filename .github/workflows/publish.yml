@@ -32,101 +32,48 @@ jobs:
 
         echo "Publishing CDL packages to NPM..."
 
-        # Stage 1: Core packages
-        echo "📦 Publishing @naeemo/cdl-compiler..."
-        cd packages/compiler
+        # Stage 1: Core package (must publish first)
+        echo "📦 Publishing @cdl/core..."
+        cd packages/core
         npm install
         npm run build
         npm publish --access public
         cd ../..
 
-        echo "📦 Publishing @naeemo/cdl-renderer-echarts..."
-        cd packages/renderer
+        # Stage 2: Framework bindings
+        echo "📦 Publishing @cdl/react..."
+        cd packages/react-combined
         npm install
         npm run build
         npm publish --access public
         cd ../..
 
-        # Stage 2: Packages that depend on core
-        echo "📦 Publishing @naeemo/cdl-ai..."
+        echo "📦 Publishing @cdl/vue..."
+        cd packages/vue-combined
+        npm install
+        npm run build
+        npm publish --access public
+        cd ../..
+
+        # Stage 3: Additional packages
+        echo "📦 Publishing @cdl/ai..."
         cd packages/ai
         npm install
         npm run build
         npm publish --access public
         cd ../..
 
-        echo "📦 Publishing @naeemo/cdl-ssr..."
-        cd packages/ssr
-        npm install
-        npm publish --access public
-        cd ../..
-
-        echo "📦 Publishing @naeemo/cdl-cli..."
+        echo "📦 Publishing @cdl/cli..."
         cd packages/cli
         npm install
         npm publish --access public
         cd ../..
 
-        # Stage 3: Framework bindings
-        echo "📦 Publishing @naeemo/cdl-react..."
-        cd packages/react
-        npm install
-        npm run build
-        npm publish --access public
-        cd ../..
-
-        echo "📦 Publishing @naeemo/cdl-vue..."
-        cd packages/vue
-        npm install
-        npm run build
-        npm publish --access public
-        cd ../..
-
-        # Stage 4: Dynamic/realtime packages
-        echo "📦 Publishing @naeemo/cdl-dynamic-core..."
-        cd packages/dynamic-core
-        npm install
-        npm run build
-        npm publish --access public
-        cd ../..
-
-        echo "📦 Publishing @naeemo/cdl-react-dynamic..."
-        cd packages/react-dynamic
-        npm install
-        npm run build
-        npm publish --access public
-        cd ../..
-
-        echo "📦 Publishing @naeemo/cdl-vue-dynamic..."
-        cd packages/vue-dynamic
-        npm install
-        npm run build
-        npm publish --access public
-        cd ../..
-
-        # Stage 5: Additional renderers and tools
-        echo "📦 Publishing @naeemo/cdl-renderer-canvas..."
-        cd packages/renderer-canvas
+        echo "📦 Publishing @cdl/ssr..."
+        cd packages/ssr
         npm install
         npm publish --access public
         cd ../..
-
-        echo "📦 Publishing @naeemo/cdl-renderer-d3..."
-        cd packages/renderer-d3
-        npm install
-        npm run build
-        npm publish --access public
-        cd ../..
-
-        echo "📦 Publishing @naeemo/cdl-mcp-server..."
-        cd packages/mcp-server
-        npm install
-        npm run build
-        npm publish --access public
-        cd ../..
-
-        # Note: @naeemo/cdl-vscode is published separately to VS Code Marketplace
-        # Note: @naeemo/cdl-integration-test is not published (internal test package)
 
         echo "✅ All packages published successfully!"
 
@@ -136,19 +83,23 @@ jobs:
         echo "🎉 CDL v${{ github.event.release.tag_name }} packages published to NPM!"
         echo ""
         echo "📦 Published packages:"
-        echo "  - @naeemo/cdl-compiler"
-        echo "  - @naeemo/cdl-renderer-echarts"
-        echo "  - @naeemo/cdl-renderer-canvas"
-        echo "  - @naeemo/cdl-renderer-d3"
-        echo "  - @naeemo/cdl-cli"
-        echo "  - @naeemo/cdl-ai"
-        echo "  - @naeemo/cdl-ssr"
-        echo "  - @naeemo/cdl-mcp-server"
-        echo "  - @naeemo/cdl-react"
-        echo "  - @naeemo/cdl-vue"
-        echo "  - @naeemo/cdl-dynamic-core"
-        echo "  - @naeemo/cdl-react-dynamic"
-        echo "  - @naeemo/cdl-vue-dynamic"
+        echo "  - @cdl/core"
+        echo "  - @cdl/react"
+        echo "  - @cdl/vue"
+        echo "  - @cdl/ai"
+        echo "  - @cdl/cli"
+        echo "  - @cdl/ssr"
         echo ""
         echo "🚀 Installation:"
-        echo "  npm install @naeemo/cdl-compiler @naeemo/cdl-renderer-echarts @naeemo/cdl-cli"
+        echo "  npm install @cdl/core @cdl/react"
+        echo ""
+        echo "📦 New package structure (v0.7):"
+        echo "  - @cdl/core: compiler + renderer + themes"
+        echo "  - @cdl/react: React components + dynamic charts"
+        echo "  - @cdl/vue: Vue components + dynamic charts"
+        echo ""
+        echo "⚠️  Migration from v0.6:"
+        echo "  - @naeemo/cdl-compiler → @cdl/core"
+        echo "  - @naeemo/cdl-renderer-echarts → @cdl/core"
+        echo "  - @naeemo/cdl-react → @cdl/react"
+        echo "  - @naeemo/cdl-vue → @cdl/vue"
