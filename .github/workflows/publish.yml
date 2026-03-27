@@ -11,6 +11,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
 
     steps:
     - name: Checkout
@@ -24,12 +25,20 @@ jobs:
         node-version: '22'
         registry-url: 'https://registry.npmjs.org'
 
+    - name: Debug npm config
+      run: |
+        echo "NPM config:"
+        npm config list
+        echo ""
+        echo "Trying npm whoami..."
+        npm whoami || echo "whoami failed"
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
     - name: Build and publish packages
       env:
-        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       run: |
-        echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-
         echo "Publishing CDL packages to NPM..."
 
         # Stage 1: Core package (must publish first)
