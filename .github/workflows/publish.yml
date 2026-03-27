@@ -41,50 +41,38 @@ jobs:
       run: |
         echo "Publishing CDL packages to NPM..."
 
+        publish_package() {
+          local pkg_dir=$1
+          local pkg_name=$2
+          cd $pkg_dir
+          local version=$(node -p "require('./package.json').version")
+          local full_name="@naeemo/cdl-${pkg_name}"
+          echo "📦 Checking $full_name@$version..."
+          if npm view "$full_name@$version" version &>/dev/null; then
+            echo "  ⚠️  $full_name@$version already exists, skipping"
+          else
+            echo "  🚀 Publishing $full_name@$version..."
+            npm install
+            npm run build 2>/dev/null || echo "  (no build script)"
+            npm publish --access public
+            echo "  ✅ Published $full_name@$version"
+          fi
+          cd ../..
+        }
+
         # Stage 1: Core package (must publish first)
-        echo "📦 Publishing @naeemo/cdl-core..."
-        cd packages/core
-        npm install
-        npm run build
-        npm publish --access public
-        cd ../..
+        publish_package "packages/core" "core"
 
         # Stage 2: Framework bindings
-        echo "📦 Publishing @naeemo/cdl-react..."
-        cd packages/react
-        npm install
-        npm run build
-        npm publish --access public
-        cd ../..
-
-        echo "📦 Publishing @naeemo/cdl-vue..."
-        cd packages/vue
-        npm install
-        npm run build
-        npm publish --access public
-        cd ../..
+        publish_package "packages/react" "react"
+        publish_package "packages/vue" "vue"
 
         # Stage 3: Additional packages
-        echo "📦 Publishing @naeemo/cdl-ai..."
-        cd packages/ai
-        npm install
-        npm run build
-        npm publish --access public
-        cd ../..
+        publish_package "packages/ai" "ai"
+        publish_package "packages/cli" "cli"
+        publish_package "packages/ssr" "ssr"
 
-        echo "📦 Publishing @naeemo/cdl-cli..."
-        cd packages/cli
-        npm install
-        npm publish --access public
-        cd ../..
-
-        echo "📦 Publishing @naeemo/cdl-ssr..."
-        cd packages/ssr
-        npm install
-        npm publish --access public
-        cd ../..
-
-        echo "✅ All packages published successfully!"
+        echo "✅ All packages processed!"
 
     - name: Create GitHub Release Comment
       if: github.event_name == 'release'

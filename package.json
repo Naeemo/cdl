@@ -1,6 +1,6 @@
 {
   "name": "cdl",
-  "version": "0.0.1",
+  "version": "0.7.1",
   "type": "module",
   "description": "Chart definition language",
   "main": "index.js",

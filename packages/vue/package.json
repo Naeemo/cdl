@@ -1,6 +1,6 @@
 {
   "name": "@naeemo/cdl-vue",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "CDL Vue components",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

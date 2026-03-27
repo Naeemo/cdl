@@ -1,6 +1,6 @@
 {
   "name": "@naeemo/cdl-ssr",
-  "version": "0.1.0",
+  "version": "0.7.1",
   "description": "CDL server-side rendering and export service",
   "main": "server.js",
   "scripts": {

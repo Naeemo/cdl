@@ -1,6 +1,6 @@
 {
   "name": "@naeemo/cdl-cli",
-  "version": "0.1.0",
+  "version": "0.7.1",
   "description": "CDL Command Line Interface",
   "main": "bin/cdl.js",
   "bin": {
